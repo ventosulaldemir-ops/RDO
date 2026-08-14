@@ -214,6 +214,11 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
             <option value="com">Com producao</option>
             <option value="sem">⚠ Sem producao</option>
           </select>
+          <select id="faz" onchange="renderTable()">
+            <option value="">Ordem: padrão</option>
+            <option value="az">A → Z (nome)</option>
+            <option value="za">Z → A (nome)</option>
+          </select>
           <span class="ct" id="tbl-ct"></span>
         </div>
         <div class="cd-b" id="tbl-box"></div>
@@ -380,7 +385,7 @@ function onDateChange(){
   SELECTED_DATE_IDX=parseInt(document.getElementById('fdate').value,10)||0;
   document.getElementById('btn-prev').disabled=SELECTED_DATE_IDX>=PARSED.days.length-1;
   document.getElementById('btn-next').disabled=SELECTED_DATE_IDX<=0;
-  ['fq','femp','ffunc','fpav','fstatus','fprod'].forEach(function(id){document.getElementById(id).value=''});
+  ['fq','femp','ffunc','fpav','fstatus','fprod','faz'].forEach(function(id){document.getElementById(id).value=''});
   renderAllForDate();
 }
 
@@ -604,7 +609,14 @@ function renderTable(){
   var day=getSelectedDay(),el=document.getElementById('tbl-box'),meta=document.getElementById('tbl-meta'),ct=document.getElementById('tbl-ct');
   if(!day){el.innerHTML='<div class="em">Sem dados</div>';return}
   var r=getFilteredPeople(day),active=r.active,ferias=r.ferias;
-  if(sortKey)active=active.slice().sort(function(a,b){return(a[sortKey]||'').localeCompare(b[sortKey]||'','pt-BR',{numeric:true})*sortDir});
+  var az=document.getElementById('faz').value;
+  if(sortKey){
+    active=active.slice().sort(function(a,b){return(a[sortKey]||'').localeCompare(b[sortKey]||'','pt-BR',{numeric:true})*sortDir});
+  } else if(az==='az'){
+    active=active.slice().sort(function(a,b){return(a.nome||'').localeCompare(b.nome||'','pt-BR')});
+  } else if(az==='za'){
+    active=active.slice().sort(function(a,b){return(b.nome||'').localeCompare(a.nome||'','pt-BR')});
+  }
   meta.textContent=active.length+' ativos'+(ferias.length?' + '+ferias.length+' ferias':'');
   ct.textContent=active.length+' registro(s)';
   var sk=sortKey,sd=sortDir;
@@ -637,7 +649,7 @@ function selectDateByValue(idx){
   SELECTED_DATE_IDX=idx;document.getElementById('fdate').value=idx;
   document.getElementById('btn-prev').disabled=SELECTED_DATE_IDX>=PARSED.days.length-1;
   document.getElementById('btn-next').disabled=SELECTED_DATE_IDX<=0;
-  ['fq','femp','ffunc','fpav','fstatus','fprod'].forEach(function(id){document.getElementById(id).value=''});
+  ['fq','femp','ffunc','fpav','fstatus','fprod','faz'].forEach(function(id){document.getElementById(id).value=''});
   renderAllForDate();document.getElementById('kpis').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
@@ -660,17 +672,80 @@ function renderAll(){
 }
 
 function doLoad(){
-  var btn=document.getElementById('btn-reload');btn.classList.add('spin');setChip('warn','carregando');document.getElementById('err-box').innerHTML='';
-  var cbName='_rdocb_'+Date.now();var ok=false;
-  window[cbName]=function(resp){
-    if(ok)return;ok=true;delete window[cbName];
-    try{if(!resp||resp.status!=='ok'||!resp.table)throw new Error('Resposta invalida (status: '+(resp?resp.status:'null')+')');var cols=resp.table.cols;var raw=[cols.map(function(c){return c.label||''})];(resp.table.rows||[]).forEach(function(row){var r=[];for(var c=0;c<cols.length;c++){var cell=(row.c||[])[c];r.push(cell?(cell.f!=null?String(cell.f):cell.v!=null?String(cell.v):''):'')}raw.push(r)});raw=raw.filter(function(r){return r.some(function(c){return(c||'').trim()!==''})});if(raw.length<2)throw new Error('Planilha vazia');PARSED=parseData(raw);setChip('ok','online');toast('Dados carregados','ok');renderAll()}
-    catch(e){setChip('err','erro');document.getElementById('err-box').innerHTML='<div class="err-box"><b>Erro: '+esc(e.message)+'</b>Verifique compartilhamento da planilha.<br><a href="https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/edit" target="_blank">Abrir planilha</a></div>';toast('Erro ao carregar','err')}
+  var APPS_URL='https://script.google.com/macros/s/AKfycbwFLxduVg7tpCeBlfYThOrigDhMn8ju9_w888TfWEblxesUJeFfvXhR03nr4zDpREY6/exec';
+  var btn=document.getElementById('btn-reload');
+  btn.classList.add('spin');
+  setChip('warn','carregando');
+  document.getElementById('err-box').innerHTML='';
+
+  // Remove scripts anteriores
+  var old=document.querySelectorAll('script[data-rdo]');
+  for(var i=0;i<old.length;i++)old[i].remove();
+
+  var cbName='rdoCallback_'+Date.now();
+  var ok=false;
+
+  window[cbName]=function(data){
+    if(ok)return; ok=true;
+    delete window[cbName];
     btn.classList.remove('spin');
+    try{
+      if(!data||data.status!=='ok')throw new Error('Status: '+(data?data.status:'null'));
+      if(!data.rows||!data.headers)throw new Error('Sem dados na resposta');
+
+      var hd=data.headers.map(function(h){return String(h||'')});
+      var raw=[hd];
+      var MONTHS={'Jan':'01','Feb':'02','Mar':'03','Apr':'04','May':'05','Jun':'06','Jul':'07','Aug':'08','Sep':'09','Oct':'10','Nov':'11','Dec':'12'};
+      data.rows.forEach(function(obj){
+        var row=hd.map(function(h){
+          var v=obj[h];
+          if(v===null||v===undefined)return '';
+          var s=String(v);
+          // ISO: 2026-08-13T03:00:00.000Z ou 2026-08-13
+          var mISO=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+          if(mISO)return mISO[3]+'/'+mISO[2]+'/'+mISO[1];
+          // String longa JS: "Wed Aug 12 2026 00:00:00 GMT-0300..."
+          var mLong=s.match(/\w+\s+(\w{3})\s+(\d{1,2})\s+(\d{4})/);
+          if(mLong&&MONTHS[mLong[1]]){
+            return String(mLong[2]).padStart(2,'0')+'/'+MONTHS[mLong[1]]+'/'+mLong[3];
+          }
+          return s;
+        });
+        raw.push(row);
+      });
+      raw=raw.filter(function(r){return r.some(function(c){return(c||'').trim()!==''})});
+      if(raw.length<2)throw new Error('Planilha vazia');
+
+      PARSED=parseData(raw);
+      setChip('ok','online');
+      toast('Carregado — '+data.total+' linhas (inclusive ocultas)','ok');
+      document.getElementById('sub-info').textContent='Apps Script · '+data.total+' linhas (inclusive ocultas)';
+      renderAll();
+    }catch(e){
+      setChip('err','erro');
+      document.getElementById('err-box').innerHTML='<div class="err-box"><b>Erro: '+esc(e.message)+'</b><br>Verifique se o Apps Script foi reimplantado com a nova versao.</div>';
+      toast('Erro ao carregar','err');
+    }
   };
-  var s=document.createElement('script');s.src='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=responseHandler:'+cbName+'&gid='+SHEET_GID+'&_='+Date.now();
-  s.onerror=function(){if(ok)return;ok=true;delete window[cbName];setChip('err','erro');document.getElementById('err-box').innerHTML='<div class="err-box"><b>Erro de rede.</b><br><a href="https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/edit" target="_blank">Abrir planilha</a></div>';btn.classList.remove('spin');toast('Erro de rede','err')};
-  setTimeout(function(){if(!ok){ok=true;delete window[cbName];setChip('err','timeout');btn.classList.remove('spin');toast('Timeout','err')}},15000);
+
+  var s=document.createElement('script');
+  s.setAttribute('data-rdo','1');
+  s.src=APPS_URL+'?callback='+cbName+'&_='+Date.now();
+  s.onerror=function(){
+    if(ok)return; ok=true;
+    delete window[cbName];
+    btn.classList.remove('spin');
+    setChip('err','erro');
+    document.getElementById('err-box').innerHTML='<div class="err-box"><b>Erro de rede ao acessar Apps Script.</b><br>Verifique se o Web App esta publicado como "Qualquer pessoa".<br><a href="'+APPS_URL+'" target="_blank">Testar URL</a></div>';
+    toast('Erro de rede','err');
+  };
+  setTimeout(function(){
+    if(ok)return; ok=true;
+    delete window[cbName];
+    btn.classList.remove('spin');
+    setChip('err','timeout');
+    toast('Timeout — tente novamente','err');
+  },20000);
   document.head.appendChild(s);
 }
 
