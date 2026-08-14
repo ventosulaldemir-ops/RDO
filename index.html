@@ -660,17 +660,71 @@ function renderAll(){
 }
 
 function doLoad(){
-  var btn=document.getElementById('btn-reload');btn.classList.add('spin');setChip('warn','carregando');document.getElementById('err-box').innerHTML='';
-  var cbName='_rdocb_'+Date.now();var ok=false;
-  window[cbName]=function(resp){
-    if(ok)return;ok=true;delete window[cbName];
-    try{if(!resp||resp.status!=='ok'||!resp.table)throw new Error('Resposta invalida (status: '+(resp?resp.status:'null')+')');var cols=resp.table.cols;var raw=[cols.map(function(c){return c.label||''})];(resp.table.rows||[]).forEach(function(row){var r=[];for(var c=0;c<cols.length;c++){var cell=(row.c||[])[c];r.push(cell?(cell.f!=null?String(cell.f):cell.v!=null?String(cell.v):''):'')}raw.push(r)});raw=raw.filter(function(r){return r.some(function(c){return(c||'').trim()!==''})});if(raw.length<2)throw new Error('Planilha vazia');PARSED=parseData(raw);setChip('ok','online');toast('Dados carregados','ok');renderAll()}
-    catch(e){setChip('err','erro');document.getElementById('err-box').innerHTML='<div class="err-box"><b>Erro: '+esc(e.message)+'</b>Verifique compartilhamento da planilha.<br><a href="https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/edit" target="_blank">Abrir planilha</a></div>';toast('Erro ao carregar','err')}
+  var APPS_URL='https://script.google.com/macros/s/AKfycbw-QiSE5Rxp44e5vH-hurLoLw1y_e30Nw-IH94MyBV9RXL2ffNPne90ajkVRL1L3Iwh/exec';
+  var btn=document.getElementById('btn-reload');
+  btn.classList.add('spin');
+  setChip('warn','carregando');
+  document.getElementById('err-box').innerHTML='';
+
+  // Remove scripts anteriores
+  var old=document.querySelectorAll('script[data-rdo]');
+  for(var i=0;i<old.length;i++)old[i].remove();
+
+  var cbName='rdoCallback';
+  var ok=false;
+
+  window[cbName]=function(data){
+    if(ok)return; ok=true;
     btn.classList.remove('spin');
+    try{
+      if(!data||data.status!=='ok')throw new Error('Status: '+(data?data.status:'null'));
+      if(!data.rows||!data.headers)throw new Error('Sem dados na resposta');
+
+      var hd=data.headers.map(function(h){return String(h||'')});
+      var raw=[hd];
+      data.rows.forEach(function(obj){
+        var row=hd.map(function(h){
+          var v=obj[h];
+          if(v===null||v===undefined)return '';
+          var s=String(v);
+          // Normaliza ISO para dd/mm/aaaa caso venha em outro formato
+          var mISO=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+          if(mISO)return mISO[3]+'/'+mISO[2]+'/'+mISO[1];
+          return s;
+        });
+        raw.push(row);
+      });
+      raw=raw.filter(function(r){return r.some(function(c){return(c||'').trim()!==''})});
+      if(raw.length<2)throw new Error('Planilha vazia');
+
+      PARSED=parseData(raw);
+      setChip('ok','online');
+      toast('Carregado — '+data.total+' linhas (inclusive ocultas)','ok');
+      document.getElementById('sub-info').textContent='Apps Script · '+data.total+' linhas (inclusive ocultas)';
+      renderAll();
+    }catch(e){
+      setChip('err','erro');
+      document.getElementById('err-box').innerHTML='<div class="err-box"><b>Erro: '+esc(e.message)+'</b><br>Verifique se o Apps Script foi reimplantado com a nova versao.</div>';
+      toast('Erro ao carregar','err');
+    }
   };
-  var s=document.createElement('script');s.src='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=responseHandler:'+cbName+'&gid='+SHEET_GID+'&_='+Date.now();
-  s.onerror=function(){if(ok)return;ok=true;delete window[cbName];setChip('err','erro');document.getElementById('err-box').innerHTML='<div class="err-box"><b>Erro de rede.</b><br><a href="https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/edit" target="_blank">Abrir planilha</a></div>';btn.classList.remove('spin');toast('Erro de rede','err')};
-  setTimeout(function(){if(!ok){ok=true;delete window[cbName];setChip('err','timeout');btn.classList.remove('spin');toast('Timeout','err')}},15000);
+
+  var s=document.createElement('script');
+  s.setAttribute('data-rdo','1');
+  s.src=APPS_URL+'?callback='+cbName+'&_='+Date.now();
+  s.onerror=function(){
+    if(ok)return; ok=true;
+    btn.classList.remove('spin');
+    setChip('err','erro');
+    document.getElementById('err-box').innerHTML='<div class="err-box"><b>Erro de rede ao acessar Apps Script.</b><br>Verifique se o Web App esta publicado como "Qualquer pessoa".<br><a href="'+APPS_URL+'" target="_blank">Testar URL</a></div>';
+    toast('Erro de rede','err');
+  };
+  setTimeout(function(){
+    if(ok)return; ok=true;
+    btn.classList.remove('spin');
+    setChip('err','timeout');
+    toast('Timeout — tente novamente','err');
+  },20000);
   document.head.appendChild(s);
 }
 
