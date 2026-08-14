@@ -102,10 +102,22 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 .err-box a{color:var(--red);text-decoration:underline}
 #toast{position:fixed;bottom:calc(var(--safe-b) + 14px);left:14px;right:14px;z-index:200;display:none;padding:12px 18px;border-radius:6px;font-family:'JetBrains Mono';font-size:11px;font-weight:700;color:#fff;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:480px;margin:0 auto}
 .print-header{display:none}
+.mode-tabs{display:flex;gap:6px;margin-bottom:12px}
+.mode-tab{font-family:'JetBrains Mono';font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:8px 14px;border-radius:3px;border:1px solid var(--line);background:var(--w);color:var(--ink2);cursor:pointer;transition:all .15s}
+.mode-tab.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.range-box{padding:12px 14px;border-bottom:1px solid var(--line);background:var(--w)}
+.range-tools{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.date-chips{display:flex;gap:6px;flex-wrap:wrap;max-height:150px;overflow-y:auto;padding:2px}
+.date-chip{font-family:'JetBrains Mono';font-size:10px;padding:6px 10px;border-radius:20px;border:1px solid var(--line);background:var(--paper);color:var(--ink2);cursor:pointer;user-select:none;white-space:nowrap;transition:all .12s}
+.date-chip:hover{border-color:var(--navy)}
+.date-chip.sel{background:var(--navy);color:#fff;border-color:var(--navy)}
+.range-summary{font-family:'JetBrains Mono';font-size:10px;color:var(--ink3);margin-top:8px}
+.prod-list{font-size:10px;color:var(--ink2);line-height:1.6}
+.prod-list .pd{white-space:nowrap;font-family:'JetBrains Mono';color:var(--ink3);font-weight:700;margin-right:4px}
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   body{background:#fff!important;padding:0!important}
-  .topbar,.cd-t,#toast,#btn-reload,#btn-print,#btn-export,.date-bar{display:none!important}
+  .topbar,.cd-t,#toast,#btn-reload,#btn-print,#btn-export,.date-bar,.range-box,.mode-tabs{display:none!important}
   .print-header{display:block!important;padding:10px 0 8px;border-bottom:3px solid var(--navy);margin-bottom:12px}
   .print-header h1{font-family:'Space Grotesk';font-size:18px;font-weight:700;color:var(--navy)}
   .print-header p{font-family:'JetBrains Mono';font-size:10px;color:var(--ink2);margin-top:3px}
@@ -140,10 +152,16 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 
 <div class="container">
   <div id="err-box"></div>
+  <div id="prod-alert"></div>
 
   <div class="sec-h">
     <div><h2><span class="tag-rdo">rdo</span>Efetivo &amp; Atividades</h2><p id="sub-date">--</p></div>
     <div style="font-family:'JetBrains Mono';font-size:9px;color:var(--ink3)" id="upd-ts">--</div>
+  </div>
+
+  <div class="mode-tabs">
+    <button class="mode-tab on" id="tab-single" onclick="setViewMode('single')">Dia unico</button>
+    <button class="mode-tab" id="tab-range" onclick="setViewMode('range')">Periodo (varios dias)</button>
   </div>
 
   <div class="date-bar" id="date-bar">
@@ -156,9 +174,23 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
     <span class="date-badge" id="date-count-badge"></span>
   </div>
 
+  <div class="cd" id="range-card" style="display:none">
+    <div class="cd-h"><h3>Selecionar periodo / dias</h3><span class="mt" id="range-meta"></span></div>
+    <div class="range-box">
+      <div class="range-tools">
+        <button class="btn btn-bl" onclick="selectAllRangeDates()">Selecionar todos</button>
+        <button class="btn btn-a" onclick="clearRangeDates()">Limpar selecao</button>
+        <button class="btn btn-gr" onclick="selectLastNDates(7)">Ultimos 7 dias</button>
+        <button class="btn btn-gr" onclick="selectLastNDates(30)">Ultimos 30 dias</button>
+      </div>
+      <div class="date-chips" id="range-chips"></div>
+      <div class="range-summary" id="range-summary"></div>
+    </div>
+  </div>
+
   <div class="kr" id="kpis"></div>
 
-  <div class="gg">
+  <div class="gg" id="single-view">
     <div>
       <div class="cd">
         <div class="cd-h"><h3>Efetivo por dia</h3><span class="mt" id="chart-meta"></span></div>
@@ -176,6 +208,11 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
             <option value="ativo">Com atividade</option>
             <option value="sem">Sem atividade</option>
             <option value="ferias">De ferias</option>
+          </select>
+          <select id="fprod" onchange="renderTable()">
+            <option value="">Producao: todas</option>
+            <option value="com">Com producao</option>
+            <option value="sem">⚠ Sem producao</option>
           </select>
           <span class="ct" id="tbl-ct"></span>
         </div>
@@ -202,7 +239,20 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
     </div>
   </div>
 
-  <div class="cd">
+  <div class="cd" id="range-view" style="display:none">
+    <div class="cd-h"><h3>Producao por pessoa no periodo selecionado</h3><span class="mt" id="range-tbl-meta"></span></div>
+    <div class="cd-t">
+      <input type="text" id="rq" placeholder="Buscar nome, empresa, funcao..." oninput="renderRangeTable()">
+      <select id="remp" onchange="renderRangeTable()"><option value="">Todas empresas</option></select>
+      <select id="rfunc" onchange="renderRangeTable()"><option value="">Todas funcoes</option></select>
+      <select id="rpav" onchange="renderRangeTable()"><option value="">Todos pavimentos</option></select>
+      <button class="btn btn-gr" onclick="doExportRangeCSV()">CSV do periodo</button>
+      <span class="ct" id="range-tbl-ct"></span>
+    </div>
+    <div class="cd-b" id="range-tbl-box"></div>
+  </div>
+
+  <div class="cd" id="hist-card">
     <div class="cd-h"><h3>Historico por data</h3><span class="mt" id="hist-meta"></span></div>
     <div class="cd-b" id="hist-box"></div>
   </div>
@@ -219,6 +269,9 @@ var PAV_BADGE={'TÉRREO':'badge-pav-terreo','1º':'badge-pav-1','2º':'badge-pav
 var PARSED=null;
 var SELECTED_DATE_IDX=0;
 var COLORS=['#2563EB','#D97706','#0D9F4F','#7C3AED','#DC2626','#0891B2','#DB2777','#65A30D','#EA580C','#0284C7'];
+var VIEW_MODE='single';
+var RANGE_SELECTED=new Set();
+var rangeSortKey=null,rangeSortDir=1;
 
 function norm(s){return(s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim()}
 function esc(s){return(s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
@@ -296,7 +349,21 @@ function parseData(raw){
   return{ci:ci,hd:hd,people:people,days:days};
 }
 
-/* ═══════ DATE FILTER ═══════ */
+/* ═══════ MODE SWITCH ═══════ */
+function setViewMode(mode){
+  VIEW_MODE=mode;
+  document.getElementById('tab-single').className='mode-tab'+(mode==='single'?' on':'');
+  document.getElementById('tab-range').className='mode-tab'+(mode==='range'?' on':'');
+  document.getElementById('date-bar').style.display=mode==='single'?'flex':'none';
+  document.getElementById('range-card').style.display=mode==='range'?'block':'none';
+  document.getElementById('single-view').style.display=mode==='single'?'grid':'none';
+  document.getElementById('range-view').style.display=mode==='range'?'block':'none';
+  document.getElementById('hist-card').style.display=mode==='single'?'block':'none';
+  if(mode==='range'){initRangeChips();renderRangeAll()}
+  else{renderAllForDate()}
+}
+
+/* ═══════ DATE FILTER (single) ═══════ */
 function populateDateFilter(){
   var sel=document.getElementById('fdate'),badge=document.getElementById('date-count-badge'),btnPrev=document.getElementById('btn-prev'),btnNext=document.getElementById('btn-next');
   if(!PARSED||!PARSED.days.length){sel.innerHTML='<option value="">Sem datas</option>';badge.textContent='';btnPrev.disabled=true;btnNext.disabled=true;return}
@@ -313,13 +380,137 @@ function onDateChange(){
   SELECTED_DATE_IDX=parseInt(document.getElementById('fdate').value,10)||0;
   document.getElementById('btn-prev').disabled=SELECTED_DATE_IDX>=PARSED.days.length-1;
   document.getElementById('btn-next').disabled=SELECTED_DATE_IDX<=0;
-  ['fq','femp','ffunc','fpav','fstatus'].forEach(function(id){document.getElementById(id).value=''});
+  ['fq','femp','ffunc','fpav','fstatus','fprod'].forEach(function(id){document.getElementById(id).value=''});
   renderAllForDate();
 }
 
 function getSelectedDay(){if(!PARSED||!PARSED.days.length)return null;return PARSED.days[Math.min(SELECTED_DATE_IDX,PARSED.days.length-1)]}
 
-/* ═══════ RENDERING ═══════ */
+/* ═══════ RANGE (multi-dia) ═══════ */
+function initRangeChips(){
+  var box=document.getElementById('range-chips');
+  if(!PARSED||!PARSED.days.length){box.innerHTML='<div class="em">Sem datas</div>';return}
+  var ascDays=PARSED.days.slice().reverse();
+  box.innerHTML=ascDays.map(function(d){var sel=RANGE_SELECTED.has(d.date);return '<span class="date-chip'+(sel?' sel':'')+'" data-date="'+esc(d.date)+'" onclick="toggleRangeDate(\''+esc(d.date).replace(/'/g,"\\'")+'\')">'+esc(d.date)+' <span style="opacity:.7">('+d.ativos.length+')</span></span>'}).join('');
+  document.getElementById('range-meta').textContent=PARSED.days.length+' data(s) disponiveis';
+}
+
+function toggleRangeDate(date){
+  if(RANGE_SELECTED.has(date))RANGE_SELECTED.delete(date);else RANGE_SELECTED.add(date);
+  initRangeChips();renderRangeAll();
+}
+function selectAllRangeDates(){if(!PARSED)return;PARSED.days.forEach(function(d){RANGE_SELECTED.add(d.date)});initRangeChips();renderRangeAll()}
+function clearRangeDates(){RANGE_SELECTED.clear();initRangeChips();renderRangeAll()}
+function selectLastNDates(n){if(!PARSED)return;RANGE_SELECTED.clear();PARSED.days.slice(0,n).forEach(function(d){RANGE_SELECTED.add(d.date)});initRangeChips();renderRangeAll()}
+
+function getRangeDays(){if(!PARSED)return[];return PARSED.days.filter(function(d){return RANGE_SELECTED.has(d.date)})}
+
+function computeRangeAgg(days){
+  var map={};
+  days.forEach(function(day){
+    day.all.forEach(function(p){
+      var key=norm(p.nome)+'|'+norm(p.empresa);
+      if(!map[key])map[key]={nome:p.nome,empresa:p.empresa,funcao:p.funcao,diasPresente:0,diasAtivo:0,diasFerias:0,diasSem:0,diasSemProd:0,pavs:{},producoes:[]};
+      var e=map[key];
+      e.diasPresente++;
+      if(p.ferias){e.diasFerias++;return}
+      if(p.atividade)e.diasAtivo++;else e.diasSem++;
+      if(!temAtividade(p.prod))e.diasSemProd++;
+      if(p.pav)e.pavs[p.pav]=(e.pavs[p.pav]||0)+1;
+      if(p.prod||p.atividade)e.producoes.push({data:p.data,prod:p.prod,atividade:p.atividade||p.atividadeRaw,pav:p.pav});
+    });
+  });
+  return Object.keys(map).map(function(k){return map[k]});
+}
+
+function populateRangeFilters(agg){
+  function fill(id,vals,def){var sel=document.getElementById(id),cur=sel.value;sel.innerHTML='<option value="">'+def+'</option>'+vals.map(function(v){return '<option value="'+esc(v)+'">'+esc(v)+'</option>'}).join('');if(vals.indexOf(cur)>-1)sel.value=cur}
+  fill('remp',uniq(agg.map(function(p){return p.empresa})),'Todas empresas');
+  fill('rfunc',uniq(agg.map(function(p){return p.funcao})),'Todas funcoes');
+  var pavSel=document.getElementById('rpav'),curPav=pavSel.value;
+  pavSel.innerHTML='<option value="">Todos pavimentos</option>'+PAVIMENTOS.map(function(v){return '<option value="'+esc(v)+'">'+esc(v)+'</option>'}).join('');
+  if(PAVIMENTOS.indexOf(curPav)>-1)pavSel.value=curPav;
+}
+
+function renderRangeKPIs(days,agg){
+  var el=document.getElementById('kpis');
+  if(!days.length){el.innerHTML='<div class="kp"><div class="kl">Nenhuma data selecionada</div><div class="kv">—</div></div>';return}
+  var totalPessoaDias=agg.reduce(function(s,p){return s+p.diasPresente},0);
+  var pessoasDistintas=agg.length;
+  var mediaDias=pessoasDistintas>0?(totalPessoaDias/pessoasDistintas).toFixed(1):'0';
+  var totalAtivo=agg.reduce(function(s,p){return s+p.diasAtivo},0);
+  var totalFerias=agg.reduce(function(s,p){return s+p.diasFerias},0);
+  var empresas=uniq(agg.map(function(p){return p.empresa})).length;
+  el.innerHTML=[
+    {i:'📅',l:'Dias no periodo',v:days.length,f:'datas selecionadas',c:'var(--blue)'},
+    {i:'👷',l:'Pessoas distintas',v:pessoasDistintas,f:'no periodo',c:'#059669'},
+    {i:'🧮',l:'Pessoa-dias',v:totalPessoaDias,f:'soma de presencas',c:'var(--cyan)'},
+    {i:'📈',l:'Media dias/pessoa',v:mediaDias,f:'presenca media',c:'#7C3AED'},
+    {i:'✅',l:'Dias c/ atividade',v:totalAtivo,f:'lancamentos',c:'var(--green)'},
+    {i:'🌴',l:'Dias de ferias',v:totalFerias,f:'no periodo',c:'var(--amber)'},
+    {i:'🏢',l:'Empresas',v:empresas,f:'envolvidas',c:'var(--navy)'}
+  ].map(function(k){return '<div class="kp" style="--kc:'+k.c+'"><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div></div>'}).join('');
+}
+
+function getFilteredRangeAgg(){
+  var q=norm(document.getElementById('rq').value),emp=document.getElementById('remp').value,func=document.getElementById('rfunc').value,pav=document.getElementById('rpav').value;
+  var days=getRangeDays();var agg=computeRangeAgg(days);
+  return agg.filter(function(p){
+    if(emp&&p.empresa!==emp)return false;
+    if(func&&p.funcao!==func)return false;
+    if(pav&&!p.pavs[pav])return false;
+    if(q){var full=norm(p.nome+' '+p.empresa+' '+p.funcao);if(full.indexOf(q)===-1)return false}
+    return true;
+  });
+}
+
+function setRangeSort(k){if(rangeSortKey===k)rangeSortDir*=-1;else{rangeSortKey=k;rangeSortDir=1}renderRangeTable()}
+
+function renderRangeTable(){
+  var el=document.getElementById('range-tbl-box'),meta=document.getElementById('range-tbl-meta'),ct=document.getElementById('range-tbl-ct');
+  var days=getRangeDays();
+  if(!days.length){el.innerHTML='<div class="em">Selecione um ou mais dias acima para ver a producao por pessoa.</div>';meta.textContent='';ct.textContent='';return}
+  var agg=getFilteredRangeAgg();
+  if(rangeSortKey==='nome'||rangeSortKey==='empresa'||rangeSortKey==='funcao')agg=agg.slice().sort(function(a,b){return(a[rangeSortKey]||'').localeCompare(b[rangeSortKey]||'','pt-BR')*rangeSortDir});
+  else if(rangeSortKey)agg=agg.slice().sort(function(a,b){return((a[rangeSortKey]||0)-(b[rangeSortKey]||0))*rangeSortDir});
+  else agg=agg.slice().sort(function(a,b){return b.diasPresente-a.diasPresente});
+  meta.textContent=days.length+' dia(s) selecionados · '+agg.length+' pessoa(s)';
+  ct.textContent=agg.length+' registro(s)';
+  var sk=rangeSortKey,sd=rangeSortDir;
+  function th(label,key){return '<th onclick="setRangeSort(\''+key+'\')" class="'+(sk===key?(sd>0?'asc':'desc'):'')+'">'+label+'</th>'}
+  var h='<table class="t"><thead><tr>'+th('Nome','nome')+th('Empresa','empresa')+th('Funcao','funcao')+th('Dias presente','diasPresente')+th('Dias c/ ativ.','diasAtivo')+th('Dias s/ ativ.','diasSem')+th('Dias s/ producao','diasSemProd')+th('Dias ferias','diasFerias')+'<th>Pavimentos</th><th>Producao / Atividades por dia</th></tr></thead><tbody>';
+  agg.forEach(function(p){
+    var pavList=Object.keys(p.pavs).sort().map(function(pv){return pavBadge(pv)}).join(' ')||'<span class="badge badge-pav-none">—</span>';
+    var prodHtml=p.producoes.length?('<div class="prod-list">'+p.producoes.slice().sort(function(a,b){return(a.data||'').localeCompare(b.data||'')}).map(function(pr){return '<div><span class="pd">'+esc(pr.data)+'</span>'+esc(pr.prod?pr.prod:(pr.atividade||'—'))+(pr.pav?' <span style="color:var(--ink3)">['+esc(pr.pav)+']</span>':'')+'</div>'}).join('')+'</div>'):'<span style="color:var(--ink3)">sem lancamentos</span>';
+    h+='<tr><td style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td><td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td><td style="color:var(--ink2)">'+esc(p.funcao)+'</td><td class="nr" style="font-weight:700;color:var(--navy)">'+p.diasPresente+'</td><td class="nr" style="color:var(--green)">'+p.diasAtivo+'</td><td class="nr" style="color:var(--red)">'+p.diasSem+'</td><td class="nr" style="color:'+(p.diasSemProd?'var(--red)':'var(--ink3)')+';font-weight:'+(p.diasSemProd?'700':'400')+'">'+(p.diasSemProd?'⚠ ':'')+p.diasSemProd+'</td><td class="nr" style="color:var(--amber)">'+p.diasFerias+'</td><td>'+pavList+'</td><td style="max-width:320px">'+prodHtml+'</td></tr>';
+  });
+  h+='</tbody></table>';el.innerHTML=h;
+}
+
+function renderRangeAll(){
+  document.getElementById('prod-alert').innerHTML='';
+  var days=getRangeDays(),agg=computeRangeAgg(days);
+  document.getElementById('sub-date').textContent=days.length?('Periodo: '+days.length+' dia(s) selecionados'):'Nenhum dia selecionado no periodo';
+  document.getElementById('range-summary').textContent=days.length?(days.length+' dia(s) selecionados de '+(PARSED?PARSED.days.length:0)):'Nenhum dia selecionado';
+  renderRangeKPIs(days,agg);
+  populateRangeFilters(agg);
+  renderRangeTable();
+  document.getElementById('upd-ts').textContent='atualizado '+fmtNow();
+}
+
+function doExportRangeCSV(){
+  var days=getRangeDays();if(!days.length){toast('Selecione ao menos um dia','warn');return}
+  var agg=getFilteredRangeAgg();
+  var rows=[['Nome','Empresa','Funcao','Dias presente','Dias c/ atividade','Dias s/ atividade','Dias s/ producao (ALERTA)','Dias ferias','Pavimentos','Detalhe por dia (data: producao/atividade [pav])']];
+  agg.forEach(function(p){
+    var detalhe=p.producoes.map(function(pr){return pr.data+': '+(pr.prod?pr.prod:(pr.atividade||'—'))+(pr.pav?' ['+pr.pav+']':'')}).join(' | ');
+    rows.push([p.nome,p.empresa,p.funcao,p.diasPresente,p.diasAtivo,p.diasSem,p.diasSemProd,p.diasFerias,Object.keys(p.pavs).join('/'),detalhe]);
+  });
+  var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v||'').replace(/"/g,'""')+'"'}).join(',')}).join('\r\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='RDO_periodo_'+days.length+'dias.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);toast('CSV do periodo exportado','ok');
+}
+
+/* ═══════ RENDERING (single day) ═══════ */
 function populateFilters(day){
   function fill(id,vals,def){var sel=document.getElementById(id),cur=sel.value;sel.innerHTML='<option value="">'+def+'</option>'+vals.map(function(v){return '<option value="'+esc(v)+'">'+esc(v)+'</option>'}).join('');if(vals.indexOf(cur)>-1)sel.value=cur}
   if(!day)return;
@@ -332,8 +523,8 @@ function populateFilters(day){
 
 function renderKPIs(day){
   if(!day){document.getElementById('kpis').innerHTML='<div class="kp"><div class="kl">Sem dados</div><div class="kv">—</div></div>';return}
-  var empCnt=Object.keys(day.byEmp).length,funcCnt=Object.keys(day.byFunc).length,comAtiv=day.ativos.filter(function(p){return p.atividade}).length,semAtiv=day.ativos.length-comAtiv,comPav=day.ativos.filter(function(p){return p.pav}).length;
-  document.getElementById('kpis').innerHTML=[{i:'👷',l:'Ativos',v:day.ativos.length,f:esc(day.date),c:'#059669'},{i:'🌴',l:'De ferias',v:day.ferias.length,f:'excluidos do efetivo',c:'var(--amber)'},{i:'🏢',l:'Empresas',v:empCnt,f:'ativas hoje',c:'var(--blue)'},{i:'⚒️',l:'Funcoes',v:funcCnt,f:'distintas',c:'var(--cyan)'},{i:'🏗️',l:'C/ pavimento',v:comPav,f:day.ativos.length>0?(comPav/day.ativos.length*100).toFixed(0)+'%':'—',c:'#7C3AED'},{i:'✅',l:'C/ atividade',v:comAtiv,f:day.ativos.length>0?(comAtiv/day.ativos.length*100).toFixed(0)+'%':'—',c:'var(--green)'},{i:'⚠️',l:'S/ atividade',v:semAtiv,f:'pendente',c:'var(--red)'}].map(function(k){return '<div class="kp" style="--kc:'+k.c+'"><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div></div>'}).join('');
+  var empCnt=Object.keys(day.byEmp).length,funcCnt=Object.keys(day.byFunc).length,comAtiv=day.ativos.filter(function(p){return p.atividade}).length,semAtiv=day.ativos.length-comAtiv,comPav=day.ativos.filter(function(p){return p.pav}).length,semProd=day.ativos.filter(function(p){return !temAtividade(p.prod)}).length;
+  document.getElementById('kpis').innerHTML=[{i:'👷',l:'Ativos',v:day.ativos.length,f:esc(day.date),c:'#059669'},{i:'🌴',l:'De ferias',v:day.ferias.length,f:'excluidos do efetivo',c:'var(--amber)'},{i:'🏢',l:'Empresas',v:empCnt,f:'ativas hoje',c:'var(--blue)'},{i:'⚒️',l:'Funcoes',v:funcCnt,f:'distintas',c:'var(--cyan)'},{i:'🏗️',l:'C/ pavimento',v:comPav,f:day.ativos.length>0?(comPav/day.ativos.length*100).toFixed(0)+'%':'—',c:'#7C3AED'},{i:'✅',l:'C/ atividade',v:comAtiv,f:day.ativos.length>0?(comAtiv/day.ativos.length*100).toFixed(0)+'%':'—',c:'var(--green)'},{i:'⚠️',l:'S/ atividade',v:semAtiv,f:'pendente',c:'var(--red)'},{i:'🚨',l:'Sem producao',v:semProd,f:day.ativos.length>0?(semProd/day.ativos.length*100).toFixed(0)+'% pendente':'—',c:'var(--red)'}].map(function(k){return '<div class="kp" style="--kc:'+k.c+'"><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div></div>'}).join('');
 }
 
 function renderBars(elId,metaId,counts,colorMap){
@@ -369,7 +560,7 @@ function renderChart(days,selectedDay){
 
 function getFilteredPeople(day){
   if(!day)return{active:[],ferias:[]};
-  var q=norm(document.getElementById('fq').value),emp=document.getElementById('femp').value,func=document.getElementById('ffunc').value,pav=document.getElementById('fpav').value,st=document.getElementById('fstatus').value;
+  var q=norm(document.getElementById('fq').value),emp=document.getElementById('femp').value,func=document.getElementById('ffunc').value,pav=document.getElementById('fpav').value,st=document.getElementById('fstatus').value,prodF=document.getElementById('fprod').value;
   var active=[],ferias=[];
   day.all.forEach(function(p){
     if(p.ferias){if(!st||st==='ferias')ferias.push(p);return}
@@ -379,6 +570,8 @@ function getFilteredPeople(day){
     if(pav&&p.pav!==pav)return;
     if(st==='ativo'&&!p.atividade)return;
     if(st==='sem'&&p.atividade)return;
+    if(prodF==='com'&&!temAtividade(p.prod))return;
+    if(prodF==='sem'&&temAtividade(p.prod))return;
     if(q){var full=norm(p.nome+' '+p.empresa+' '+p.funcao+' '+p.atividade+' '+p.regiao);if(full.indexOf(q)===-1)return}
     active.push(p);
   });
@@ -388,6 +581,20 @@ function getFilteredPeople(day){
 function pavBadge(pav){
   if(!pav)return '<span class="badge badge-pav-none">—</span>';
   return '<span class="badge '+(PAV_BADGE[pav]||'badge-blue')+'">'+esc(pav)+'</span>';
+}
+
+function prodBadge(prod){
+  if(temAtividade(prod)){var t=prod.length>20?prod.slice(0,20)+'…':prod;return '<span class="badge badge-green" title="'+esc(prod)+'">'+esc(t)+'</span>'}
+  return '<span class="badge badge-red" style="animation:pulse 1.4s ease infinite" title="Producao nao preenchida">⚠ SEM PRODUCAO</span>';
+}
+
+function renderProdAlert(day){
+  var el=document.getElementById('prod-alert');
+  if(!day||!day.ativos.length){el.innerHTML='';return}
+  var semProd=day.ativos.filter(function(p){return !temAtividade(p.prod)});
+  if(!semProd.length){el.innerHTML='';return}
+  var nomes=semProd.slice(0,8).map(function(p){return esc(p.nome)}).join(', ')+(semProd.length>8?' e mais '+(semProd.length-8)+'...':'');
+  el.innerHTML='<div class="err-box" style="background:var(--redBg);border-color:#FCA5A5;color:var(--red)"><b>⚠ '+semProd.length+' pessoa(s) sem producao lancada em '+esc(day.date)+'</b>'+nomes+' — confira mesmo que a linha esteja oculta na planilha.</div>';
 }
 
 var sortKey=null,sortDir=1;
@@ -401,14 +608,14 @@ function renderTable(){
   meta.textContent=active.length+' ativos'+(ferias.length?' + '+ferias.length+' ferias':'');
   ct.textContent=active.length+' registro(s)';
   var sk=sortKey,sd=sortDir;
-  var h='<table class="t"><thead><tr><th onclick="setSort(\'nome\')" class="'+(sk==='nome'?sd>0?'asc':'desc':'')+'">Nome</th><th onclick="setSort(\'funcao\')" class="'+(sk==='funcao'?sd>0?'asc':'desc':'')+'">Funcao</th><th onclick="setSort(\'empresa\')" class="'+(sk==='empresa'?sd>0?'asc':'desc':'')+'">Empresa</th><th>Atividade</th><th onclick="setSort(\'pav\')" class="'+(sk==='pav'?sd>0?'asc':'desc':'')+'">Pavimento</th><th onclick="setSort(\'regiao\')" class="'+(sk==='regiao'?sd>0?'asc':'desc':'')+'">Local</th><th>Status</th></tr></thead><tbody>';
+  var h='<table class="t"><thead><tr><th onclick="setSort(\'nome\')" class="'+(sk==='nome'?sd>0?'asc':'desc':'')+'">Nome</th><th onclick="setSort(\'funcao\')" class="'+(sk==='funcao'?sd>0?'asc':'desc':'')+'">Funcao</th><th onclick="setSort(\'empresa\')" class="'+(sk==='empresa'?sd>0?'asc':'desc':'')+'">Empresa</th><th>Atividade</th><th>Producao</th><th onclick="setSort(\'pav\')" class="'+(sk==='pav'?sd>0?'asc':'desc':'')+'">Pavimento</th><th onclick="setSort(\'regiao\')" class="'+(sk==='regiao'?sd>0?'asc':'desc':'')+'">Local</th><th>Status</th></tr></thead><tbody>';
   active.forEach(function(p){
     var statusBadge=p.atividade?'<span class="badge badge-ativo">ativo</span>':'<span class="badge badge-semativ">sem lanc.</span>';
-    h+='<tr><td style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td><td style="color:var(--ink2)">'+esc(p.funcao)+'</td><td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td><td style="max-width:240px;word-break:break-word">'+(p.atividade?esc(p.atividade):p.atividadeRaw?'<span style="color:var(--ink3);font-size:10px;font-style:italic">'+esc(p.atividadeRaw)+'</span>':'<span style="color:var(--ink3)">—</span>')+'</td><td>'+pavBadge(p.pav)+'</td><td style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td><td>'+statusBadge+'</td></tr>';
+    h+='<tr><td style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td><td style="color:var(--ink2)">'+esc(p.funcao)+'</td><td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td><td style="max-width:240px;word-break:break-word">'+(p.atividade?esc(p.atividade):p.atividadeRaw?'<span style="color:var(--ink3);font-size:10px;font-style:italic">'+esc(p.atividadeRaw)+'</span>':'<span style="color:var(--ink3)">—</span>')+'</td><td>'+prodBadge(p.prod)+'</td><td>'+pavBadge(p.pav)+'</td><td style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td><td>'+statusBadge+'</td></tr>';
   });
   if(ferias.length){
-    h+='<tr class="ferias-header"><td colspan="7">★ '+ferias.length+' PESSOA(S) DE FERIAS (excluidas do efetivo)</td></tr>';
-    ferias.forEach(function(p){h+='<tr class="ferias-row"><td style="font-weight:600;color:#92400E;white-space:nowrap">'+esc(p.nome)+'</td><td style="color:#B45309">'+esc(p.funcao)+'</td><td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td><td colspan="2"><span class="badge badge-ferias">FERIAS</span></td><td style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td><td><span class="badge badge-amber">ferias</span></td></tr>'});
+    h+='<tr class="ferias-header"><td colspan="8">★ '+ferias.length+' PESSOA(S) DE FERIAS (excluidas do efetivo)</td></tr>';
+    ferias.forEach(function(p){h+='<tr class="ferias-row"><td style="font-weight:600;color:#92400E;white-space:nowrap">'+esc(p.nome)+'</td><td style="color:#B45309">'+esc(p.funcao)+'</td><td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td><td colspan="3"><span class="badge badge-ferias">FERIAS</span></td><td style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td><td><span class="badge badge-amber">ferias</span></td></tr>'});
   }
   h+='</tbody></table>';el.innerHTML=h;
 }
@@ -430,7 +637,7 @@ function selectDateByValue(idx){
   SELECTED_DATE_IDX=idx;document.getElementById('fdate').value=idx;
   document.getElementById('btn-prev').disabled=SELECTED_DATE_IDX>=PARSED.days.length-1;
   document.getElementById('btn-next').disabled=SELECTED_DATE_IDX<=0;
-  ['fq','femp','ffunc','fpav','fstatus'].forEach(function(id){document.getElementById(id).value=''});
+  ['fq','femp','ffunc','fpav','fstatus','fprod'].forEach(function(id){document.getElementById(id).value=''});
   renderAllForDate();document.getElementById('kpis').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
@@ -440,11 +647,17 @@ function renderAllForDate(){
   renderKPIs(day);
   if(day){populateFilters(day);renderBars('emp-bars','emp-meta',day.byEmp,COLORS);renderBars('func-bars','func-meta',day.byFunc,COLORS);renderBars('pav-bars','pav-meta',day.byPav,PAV_CORES);renderBars('reg-bars','reg-meta',day.byRegiao,COLORS)}
   else{['emp-bars','func-bars','pav-bars','reg-bars'].forEach(function(id){document.getElementById(id).innerHTML=''});['emp-meta','func-meta','pav-meta','reg-meta'].forEach(function(id){document.getElementById(id).textContent=''})}
-  renderChart(PARSED.days,day);renderTable();renderHist(PARSED.days);
+  renderChart(PARSED.days,day);renderTable();renderHist(PARSED.days);renderProdAlert(day);
   document.getElementById('upd-ts').textContent='atualizado '+fmtNow();
 }
 
-function renderAll(){if(!PARSED){document.getElementById('kpis').innerHTML='<div class="kp"><div class="kl">Sem dados</div><div class="kv">—</div></div>';return}populateDateFilter();document.getElementById('sub-info').textContent='Fonte: Google Sheets · '+PARSED.people.length+' registros';renderAllForDate()}
+function renderAll(){
+  if(!PARSED){document.getElementById('kpis').innerHTML='<div class="kp"><div class="kl">Sem dados</div><div class="kv">—</div></div>';return}
+  populateDateFilter();
+  document.getElementById('sub-info').textContent='Fonte: Google Sheets · '+PARSED.people.length+' registros';
+  initRangeChips();
+  if(VIEW_MODE==='range')renderRangeAll();else renderAllForDate();
+}
 
 function doLoad(){
   var btn=document.getElementById('btn-reload');btn.classList.add('spin');setChip('warn','carregando');document.getElementById('err-box').innerHTML='';
@@ -463,7 +676,9 @@ function doLoad(){
 
 function doPrint(){var now=new Date(),day=getSelectedDay(),ph=document.getElementById('print-header');ph.innerHTML='<h1>RDO - Relatorio Diario de Obra</h1><p>'+now.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})+' '+now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+(day?' | Data: '+day.date+' | Efetivo: '+day.ativos.length+' ativos':'')+'</p>';setTimeout(function(){window.print()},120)}
 
-function doExportCSV(){var day=getSelectedDay();if(!day){toast('Sem dados','warn');return}var rows=[['Nome','Funcao','Empresa','Atividade','Pavimento','Local','Producao','Status','Data']];day.all.forEach(function(p){rows.push([p.nome,p.funcao,p.empresa,p.atividade,p.pav||'',p.regiao||'',p.prod||'',p.ferias?'Ferias':p.atividade?'Ativo':'Sem atividade',p.data])});var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v||'').replace(/"/g,'""')+'"'}).join(',')}).join('\r\n');var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='RDO_'+day.date+'.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);toast('CSV exportado','ok')}
+function doExportCSV(){
+  if(VIEW_MODE==='range'){doExportRangeCSV();return}
+  var day=getSelectedDay();if(!day){toast('Sem dados','warn');return}var rows=[['Nome','Funcao','Empresa','Atividade','Pavimento','Local','Producao','Producao preenchida?','Status','Data']];day.all.forEach(function(p){rows.push([p.nome,p.funcao,p.empresa,p.atividade,p.pav||'',p.regiao||'',p.prod||'',p.ferias?'—':(temAtividade(p.prod)?'Sim':'NAO - ALERTA'),p.ferias?'Ferias':p.atividade?'Ativo':'Sem atividade',p.data])});var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v||'').replace(/"/g,'""')+'"'}).join(',')}).join('\r\n');var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='RDO_'+day.date+'.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);toast('CSV exportado','ok')}
 
 setInterval(function(){document.getElementById('clk').textContent=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})},1000);
 doLoad();
