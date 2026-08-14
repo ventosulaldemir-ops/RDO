@@ -528,8 +528,18 @@ function populateFilters(day){
 
 function renderKPIs(day){
   if(!day){document.getElementById('kpis').innerHTML='<div class="kp"><div class="kl">Sem dados</div><div class="kv">—</div></div>';return}
-  var empCnt=Object.keys(day.byEmp).length,funcCnt=Object.keys(day.byFunc).length,comAtiv=day.ativos.filter(function(p){return p.atividade}).length,semAtiv=day.ativos.length-comAtiv,comPav=day.ativos.filter(function(p){return p.pav}).length,semProd=day.ativos.filter(function(p){return !temAtividade(p.prod)}).length;
-  document.getElementById('kpis').innerHTML=[{i:'👷',l:'Ativos',v:day.ativos.length,f:esc(day.date),c:'#059669'},{i:'🌴',l:'De ferias',v:day.ferias.length,f:'excluidos do efetivo',c:'var(--amber)'},{i:'🏢',l:'Empresas',v:empCnt,f:'ativas hoje',c:'var(--blue)'},{i:'⚒️',l:'Funcoes',v:funcCnt,f:'distintas',c:'var(--cyan)'},{i:'🏗️',l:'C/ pavimento',v:comPav,f:day.ativos.length>0?(comPav/day.ativos.length*100).toFixed(0)+'%':'—',c:'#7C3AED'},{i:'✅',l:'C/ atividade',v:comAtiv,f:day.ativos.length>0?(comAtiv/day.ativos.length*100).toFixed(0)+'%':'—',c:'var(--green)'},{i:'⚠️',l:'S/ atividade',v:semAtiv,f:'pendente',c:'var(--red)'},{i:'🚨',l:'Sem producao',v:semProd,f:day.ativos.length>0?(semProd/day.ativos.length*100).toFixed(0)+'% pendente':'—',c:'var(--red)'}].map(function(k){return '<div class="kp" style="--kc:'+k.c+'"><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div></div>'}).join('');
+  var empCnt=Object.keys(day.byEmp).length,funcCnt=Object.keys(day.byFunc).length;
+  var comAtiv=day.ativos.filter(function(p){return !!p.atividade}).length;
+  var faltosos=day.ativos.length-comAtiv;
+  var comPav=day.ativos.filter(function(p){return p.pav}).length;
+  document.getElementById('kpis').innerHTML=[
+    {i:'👷',l:'Efetivo Real',   v:comAtiv,           f:esc(day.date),                      c:'#059669'},
+    {i:'🌴',l:'De Ferias',      v:day.ferias.length, f:'excluidos do efetivo',              c:'var(--amber)'},
+    {i:'🚫',l:'Faltosos',       v:faltosos,          f:'sem atividade — excluidos',         c:'var(--red)'},
+    {i:'🏢',l:'Empresas',       v:empCnt,            f:'ativas hoje',                       c:'var(--blue)'},
+    {i:'⚒️',l:'Funcoes',        v:funcCnt,           f:'distintas',                         c:'var(--cyan)'},
+    {i:'🏗️',l:'C/ Pavimento',   v:comPav,            f:day.ativos.length>0?(comPav/day.ativos.length*100).toFixed(0)+'%':'—', c:'#7C3AED'}
+  ].map(function(k){return '<div class="kp" style="--kc:'+k.c+'"><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div></div>'}).join('');
 }
 
 function renderBars(elId,metaId,counts,colorMap){
@@ -594,12 +604,7 @@ function prodBadge(prod){
 }
 
 function renderProdAlert(day){
-  var el=document.getElementById('prod-alert');
-  if(!day||!day.ativos.length){el.innerHTML='';return}
-  var semProd=day.ativos.filter(function(p){return !temAtividade(p.prod)});
-  if(!semProd.length){el.innerHTML='';return}
-  var nomes=semProd.slice(0,8).map(function(p){return esc(p.nome)}).join(', ')+(semProd.length>8?' e mais '+(semProd.length-8)+'...':'');
-  el.innerHTML='<div class="err-box" style="background:var(--redBg);border-color:#FCA5A5;color:var(--red)"><b>⚠ '+semProd.length+' pessoa(s) sem producao lancada em '+esc(day.date)+'</b>'+nomes+' — confira mesmo que a linha esteja oculta na planilha.</div>';
+  document.getElementById('prod-alert').innerHTML='';
 }
 
 var sortKey=null,sortDir=1;
@@ -608,28 +613,81 @@ function setSort(k){if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=1}renderTa
 function renderTable(){
   var day=getSelectedDay(),el=document.getElementById('tbl-box'),meta=document.getElementById('tbl-meta'),ct=document.getElementById('tbl-ct');
   if(!day){el.innerHTML='<div class="em">Sem dados</div>';return}
-  var r=getFilteredPeople(day),active=r.active,ferias=r.ferias;
+  var r=getFilteredPeople(day),ferias=r.ferias;
   var az=document.getElementById('faz').value;
-  if(sortKey){
-    active=active.slice().sort(function(a,b){return(a[sortKey]||'').localeCompare(b[sortKey]||'','pt-BR',{numeric:true})*sortDir});
-  } else if(az==='az'){
-    active=active.slice().sort(function(a,b){return(a.nome||'').localeCompare(b.nome||'','pt-BR')});
-  } else if(az==='za'){
-    active=active.slice().sort(function(a,b){return(b.nome||'').localeCompare(a.nome||'','pt-BR')});
+
+  /* Separar ativos reais dos faltosos (sem atividade) */
+  var ativos=r.active.filter(function(p){return !!p.atividade});
+  var faltosos=r.active.filter(function(p){return !p.atividade});
+
+  /* Ordenação */
+  function sortPpl(arr){
+    if(sortKey) return arr.slice().sort(function(a,b){return(a[sortKey]||'').localeCompare(b[sortKey]||'','pt-BR',{numeric:true})*sortDir});
+    if(az==='az') return arr.slice().sort(function(a,b){return(a.nome||'').localeCompare(b.nome||'','pt-BR')});
+    if(az==='za') return arr.slice().sort(function(a,b){return(b.nome||'').localeCompare(a.nome||'','pt-BR')});
+    return arr;
   }
-  meta.textContent=active.length+' ativos'+(ferias.length?' + '+ferias.length+' ferias':'');
-  ct.textContent=active.length+' registro(s)';
+  ativos  = sortPpl(ativos);
+  faltosos= sortPpl(faltosos);
+  ferias  = sortPpl(ferias);
+
+  meta.textContent=ativos.length+' ativos'+(faltosos.length?' · '+faltosos.length+' faltosos':'')+(ferias.length?' · '+ferias.length+' ferias':'');
+  ct.textContent=(ativos.length+faltosos.length+ferias.length)+' registro(s)';
+
   var sk=sortKey,sd=sortDir;
-  var h='<table class="t"><thead><tr><th onclick="setSort(\'nome\')" class="'+(sk==='nome'?sd>0?'asc':'desc':'')+'">Nome</th><th onclick="setSort(\'funcao\')" class="'+(sk==='funcao'?sd>0?'asc':'desc':'')+'">Funcao</th><th onclick="setSort(\'empresa\')" class="'+(sk==='empresa'?sd>0?'asc':'desc':'')+'">Empresa</th><th>Atividade</th><th>Producao</th><th onclick="setSort(\'pav\')" class="'+(sk==='pav'?sd>0?'asc':'desc':'')+'">Pavimento</th><th onclick="setSort(\'regiao\')" class="'+(sk==='regiao'?sd>0?'asc':'desc':'')+'">Local</th><th>Status</th></tr></thead><tbody>';
-  active.forEach(function(p){
-    var statusBadge=p.atividade?'<span class="badge badge-ativo">ativo</span>':'<span class="badge badge-semativ">sem lanc.</span>';
-    h+='<tr><td style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td><td style="color:var(--ink2)">'+esc(p.funcao)+'</td><td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td><td style="max-width:240px;word-break:break-word">'+(p.atividade?esc(p.atividade):p.atividadeRaw?'<span style="color:var(--ink3);font-size:10px;font-style:italic">'+esc(p.atividadeRaw)+'</span>':'<span style="color:var(--ink3)">—</span>')+'</td><td>'+prodBadge(p.prod)+'</td><td>'+pavBadge(p.pav)+'</td><td style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td><td>'+statusBadge+'</td></tr>';
+  var h='<table class="t"><thead><tr>'+
+    '<th onclick="setSort(\'nome\')" class="'+(sk==='nome'?sd>0?'asc':'desc':'')+'">Nome</th>'+
+    '<th onclick="setSort(\'funcao\')" class="'+(sk==='funcao'?sd>0?'asc':'desc':'')+'">Funcao</th>'+
+    '<th onclick="setSort(\'empresa\')" class="'+(sk==='empresa'?sd>0?'asc':'desc':'')+'">Empresa</th>'+
+    '<th>Atividade / Servico</th>'+
+    '<th onclick="setSort(\'pav\')" class="'+(sk==='pav'?sd>0?'asc':'desc':'')+'">Pav.</th>'+
+    '<th onclick="setSort(\'regiao\')" class="'+(sk==='regiao'?sd>0?'asc':'desc':'')+'">Local</th>'+
+    '</tr></thead><tbody>';
+
+  /* Ativos com atividade */
+  ativos.forEach(function(p){
+    h+='<tr>'+
+      '<td style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td>'+
+      '<td style="color:var(--ink2)">'+esc(p.funcao)+'</td>'+
+      '<td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
+      '<td style="min-width:280px;white-space:normal;line-height:1.5">'+esc(p.atividade)+'</td>'+
+      '<td>'+pavBadge(p.pav)+'</td>'+
+      '<td style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td>'+
+    '</tr>';
   });
-  if(ferias.length){
-    h+='<tr class="ferias-header"><td colspan="8">★ '+ferias.length+' PESSOA(S) DE FERIAS (excluidas do efetivo)</td></tr>';
-    ferias.forEach(function(p){h+='<tr class="ferias-row"><td style="font-weight:600;color:#92400E;white-space:nowrap">'+esc(p.nome)+'</td><td style="color:#B45309">'+esc(p.funcao)+'</td><td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td><td colspan="3"><span class="badge badge-ferias">FERIAS</span></td><td style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td><td><span class="badge badge-amber">ferias</span></td></tr>'});
+
+  /* Faltosos */
+  if(faltosos.length){
+    h+='<tr style="background:#FEE2E2"><td colspan="6" style="padding:8px 12px;font-family:\'JetBrains Mono\';font-size:10px;color:#B91C1C;font-weight:700;letter-spacing:.04em;text-transform:uppercase">'+
+      '🚫 '+faltosos.length+' FALTOSO(S) — sem atividade (excluidos do efetivo real)</td></tr>';
+    faltosos.forEach(function(p){
+      h+='<tr style="background:#FFF5F5">'+
+        '<td style="font-weight:600;white-space:nowrap;color:#B91C1C">'+esc(p.nome)+'</td>'+
+        '<td style="color:#991B1B">'+esc(p.funcao)+'</td>'+
+        '<td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
+        '<td><span class="badge badge-red">FALTOSO</span>'+(p.atividadeRaw?'<span style="color:var(--ink3);font-size:10px;font-style:italic;margin-left:6px">'+esc(p.atividadeRaw)+'</span>':'')+'</td>'+
+        '<td>'+pavBadge(p.pav)+'</td>'+
+        '<td style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td>'+
+      '</tr>';
+    });
   }
-  h+='</tbody></table>';el.innerHTML=h;
+
+  /* Ferias */
+  if(ferias.length){
+    h+='<tr class="ferias-header"><td colspan="6">★ '+ferias.length+' PESSOA(S) DE FERIAS (excluidas do efetivo)</td></tr>';
+    ferias.forEach(function(p){
+      h+='<tr class="ferias-row">'+
+        '<td style="font-weight:600;color:#92400E;white-space:nowrap">'+esc(p.nome)+'</td>'+
+        '<td style="color:#B45309">'+esc(p.funcao)+'</td>'+
+        '<td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
+        '<td colspan="2"><span class="badge badge-ferias">FERIAS</span></td>'+
+        '<td style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td>'+
+      '</tr>';
+    });
+  }
+
+  h+='</tbody></table>';
+  el.innerHTML=h;
 }
 
 function renderHist(days){
