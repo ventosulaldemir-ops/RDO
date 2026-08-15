@@ -589,7 +589,6 @@ function renderRangeKPIs2(days,agg){
   var totalPessoaDias=agg.reduce(function(s,p){return s+p.diasPresente},0);
   var totalFerias=agg.reduce(function(s,p){return s+p.diasFerias},0);
   var totalAtivo=agg.reduce(function(s,p){return s+p.diasAtivo},0);
-  var totalSemProd=agg.reduce(function(s,p){return s+p.diasSemProd},0);
   var naoFerias=totalPessoaDias-totalFerias;
   var taxaAtividade=naoFerias>0?(totalAtivo/naoFerias*100).toFixed(0):'0';
   var unicos=agg.filter(function(p){return p.diasPresente===1}).length;
@@ -598,7 +597,6 @@ function renderRangeKPIs2(days,agg){
     {i:'🔺',l:'Pico de efetivo',v:maxV,f:maxDay?maxDay.date:'—',c:'var(--green)'},
     {i:'🔻',l:'Menor efetivo',v:minV,f:minDay?minDay.date:'—',c:'var(--red)'},
     {i:'🎯',l:'Taxa de atividade',v:taxaAtividade+'%',f:'dias c/ atividade vs presenca',c:'var(--blue)'},
-    {i:'⚠️',l:'Dias sem producao',v:totalSemProd,f:'alerta — precisa preencher',c:'var(--amber)'},
     {i:'🔄',l:'Presenca unica',v:unicos,f:'pessoas com so 1 dia no periodo',c:'#7C3AED'}
   ].map(function(k){return '<div class="kp" style="--kc:'+k.c+'"><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div></div>'}).join('');
 }
