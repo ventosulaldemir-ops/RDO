@@ -960,15 +960,39 @@ function onLoadSuccess(data,btn){
   }
 }
 
-function onLoadFail(btn,msg){
+/* ═══════ Mensagens de erro especificas por causa real da falha ═══════ */
+function onLoadFail(btn,reason,detail){
   btn.classList.remove('spin');
   setChip('err','erro');
-  document.getElementById('err-box').innerHTML='<div class="err-box"><b>Erro de rede ao acessar Apps Script.</b><br>'+esc(msg||'Verifique se o Web App esta publicado como "Qualquer pessoa".')+'<br><a href="'+APPS_URL+'" target="_blank">Testar URL</a></div>';
-  toast('Erro de rede','err');
+  var msgs={
+    'timeout':{
+      title:'Tempo esgotado ao contatar o Apps Script.',
+      body:'A conexão demorou demais para responder. Isso é comum em redes móveis (4G/5G) mais lentas ou instáveis. Verifique sua conexão e toque em "Atualizar" novamente.'
+    },
+    'http':{
+      title:'O Apps Script respondeu com erro '+(detail||'')+'.',
+      body:'Isso normalmente indica um problema na implantação (deploy) do Web App, e não no site em si — no PC ele funciona porque pode estar usando uma versão em cache. Reimplante o Apps Script como "Novo deploy" (não apenas editar o existente).'
+    },
+    'json':{
+      title:'A resposta do servidor não é um JSON válido.',
+      body:'Provavelmente o Apps Script retornou uma página de login do Google em vez dos dados — sinal de que o Web App não está publicado como "Qualquer pessoa" (Anyone), ou a sessão/implantação expirou.'
+    },
+    'network':{
+      title:'Falha de rede ao acessar o Apps Script.',
+      body:'No celular isso costuma acontecer quando o link é aberto dentro do navegador embutido de apps como WhatsApp, Instagram ou Facebook — eles bloqueiam esse tipo de requisição. Tente abrir o link direto no Chrome ou Safari (toque em "⋮" ou compartilhar → "Abrir no navegador"). Também pode ser um bloqueador de rastreamento/anúncios ou DNS da operadora bloqueando script.google.com.'
+    },
+    'generic':{
+      title:'Não foi possível carregar os dados.',
+      body:detail||'Verifique se o Apps Script está publicado como "Qualquer pessoa" e teste o link diretamente.'
+    }
+  };
+  var m=msgs[reason]||msgs.generic;
+  document.getElementById('err-box').innerHTML='<div class="err-box"><b>'+esc(m.title)+'</b>'+esc(m.body)+'<br><br>Link para testar direto: <a href="'+APPS_URL+'" target="_blank" rel="noopener">abrir Apps Script</a></div>';
+  toast(m.title,'err');
 }
 
-/* Fallback JSONP: usado quando fetch() falha (ex.: bloqueio de CORS em alguns navegadores antigos) */
-function loadViaJsonp(btn){
+/* Fallback JSONP: usado quando fetch() falha (ex.: bloqueio de CORS em alguns navegadores) */
+function loadViaJsonp(btn,prevErr){
   var old=document.querySelectorAll('script[data-rdo]');
   for(var i=0;i<old.length;i++)old[i].remove();
   var cbName='rdoCallback_'+Date.now();
@@ -984,15 +1008,14 @@ function loadViaJsonp(btn){
   s.onerror=function(){
     if(ok)return; ok=true;
     delete window[cbName];
-    onLoadFail(btn,'Verifique se o Web App esta publicado como "Qualquer pessoa".');
+    // fetch E jsonp falharam -> quase sempre navegador in-app ou rede bloqueando o dominio
+    onLoadFail(btn,'network');
   };
   setTimeout(function(){
     if(ok)return; ok=true;
     delete window[cbName];
-    btn.classList.remove('spin');
-    setChip('err','timeout');
-    toast('Timeout — tente novamente','err');
-  },20000);
+    onLoadFail(btn,'timeout');
+  },25000);
   document.head.appendChild(s);
 }
 
@@ -1005,21 +1028,49 @@ function doLoad(){
   // Metodo principal: fetch() direto — funciona mesmo dentro de iframes com
   // sandbox restrito (ex.: paginas incorporadas no Google Sites), onde a
   // injecao de <script> externo (JSONP) costuma ser bloqueada.
+  // Timeout maior (25s) para acomodar redes moveis mais lentas.
   var ctrl=('AbortController' in window)?new AbortController():null;
-  var timer=setTimeout(function(){if(ctrl)ctrl.abort()},20000);
+  var timedOut=false;
+  var timer=setTimeout(function(){timedOut=true;if(ctrl)ctrl.abort()},25000);
 
-  fetch(APPS_URL+'?_='+Date.now(),{method:'GET',signal:ctrl?ctrl.signal:undefined,cache:'no-store'})
-    .then(function(res){
-      if(!res.ok)throw new Error('HTTP '+res.status);
-      return res.json();
+  fetch(APPS_URL+'?_='+Date.now(),{
+      method:'GET',
+      signal:ctrl?ctrl.signal:undefined,
+      cache:'no-store',
+      mode:'cors',
+      credentials:'omit',
+      redirect:'follow'
     })
-    .then(function(data){
+    .then(function(res){
+      if(!res.ok){var e=new Error('HTTP '+res.status);e.httpStatus=res.status;throw e}
+      return res.text();
+    })
+    .then(function(text){
       clearTimeout(timer);
+      var data;
+      try{data=JSON.parse(text)}
+      catch(parseErr){
+        var e=new Error('JSON invalido');e.isJsonError=true;throw e;
+      }
       onLoadSuccess(data,btn);
     })
     .catch(function(err){
       clearTimeout(timer);
-      // fetch falhou (rede, CORS, ou timeout) — tenta o metodo antigo (JSONP) como reserva
+      if(err && err.isJsonError){
+        // resposta chegou (rede ok) mas nao e JSON -> normalmente tela de login do Google
+        // ainda tenta JSONP, que as vezes contorna esse cenario
+        loadViaJsonp(btn);
+        return;
+      }
+      if(err && err.httpStatus){
+        onLoadFail(btn,'http',err.httpStatus);
+        return;
+      }
+      if(timedOut || (err && err.name==='AbortError')){
+        onLoadFail(btn,'timeout');
+        return;
+      }
+      // fetch falhou por rede/CORS — tenta o metodo antigo (JSONP) como reserva
       loadViaJsonp(btn);
     });
 }
