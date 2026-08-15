@@ -963,8 +963,13 @@ function onLoadSuccess(data,btn){
 function onLoadFail(btn,msg){
   btn.classList.remove('spin');
   setChip('err','erro');
-  document.getElementById('err-box').innerHTML='<div class="err-box"><b>Erro de rede ao acessar Apps Script.</b><br>'+esc(msg||'Verifique se o Web App esta publicado como "Qualquer pessoa".')+'<br><a href="'+APPS_URL+'" target="_blank">Testar URL</a></div>';
-  toast('Erro de rede','err');
+  document.getElementById('err-box').innerHTML='<div class="err-box"><b>Nao foi possivel carregar os dados.</b><br>'
+    +esc(msg||'Verifique se o Web App esta publicado como "Qualquer pessoa, mesmo anonimos".')
+    +'<br><br>Dica: Acesse o link abaixo no celular para testar:<br>'
+    +'<a href="'+APPS_URL+'" target="_blank" style="word-break:break-all">Testar Apps Script</a>'
+    +'<br><br><small>Se abrir e mostrar JSON, o problema e CORS. '
+    +'Reimplante o Apps Script como "Qualquer pessoa" e tente novamente.</small></div>';
+  toast('Erro ao carregar dados','err');
 }
 
 /* Fallback JSONP: usado quando fetch() falha (ex.: bloqueio de CORS em alguns navegadores antigos) */
@@ -1002,12 +1007,41 @@ function doLoad(){
   setChip('warn','carregando');
   document.getElementById('err-box').innerHTML='';
 
-  // Metodo principal: fetch() direto — funciona mesmo dentro de iframes com
-  // sandbox restrito (ex.: paginas incorporadas no Google Sites), onde a
-  // injecao de <script> externo (JSONP) costuma ser bloqueada.
-  var ctrl=('AbortController' in window)?new AbortController():null;
-  var timer=setTimeout(function(){if(ctrl)ctrl.abort()},20000);
+  // Tenta JSONP primeiro — mais compativel com Apps Script em mobile/GitHub Pages
+  // fetch() com CORS costuma ser bloqueado em alguns navegadores mobile
+  var jsonpOk=false;
+  var cbName='rdoCb_'+Date.now();
+  var jsonpTimer=setTimeout(function(){
+    if(jsonpOk)return;
+    // JSONP demorou — tenta fetch como ultimo recurso
+    tryFetch(btn);
+  },8000);
 
+  window[cbName]=function(data){
+    if(jsonpOk)return; jsonpOk=true;
+    clearTimeout(jsonpTimer);
+    delete window[cbName];
+    var old=document.querySelectorAll('script[data-rdo]');
+    for(var i=0;i<old.length;i++)old[i].remove();
+    onLoadSuccess(data,btn);
+  };
+
+  var s=document.createElement('script');
+  s.setAttribute('data-rdo','1');
+  s.src=APPS_URL+'?callback='+cbName+'&_='+Date.now();
+  s.onerror=function(){
+    if(jsonpOk)return; jsonpOk=true;
+    clearTimeout(jsonpTimer);
+    delete window[cbName];
+    // JSONP falhou — tenta fetch
+    tryFetch(btn);
+  };
+  document.head.appendChild(s);
+}
+
+function tryFetch(btn){
+  var ctrl=('AbortController' in window)?new AbortController():null;
+  var timer=setTimeout(function(){if(ctrl)ctrl.abort()},15000);
   fetch(APPS_URL+'?_='+Date.now(),{method:'GET',signal:ctrl?ctrl.signal:undefined,cache:'no-store'})
     .then(function(res){
       if(!res.ok)throw new Error('HTTP '+res.status);
@@ -1019,8 +1053,7 @@ function doLoad(){
     })
     .catch(function(err){
       clearTimeout(timer);
-      // fetch falhou (rede, CORS, ou timeout) — tenta o metodo antigo (JSONP) como reserva
-      loadViaJsonp(btn);
+      onLoadFail(btn,'CORS bloqueado pelo navegador. Erro: '+err.message+'. Reimplante o Apps Script como "Qualquer pessoa, mesmo anonimos".');
     });
 }
 
