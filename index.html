@@ -968,62 +968,47 @@ function onLoadFail(btn,msg){
 }
 
 /* Fallback JSONP: usado quando fetch() falha (ex.: bloqueio de CORS em alguns navegadores antigos) */
-function loadViaJsonp(btn){
-  var old=document.querySelectorAll('script[data-rdo]');
-  for(var i=0;i<old.length;i++)old[i].remove();
-  var cbName='rdoCallback_'+Date.now();
-  var ok=false;
-  window[cbName]=function(data){
-    if(ok)return; ok=true;
-    delete window[cbName];
-    onLoadSuccess(data,btn);
-  };
-  var s=document.createElement('script');
-  s.setAttribute('data-rdo','1');
-  s.src=APPS_URL+'?callback='+cbName+'&_='+Date.now();
-  s.onerror=function(){
-    if(ok)return; ok=true;
-    delete window[cbName];
-    onLoadFail(btn,'Verifique se o Web App esta publicado como "Qualquer pessoa".');
-  };
-  setTimeout(function(){
-    if(ok)return; ok=true;
-    delete window[cbName];
-    btn.classList.remove('spin');
-    setChip('err','timeout');
-    toast('Timeout — tente novamente','err');
-  },20000);
-  document.head.appendChild(s);
-}
-
 function doLoad(){
   var btn=document.getElementById('btn-reload');
   btn.classList.add('spin');
   setChip('warn','carregando');
   document.getElementById('err-box').innerHTML='';
 
-  // Metodo principal: fetch() direto — funciona mesmo dentro de iframes com
-  // sandbox restrito (ex.: paginas incorporadas no Google Sites), onde a
-  // injecao de <script> externo (JSONP) costuma ser bloqueada.
-  var ctrl=('AbortController' in window)?new AbortController():null;
-  var timer=setTimeout(function(){if(ctrl)ctrl.abort()},20000);
+  // Vai direto pro JSONP - sem fetch, sem CORS
+  var old=document.querySelectorAll('script[data-rdo]');
+  for(var i=0;i<old.length;i++)old[i].remove();
 
-  fetch(APPS_URL+'?_='+Date.now(),{method:'GET',signal:ctrl?ctrl.signal:undefined,cache:'no-store'})
-    .then(function(res){
-      if(!res.ok)throw new Error('HTTP '+res.status);
-      return res.json();
-    })
-    .then(function(data){
-      clearTimeout(timer);
-      onLoadSuccess(data,btn);
-    })
-    .catch(function(err){
-      clearTimeout(timer);
-      // fetch falhou (rede, CORS, ou timeout) — tenta o metodo antigo (JSONP) como reserva
-      loadViaJsonp(btn);
-    });
+  var cbName='rdoCb_'+Date.now();
+  var ok=false;
+
+  window[cbName]=function(data){
+    if(ok)return; ok=true;
+    delete window[cbName];
+    var old2=document.querySelectorAll('script[data-rdo]');
+    for(var j=0;j<old2.length;j++)old2[j].remove();
+    onLoadSuccess(data,btn);
+  };
+
+  var s=document.createElement('script');
+  s.setAttribute('data-rdo','1');
+  s.src=APPS_URL+'?callback='+cbName+'&_='+Date.now();
+  s.onerror=function(){
+    if(ok)return; ok=true;
+    delete window[cbName];
+    onLoadFail(btn,'Apps Script inacessivel. Verifique se esta publicado como "Qualquer pessoa".');
+  };
+
+  setTimeout(function(){
+    if(ok)return; ok=true;
+    delete window[cbName];
+    btn.classList.remove('spin');
+    setChip('err','timeout');
+    document.getElementById('err-box').innerHTML='<div class="err-box"><b>Timeout ao carregar.</b><br>Verifique sua conexao e se o Apps Script esta publicado como "Qualquer pessoa".<br><a href="'+APPS_URL+'?callback=teste" target="_blank">Testar Apps Script</a></div>';
+    toast('Timeout - tente novamente','err');
+  },20000);
+
+  document.head.appendChild(s);
 }
-
 function doPrint(){var now=new Date(),day=getSelectedDay(),ph=document.getElementById('print-header');ph.innerHTML='<h1>RDO - Relatorio Diario de Obra</h1><p>'+now.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})+' '+now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+(day?' | Data: '+day.date+' | Efetivo: '+day.ativos.length+' ativos':'')+'</p>';setTimeout(function(){window.print()},120)}
 
 function doExportCSV(){
