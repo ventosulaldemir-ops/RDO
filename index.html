@@ -913,7 +913,7 @@ function renderAll(){
   if(VIEW_MODE==='range')renderRangeAll();else renderAllForDate();
 }
 
-var APPS_URL='https://script.google.com/macros/s/AKfycbwFLxduVg7tpCeBlfYThOrigDhMn8ju9_w888TfWEblxesUJeFfvXhR03nr4zDpREY6/exec';
+var APPS_URL='https://script.google.com/macros/s/AKfycbwKyrmzyeeuQZLxLfpVMq757LPUeSf2qWOgMbFxBwbXnyic-fjU3JG0zmJh2BPIcn4y/exec';
 
 function processRdoData(data){
   if(!data||data.status!=='ok')throw new Error('Status: '+(data?data.status:'null'));
@@ -1006,23 +1006,21 @@ function doLoad(){
   btn.classList.add('spin');
   setChip('warn','carregando');
   document.getElementById('err-box').innerHTML='';
+  loadViaJsonp(btn);
+}
 
-  // Tenta JSONP primeiro — mais compativel com Apps Script em mobile/GitHub Pages
-  // fetch() com CORS costuma ser bloqueado em alguns navegadores mobile
-  var jsonpOk=false;
+function loadViaJsonp(btn){
+  // Remove scripts antigos
+  var old=document.querySelectorAll('script[data-rdo]');
+  for(var i=0;i<old.length;i++)old[i].remove();
+
   var cbName='rdoCb_'+Date.now();
-  var jsonpTimer=setTimeout(function(){
-    if(jsonpOk)return;
-    // JSONP demorou — tenta fetch como ultimo recurso
-    tryFetch(btn);
-  },8000);
+  var done=false;
 
   window[cbName]=function(data){
-    if(jsonpOk)return; jsonpOk=true;
-    clearTimeout(jsonpTimer);
+    if(done)return; done=true;
     delete window[cbName];
-    var old=document.querySelectorAll('script[data-rdo]');
-    for(var i=0;i<old.length;i++)old[i].remove();
+    btn.classList.remove('spin');
     onLoadSuccess(data,btn);
   };
 
@@ -1030,31 +1028,20 @@ function doLoad(){
   s.setAttribute('data-rdo','1');
   s.src=APPS_URL+'?callback='+cbName+'&_='+Date.now();
   s.onerror=function(){
-    if(jsonpOk)return; jsonpOk=true;
-    clearTimeout(jsonpTimer);
+    if(done)return; done=true;
     delete window[cbName];
-    // JSONP falhou — tenta fetch
-    tryFetch(btn);
+    onLoadFail(btn,'Nao foi possivel carregar. Verifique se o Apps Script esta publicado como "Qualquer pessoa, mesmo anonimos".');
   };
-  document.head.appendChild(s);
-}
 
-function tryFetch(btn){
-  var ctrl=('AbortController' in window)?new AbortController():null;
-  var timer=setTimeout(function(){if(ctrl)ctrl.abort()},15000);
-  fetch(APPS_URL+'?_='+Date.now(),{method:'GET',signal:ctrl?ctrl.signal:undefined,cache:'no-store'})
-    .then(function(res){
-      if(!res.ok)throw new Error('HTTP '+res.status);
-      return res.json();
-    })
-    .then(function(data){
-      clearTimeout(timer);
-      onLoadSuccess(data,btn);
-    })
-    .catch(function(err){
-      clearTimeout(timer);
-      onLoadFail(btn,'CORS bloqueado pelo navegador. Erro: '+err.message+'. Reimplante o Apps Script como "Qualquer pessoa, mesmo anonimos".');
-    });
+  setTimeout(function(){
+    if(done)return; done=true;
+    delete window[cbName];
+    btn.classList.remove('spin');
+    setChip('err','timeout');
+    toast('Timeout — tente novamente','err');
+  },25000);
+
+  document.head.appendChild(s);
 }
 
 function doPrint(){var now=new Date(),day=getSelectedDay(),ph=document.getElementById('print-header');ph.innerHTML='<h1>RDO - Relatorio Diario de Obra</h1><p>'+now.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})+' '+now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+(day?' | Data: '+day.date+' | Efetivo: '+day.ativos.length+' ativos':'')+'</p>';setTimeout(function(){window.print()},120)}
