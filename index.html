@@ -129,15 +129,11 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
   @page{size:A4 portrait;margin:10mm 8mm 12mm 8mm}
 }
 @media(max-width:900px){.gg{grid-template-columns:1fr}.bar-label{min-width:100px;max-width:100px}}
-
-/* ═══ Scroll-fade hint for horizontally scrollable tables (mobile) ═══ */
 .cd-b.can-scroll::after{content:'';position:sticky;top:0;right:0;float:right;width:18px;height:100%;margin-left:-18px;pointer-events:none;background:linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,.9));display:block}
-
 @media(max-width:640px){
   table.t th{top:var(--topbar-h)}
   .kr{grid-template-columns:repeat(2,1fr)}
 }
-
 @media(max-width:480px){
   html{scroll-padding-top:calc(var(--topbar-h) + 8px)}
   .topbar{padding:0 10px}
@@ -183,7 +179,6 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
   .bar-pct{font-size:8px;min-width:30px}
   .chart-wrap{padding:10px 6px}
 }
-
 @media(max-width:360px){
   .kr{grid-template-columns:1fr}
   .btn span.btn-label{display:none}
@@ -192,6 +187,15 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 </style>
 </head>
 <body>
+<div id="inapp-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#0B1D33,#122B4D);color:#fff;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:'Inter',system-ui,sans-serif">
+  <div style="font-size:44px;margin-bottom:14px">🌐</div>
+  <div style="font-family:'Space Grotesk';font-size:19px;font-weight:700;margin-bottom:10px;max-width:340px">Este navegador embutido bloqueia o carregamento dos dados</div>
+  <div style="font-size:13px;color:#B9C7D9;max-width:340px;line-height:1.6;margin-bottom:22px">Voce abriu este link de dentro do WhatsApp, Instagram ou similar. Esses apps usam um navegador restrito que impede o site de buscar os dados da planilha. Abra no navegador normal do celular para funcionar.</div>
+  <button id="inapp-open-btn" style="font-family:'JetBrains Mono';font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:12px;background:#D97706;color:#0B1D33;border:none;padding:14px 22px;border-radius:5px;cursor:pointer;min-height:46px;width:100%;max-width:320px;margin-bottom:10px">Abrir no navegador</button>
+  <button id="inapp-copy-btn" style="font-family:'JetBrains Mono';font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:11px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3);padding:12px 20px;border-radius:5px;cursor:pointer;min-height:44px;width:100%;max-width:320px;margin-bottom:18px">Copiar link</button>
+  <div style="font-size:10.5px;color:#8BADC4;max-width:320px;line-height:1.7">Se o botao acima nao abrir automaticamente: toque no icone de <b>⋮</b> ou <b>compartilhar</b> no topo desta tela e escolha "Abrir no Chrome" ou "Abrir no Safari".</div>
+  <button id="inapp-dismiss-btn" style="margin-top:20px;background:none;border:none;color:#5B7A9C;font-family:'JetBrains Mono';font-size:9.5px;text-decoration:underline;cursor:pointer;padding:8px">Continuar mesmo assim (pode nao funcionar)</button>
+</div>
 <div class="print-header" id="print-header"></div>
 <div class="topbar">
   <div class="topbar-in">
@@ -347,6 +351,48 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 <div id="toast"></div>
 
 <script>
+/* ═══════ DETECCAO DE NAVEGADOR IN-APP ═══════ */
+(function(){
+  var ua=navigator.userAgent||'';
+  var isInApp = /FBAN|FBAV|FB_IAB|Instagram|WhatsApp|Line\/|MicroMessenger|TikTok|Twitter|Snapchat/i.test(ua);
+  if(!isInApp)return;
+  var isAndroid = /Android/i.test(ua);
+  var isIOS = /iPhone|iPad|iPod/i.test(ua);
+  var currentUrl = location.href;
+  var overlay=document.getElementById('inapp-overlay');
+  var openBtn=document.getElementById('inapp-open-btn');
+  var copyBtn=document.getElementById('inapp-copy-btn');
+  var dismissBtn=document.getElementById('inapp-dismiss-btn');
+  function showOverlay(){if(overlay){overlay.style.display='flex'}}
+  function hideOverlay(){if(overlay){overlay.style.display='none'}}
+  function tryOpenExternal(){
+    if(isAndroid){
+      var noScheme=currentUrl.replace(/^https?:\/\//,'');
+      var intentUrl='intent://'+noScheme+'#Intent;scheme=https;package=com.android.chrome;end';
+      window.location.href=intentUrl;
+      setTimeout(function(){window.open(currentUrl,'_system')},800);
+    }else if(isIOS){window.open(currentUrl,'_blank')}
+    else{window.open(currentUrl,'_blank')}
+  }
+  if(openBtn)openBtn.addEventListener('click',tryOpenExternal);
+  if(copyBtn)copyBtn.addEventListener('click',function(){
+    function fallbackCopy(){
+      var ta=document.createElement('textarea');
+      ta.value=currentUrl;ta.style.position='fixed';ta.style.opacity='0';
+      document.body.appendChild(ta);ta.select();
+      try{document.execCommand('copy')}catch(e){}
+      document.body.removeChild(ta);
+    }
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(currentUrl).catch(fallbackCopy)}
+    else{fallbackCopy()}
+    copyBtn.textContent='Link copiado! Cole no navegador';
+    setTimeout(function(){copyBtn.textContent='Copiar link'},2500);
+  });
+  if(dismissBtn)dismissBtn.addEventListener('click',hideOverlay);
+  showOverlay();
+  if(isAndroid){setTimeout(tryOpenExternal,400)}
+})();
+
 var SHEET_ID='1uYl5jd-0eMqxnCpXZI2Rm7VtOdCmrd6CWKFfGX_sgTU';
 var SHEET_GID='286377544';
 var PAVIMENTOS=['TÉRREO','1º','2º','3º','ENAE','INF'];
@@ -366,8 +412,6 @@ function fmtNow(){return new Date().toLocaleString('pt-BR',{day:'2-digit',month:
 
 var KW_VAZIO=['nao encontrado','não encontrado','n/a','na','nenhum','nenhuma','sem atividade','sem lancamento','sem lançamento','sem serviço','indefinido','—','--','-'];
 function temAtividade(v){if(!v||!v.trim())return false;var n=norm(v);if(!n)return false;for(var i=0;i<KW_VAZIO.length;i++){if(n===KW_VAZIO[i]||n.indexOf(KW_VAZIO[i])===0)return false}return true}
-
-/* Efetivo real de um dia = pessoas com atividade lancada (excluindo ferias e faltosos) */
 function comAtividadeCount(day){return day.ativos.filter(function(p){return !!p.atividade}).length}
 
 function setChip(state,txt){var el=document.getElementById('chip'),dot=document.getElementById('livedot'),t=document.getElementById('chip-txt');el.className='chip chip-'+state;dot.style.display=state==='ok'?'inline-block':'none';t.textContent=txt}
@@ -376,7 +420,6 @@ function toast(msg,type){var el=document.getElementById('toast');el.style.displa
 
 function findCol(hd,kws){for(var i=0;i<hd.length;i++){var n=norm(hd[i]);for(var k=0;k<kws.length;k++){if(n.indexOf(norm(kws[k]))>-1)return i}}return -1}
 
-/* ═══════ NORMALIZACAO SILENCIOSA ═══════ */
 function limparParaMatch(s){return norm(s).replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,' ').trim()}
 
 function normalizarPavimento(cru){
@@ -412,11 +455,9 @@ function detectarDoTexto(texto){
   return '';
 }
 
-/* ═══════ FERIAS ═══════ */
 var KW_FERIAS=['ferias','férias','de ferias','em ferias','feria'];
 function isFerias(row,ci){var fields=[ci.status,ci.atividade];for(var fi=0;fi<fields.length;fi++){if(fields[fi]>-1){var v=norm(row[fields[fi]]||'');for(var k=0;k<KW_FERIAS.length;k++){if(v.indexOf(KW_FERIAS[k])>-1)return true}}}return false}
 
-/* ═══════ PARSE ═══════ */
 function parseData(raw){
   if(!raw||raw.length<2)return null;
   var hd=raw[0];
@@ -442,7 +483,6 @@ function parseData(raw){
   return{ci:ci,hd:hd,people:people,days:days};
 }
 
-/* ═══════ MODE SWITCH ═══════ */
 function setViewMode(mode){
   VIEW_MODE=mode;
   document.getElementById('tab-single').className='mode-tab'+(mode==='single'?' on':'');
@@ -458,7 +498,6 @@ function setViewMode(mode){
   else{renderAllForDate()}
 }
 
-/* ═══════ DATE FILTER (single) ═══════ */
 function populateDateFilter(){
   var sel=document.getElementById('fdate'),badge=document.getElementById('date-count-badge'),btnPrev=document.getElementById('btn-prev'),btnNext=document.getElementById('btn-next');
   if(!PARSED||!PARSED.days.length){sel.innerHTML='<option value="">Sem datas</option>';badge.textContent='';btnPrev.disabled=true;btnNext.disabled=true;return}
@@ -482,52 +521,34 @@ function onDateChange(){
 
 function getSelectedDay(){if(!PARSED||!PARSED.days.length)return null;return PARSED.days[Math.min(SELECTED_DATE_IDX,PARSED.days.length-1)]}
 
-/* ═══════ RANGE (multi-dia) ═══════ */
 var MESES_PT=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 function parseDateBR(s){
-  var parts=(s||'').split('/');
-  if(parts.length!==3)return null;
+  var parts=(s||'').split('/');if(parts.length!==3)return null;
   var d=parseInt(parts[0],10),m=parseInt(parts[1],10),y=parseInt(parts[2],10);
-  if(!d||!m||!y)return null;
-  return{d:d,m:m,y:y,key:y+'-'+String(m).padStart(2,'0')};
+  if(!d||!m||!y)return null;return{d:d,m:m,y:y,key:y+'-'+String(m).padStart(2,'0')};
 }
 
 function initRangeChips(){
   var box=document.getElementById('range-chips');
   if(!PARSED||!PARSED.days.length){box.innerHTML='<div class="em">Sem datas</div>';return}
-  var ascDays=PARSED.days.slice().reverse();
-  var html='',curKey=null;
+  var ascDays=PARSED.days.slice().reverse();var html='',curKey=null;
   ascDays.forEach(function(d){
-    var pd=parseDateBR(d.date);
-    var key=pd?pd.key:'?';
-    if(key!==curKey){
-      curKey=key;
-      var label=pd?(MESES_PT[pd.m-1]+' de '+pd.y):'Data invalida';
-      html+='<div style="width:100%;font-family:\'JetBrains Mono\';font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin:8px 0 3px;padding-top:6px;border-top:1px dashed var(--line)">'+esc(label)+'</div>';
-    }
+    var pd=parseDateBR(d.date);var key=pd?pd.key:'?';
+    if(key!==curKey){curKey=key;var label=pd?(MESES_PT[pd.m-1]+' de '+pd.y):'Data invalida';html+='<div style="width:100%;font-family:\'JetBrains Mono\';font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin:8px 0 3px;padding-top:6px;border-top:1px dashed var(--line)">'+esc(label)+'</div>'}
     var sel=RANGE_SELECTED.has(d.date);
     html+='<span class="date-chip'+(sel?' sel':'')+'" data-date="'+esc(d.date)+'" onclick="toggleRangeDate(\''+esc(d.date).replace(/'/g,"\\'")+'\')">'+esc(d.date)+' <span style="opacity:.7">('+d.ativos.length+')</span></span>';
   });
-  box.innerHTML=html;
-  document.getElementById('range-meta').textContent=PARSED.days.length+' data(s) disponiveis';
+  box.innerHTML=html;document.getElementById('range-meta').textContent=PARSED.days.length+' data(s) disponiveis';
 }
 
-function toggleRangeDate(date){
-  if(RANGE_SELECTED.has(date))RANGE_SELECTED.delete(date);else RANGE_SELECTED.add(date);
-  initRangeChips();renderRangeAll();
-}
+function toggleRangeDate(date){if(RANGE_SELECTED.has(date))RANGE_SELECTED.delete(date);else RANGE_SELECTED.add(date);initRangeChips();renderRangeAll()}
 function selectAllRangeDates(){if(!PARSED)return;PARSED.days.forEach(function(d){RANGE_SELECTED.add(d.date)});initRangeChips();renderRangeAll()}
 function clearRangeDates(){RANGE_SELECTED.clear();initRangeChips();renderRangeAll()}
 function selectLastNDates(n){if(!PARSED)return;RANGE_SELECTED.clear();PARSED.days.slice(0,n).forEach(function(d){RANGE_SELECTED.add(d.date)});initRangeChips();renderRangeAll()}
 function selectCurrentMonth(offset){
-  if(!PARSED)return;
-  var now=new Date();
-  var targetM=now.getMonth()+1+offset,targetY=now.getFullYear();
-  while(targetM<1){targetM+=12;targetY--}
-  while(targetM>12){targetM-=12;targetY++}
-  RANGE_SELECTED.clear();
-  PARSED.days.forEach(function(d){var pd=parseDateBR(d.date);if(pd&&pd.m===targetM&&pd.y===targetY)RANGE_SELECTED.add(d.date)});
-  initRangeChips();renderRangeAll();
+  if(!PARSED)return;var now=new Date();var targetM=now.getMonth()+1+offset,targetY=now.getFullYear();
+  while(targetM<1){targetM+=12;targetY--}while(targetM>12){targetM-=12;targetY++}
+  RANGE_SELECTED.clear();PARSED.days.forEach(function(d){var pd=parseDateBR(d.date);if(pd&&pd.m===targetM&&pd.y===targetY)RANGE_SELECTED.add(d.date)});initRangeChips();renderRangeAll();
 }
 
 function getRangeDays(){if(!PARSED)return[];return PARSED.days.filter(function(d){return RANGE_SELECTED.has(d.date)})}
@@ -538,9 +559,7 @@ function computeRangeAgg(days){
     day.all.forEach(function(p){
       var key=norm(p.nome)+'|'+norm(p.empresa);
       if(!map[key])map[key]={nome:p.nome,empresa:p.empresa,funcao:p.funcao,diasPresente:0,diasAtivo:0,diasFerias:0,diasSem:0,diasSemProd:0,pavs:{},producoes:[]};
-      var e=map[key];
-      e.diasPresente++;
-      if(p.ferias){e.diasFerias++;return}
+      var e=map[key];e.diasPresente++;if(p.ferias){e.diasFerias++;return}
       if(p.atividade)e.diasAtivo++;else e.diasSem++;
       if(!temAtividade(p.prod))e.diasSemProd++;
       if(p.pav)e.pavs[p.pav]=(e.pavs[p.pav]||0)+1;
@@ -563,25 +582,14 @@ function renderRangeKPIs(days,agg){
   var el=document.getElementById('kpis');
   if(!days.length){el.innerHTML='<div class="kp"><div class="kl">Nenhuma data selecionada</div><div class="kv">—</div></div>';document.getElementById('kpis2').innerHTML='';return}
   var totalPessoaDias=agg.reduce(function(s,p){return s+p.diasPresente},0);
-  var pessoasDistintas=agg.length;
-  var mediaDias=pessoasDistintas>0?(totalPessoaDias/pessoasDistintas).toFixed(1):'0';
-  var totalAtivo=agg.reduce(function(s,p){return s+p.diasAtivo},0);
-  var totalFerias=agg.reduce(function(s,p){return s+p.diasFerias},0);
+  var pessoasDistintas=agg.length;var mediaDias=pessoasDistintas>0?(totalPessoaDias/pessoasDistintas).toFixed(1):'0';
+  var totalAtivo=agg.reduce(function(s,p){return s+p.diasAtivo},0);var totalFerias=agg.reduce(function(s,p){return s+p.diasFerias},0);
   var empresas=uniq(agg.map(function(p){return p.empresa})).length;
-  el.innerHTML=[
-    {i:'📅',l:'Dias no periodo',v:days.length,f:'datas selecionadas',c:'var(--blue)'},
-    {i:'👷',l:'Pessoas distintas',v:pessoasDistintas,f:'no periodo',c:'#059669'},
-    {i:'🧮',l:'Pessoa-dias',v:totalPessoaDias,f:'soma de presencas',c:'var(--cyan)'},
-    {i:'📈',l:'Media dias/pessoa',v:mediaDias,f:'presenca media',c:'#7C3AED'},
-    {i:'✅',l:'Dias c/ atividade',v:totalAtivo,f:'lancamentos',c:'var(--green)'},
-    {i:'🌴',l:'Dias de ferias',v:totalFerias,f:'no periodo',c:'var(--amber)'},
-    {i:'🏢',l:'Empresas',v:empresas,f:'envolvidas',c:'var(--navy)'}
-  ].map(function(k){return '<div class="kp" style="--kc:'+k.c+'"><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div></div>'}).join('');
+  el.innerHTML=[{i:'📅',l:'Dias no periodo',v:days.length,f:'datas selecionadas',c:'var(--blue)'},{i:'👷',l:'Pessoas distintas',v:pessoasDistintas,f:'no periodo',c:'#059669'},{i:'🧮',l:'Pessoa-dias',v:totalPessoaDias,f:'soma de presencas',c:'var(--cyan)'},{i:'📈',l:'Media dias/pessoa',v:mediaDias,f:'presenca media',c:'#7C3AED'},{i:'✅',l:'Dias c/ atividade',v:totalAtivo,f:'lancamentos',c:'var(--green)'},{i:'🌴',l:'Dias de ferias',v:totalFerias,f:'no periodo',c:'var(--amber)'},{i:'🏢',l:'Empresas',v:empresas,f:'envolvidas',c:'var(--navy)'}].map(function(k){return '<div class="kp" style="--kc:'+k.c+'"><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div></div>'}).join('');
 }
 
 function renderRangeKPIs2(days,agg){
-  var el=document.getElementById('kpis2');
-  if(!days.length){el.innerHTML='';return}
+  var el=document.getElementById('kpis2');if(!days.length){el.innerHTML='';return}
   var headcounts=days.map(function(d){return comAtividadeCount(d)});
   var efetivoMedio=(headcounts.reduce(function(s,v){return s+v},0)/days.length).toFixed(1);
   var maxV=Math.max.apply(null,headcounts),minV=Math.min.apply(null,headcounts);
@@ -589,33 +597,19 @@ function renderRangeKPIs2(days,agg){
   var totalPessoaDias=agg.reduce(function(s,p){return s+p.diasPresente},0);
   var totalFerias=agg.reduce(function(s,p){return s+p.diasFerias},0);
   var totalAtivo=agg.reduce(function(s,p){return s+p.diasAtivo},0);
-  var naoFerias=totalPessoaDias-totalFerias;
-  var taxaAtividade=naoFerias>0?(totalAtivo/naoFerias*100).toFixed(0):'0';
+  var naoFerias=totalPessoaDias-totalFerias;var taxaAtividade=naoFerias>0?(totalAtivo/naoFerias*100).toFixed(0):'0';
   var unicos=agg.filter(function(p){return p.diasPresente===1}).length;
-  el.innerHTML=[
-    {i:'📊',l:'Efetivo medio/dia',v:efetivoMedio,f:'media de pessoas por dia',c:'#059669'},
-    {i:'🔺',l:'Pico de efetivo',v:maxV,f:maxDay?maxDay.date:'—',c:'var(--green)'},
-    {i:'🔻',l:'Menor efetivo',v:minV,f:minDay?minDay.date:'—',c:'var(--red)'},
-    {i:'🎯',l:'Taxa de atividade',v:taxaAtividade+'%',f:'dias c/ atividade vs presenca',c:'var(--blue)'},
-    {i:'🔄',l:'Presenca unica',v:unicos,f:'pessoas com so 1 dia no periodo',c:'#7C3AED'}
-  ].map(function(k){return '<div class="kp" style="--kc:'+k.c+'"><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div></div>'}).join('');
+  el.innerHTML=[{i:'📊',l:'Efetivo medio/dia',v:efetivoMedio,f:'media de pessoas por dia',c:'#059669'},{i:'🔺',l:'Pico de efetivo',v:maxV,f:maxDay?maxDay.date:'—',c:'var(--green)'},{i:'🔻',l:'Menor efetivo',v:minV,f:minDay?minDay.date:'—',c:'var(--red)'},{i:'🎯',l:'Taxa de atividade',v:taxaAtividade+'%',f:'dias c/ atividade vs presenca',c:'var(--blue)'},{i:'🔄',l:'Presenca unica',v:unicos,f:'pessoas com so 1 dia no periodo',c:'#7C3AED'}].map(function(k){return '<div class="kp" style="--kc:'+k.c+'"><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div></div>'}).join('');
 }
 
-function aggregateAcrossDays(days,field){
-  var out={};
-  days.forEach(function(d){Object.keys(d[field]).forEach(function(k){out[k]=(out[k]||0)+d[field][k]})});
-  return out;
-}
+function aggregateAcrossDays(days,field){var out={};days.forEach(function(d){Object.keys(d[field]).forEach(function(k){out[k]=(out[k]||0)+d[field][k]})});return out}
 
 function getFilteredRangeAgg(){
   var q=norm(document.getElementById('rq').value),emp=document.getElementById('remp').value,func=document.getElementById('rfunc').value,pav=document.getElementById('rpav').value;
   var days=getRangeDays();var agg=computeRangeAgg(days);
   return agg.filter(function(p){
-    if(emp&&p.empresa!==emp)return false;
-    if(func&&p.funcao!==func)return false;
-    if(pav&&!p.pavs[pav])return false;
-    if(q){var full=norm(p.nome+' '+p.empresa+' '+p.funcao);if(full.indexOf(q)===-1)return false}
-    return true;
+    if(emp&&p.empresa!==emp)return false;if(func&&p.funcao!==func)return false;if(pav&&!p.pavs[pav])return false;
+    if(q){var full=norm(p.nome+' '+p.empresa+' '+p.funcao);if(full.indexOf(q)===-1)return false}return true;
   });
 }
 
@@ -629,8 +623,7 @@ function renderRangeTable(){
   if(rangeSortKey==='nome'||rangeSortKey==='empresa'||rangeSortKey==='funcao')agg=agg.slice().sort(function(a,b){return(a[rangeSortKey]||'').localeCompare(b[rangeSortKey]||'','pt-BR')*rangeSortDir});
   else if(rangeSortKey)agg=agg.slice().sort(function(a,b){return((a[rangeSortKey]||0)-(b[rangeSortKey]||0))*rangeSortDir});
   else agg=agg.slice().sort(function(a,b){return b.diasPresente-a.diasPresente});
-  meta.textContent=days.length+' dia(s) selecionados · '+agg.length+' pessoa(s)';
-  ct.textContent=agg.length+' registro(s)';
+  meta.textContent=days.length+' dia(s) selecionados · '+agg.length+' pessoa(s)';ct.textContent=agg.length+' registro(s)';
   var sk=rangeSortKey,sd=rangeSortDir;
   function th(label,key){return '<th onclick="setRangeSort(\''+key+'\')" class="'+(sk===key?(sd>0?'asc':'desc'):'')+'">'+label+'</th>'}
   var h='<table class="t"><thead><tr>'+th('Nome','nome')+th('Empresa','empresa')+th('Funcao','funcao')+th('Dias presente','diasPresente')+th('Dias c/ ativ.','diasAtivo')+th('Dias s/ ativ.','diasSem')+th('Dias s/ producao','diasSemProd')+th('Dias ferias','diasFerias')+'<th>Pavimentos</th><th>Producao / Atividades por dia</th></tr></thead><tbody>';
@@ -639,8 +632,7 @@ function renderRangeTable(){
     var prodHtml=p.producoes.length?('<div class="prod-list">'+p.producoes.slice().sort(function(a,b){return(a.data||'').localeCompare(b.data||'')}).map(function(pr){return '<div><span class="pd">'+esc(pr.data)+'</span>'+esc(pr.prod?pr.prod:(pr.atividade||'—'))+(pr.pav?' <span style="color:var(--ink3)">['+esc(pr.pav)+']</span>':'')+'</div>'}).join('')+'</div>'):'<span style="color:var(--ink3)">sem lancamentos</span>';
     h+='<tr><td style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td><td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td><td style="color:var(--ink2)">'+esc(p.funcao)+'</td><td class="nr" style="font-weight:700;color:var(--navy)">'+p.diasPresente+'</td><td class="nr" style="color:var(--green)">'+p.diasAtivo+'</td><td class="nr" style="color:var(--red)">'+p.diasSem+'</td><td class="nr" style="color:'+(p.diasSemProd?'var(--red)':'var(--ink3)')+';font-weight:'+(p.diasSemProd?'700':'400')+'">'+(p.diasSemProd?'⚠ ':'')+p.diasSemProd+'</td><td class="nr" style="color:var(--amber)">'+p.diasFerias+'</td><td>'+pavList+'</td><td style="max-width:320px">'+prodHtml+'</td></tr>';
   });
-  h+='</tbody></table>';el.innerHTML=h;
-  markScrollable(el);
+  h+='</tbody></table>';el.innerHTML=h;markScrollable(el);
 }
 
 function renderRangeAll(){
@@ -648,20 +640,10 @@ function renderRangeAll(){
   var days=getRangeDays(),agg=computeRangeAgg(days);
   document.getElementById('sub-date').textContent=days.length?('Periodo: '+days.length+' dia(s) selecionados'):'Nenhum dia selecionado no periodo';
   document.getElementById('range-summary').textContent=days.length?(days.length+' dia(s) selecionados de '+(PARSED?PARSED.days.length:0)):'Nenhum dia selecionado';
-  renderRangeKPIs(days,agg);
-  renderRangeKPIs2(days,agg);
-  if(days.length){
-    renderChart(days,null,'rchart-box','rchart-meta');
-    renderBars('rtop-emp-bars','rtop-emp-meta',aggregateAcrossDays(days,'byEmp'),COLORS);
-    renderBars('rtop-func-bars','rtop-func-meta',aggregateAcrossDays(days,'byFunc'),COLORS);
-  }else{
-    document.getElementById('rchart-box').innerHTML='<div class="em">Selecione um ou mais dias acima</div>';
-    document.getElementById('rchart-meta').textContent='';
-    ['rtop-emp-bars','rtop-func-bars'].forEach(function(id){document.getElementById(id).innerHTML=''});
-    ['rtop-emp-meta','rtop-func-meta'].forEach(function(id){document.getElementById(id).textContent=''});
-  }
-  populateRangeFilters(agg);
-  renderRangeTable();
+  renderRangeKPIs(days,agg);renderRangeKPIs2(days,agg);
+  if(days.length){renderChart(days,null,'rchart-box','rchart-meta');renderBars('rtop-emp-bars','rtop-emp-meta',aggregateAcrossDays(days,'byEmp'),COLORS);renderBars('rtop-func-bars','rtop-func-meta',aggregateAcrossDays(days,'byFunc'),COLORS)}
+  else{document.getElementById('rchart-box').innerHTML='<div class="em">Selecione um ou mais dias acima</div>';document.getElementById('rchart-meta').textContent='';['rtop-emp-bars','rtop-func-bars'].forEach(function(id){document.getElementById(id).innerHTML=''});['rtop-emp-meta','rtop-func-meta'].forEach(function(id){document.getElementById(id).textContent=''})}
+  populateRangeFilters(agg);renderRangeTable();
   document.getElementById('upd-ts').textContent='atualizado '+fmtNow();
 }
 
@@ -669,20 +651,14 @@ function doExportRangeCSV(){
   var days=getRangeDays();if(!days.length){toast('Selecione ao menos um dia','warn');return}
   var agg=getFilteredRangeAgg();
   var rows=[['Nome','Empresa','Funcao','Dias presente','Dias c/ atividade','Dias s/ atividade','Dias s/ producao (ALERTA)','Dias ferias','Pavimentos','Detalhe por dia (data: producao/atividade [pav])']];
-  agg.forEach(function(p){
-    var detalhe=p.producoes.map(function(pr){return pr.data+': '+(pr.prod?pr.prod:(pr.atividade||'—'))+(pr.pav?' ['+pr.pav+']':'')}).join(' | ');
-    rows.push([p.nome,p.empresa,p.funcao,p.diasPresente,p.diasAtivo,p.diasSem,p.diasSemProd,p.diasFerias,Object.keys(p.pavs).join('/'),detalhe]);
-  });
+  agg.forEach(function(p){var detalhe=p.producoes.map(function(pr){return pr.data+': '+(pr.prod?pr.prod:(pr.atividade||'—'))+(pr.pav?' ['+pr.pav+']':'')}).join(' | ');rows.push([p.nome,p.empresa,p.funcao,p.diasPresente,p.diasAtivo,p.diasSem,p.diasSemProd,p.diasFerias,Object.keys(p.pavs).join('/'),detalhe])});
   var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v||'').replace(/"/g,'""')+'"'}).join(',')}).join('\r\n');
   var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='RDO_periodo_'+days.length+'dias.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);toast('CSV do periodo exportado','ok');
 }
 
-/* ═══════ RENDERING (single day) ═══════ */
 function populateFilters(day){
   function fill(id,vals,def){var sel=document.getElementById(id),cur=sel.value;sel.innerHTML='<option value="">'+def+'</option>'+vals.map(function(v){return '<option value="'+esc(v)+'">'+esc(v)+'</option>'}).join('');if(vals.indexOf(cur)>-1)sel.value=cur}
-  if(!day)return;
-  fill('femp',uniq(day.ativos.map(function(p){return p.empresa})),'Todas empresas');
-  fill('ffunc',uniq(day.ativos.map(function(p){return p.funcao})),'Todas funcoes');
+  if(!day)return;fill('femp',uniq(day.ativos.map(function(p){return p.empresa})),'Todas empresas');fill('ffunc',uniq(day.ativos.map(function(p){return p.funcao})),'Todas funcoes');
   var pavSel=document.getElementById('fpav');var curPav=pavSel.value;
   pavSel.innerHTML='<option value="">Todos pavimentos</option>'+PAVIMENTOS.map(function(v){var cnt=day.byPav[v]||0;return '<option value="'+esc(v)+'">'+esc(v)+(cnt>0?' ('+cnt+')':' (0)')+'</option>'}).join('');
   if(PAVIMENTOS.indexOf(curPav)>-1)pavSel.value=curPav;
@@ -691,17 +667,8 @@ function populateFilters(day){
 function renderKPIs(day){
   if(!day){document.getElementById('kpis').innerHTML='<div class="kp"><div class="kl">Sem dados</div><div class="kv">—</div></div>';return}
   var empCnt=Object.keys(day.byEmp).length,funcCnt=Object.keys(day.byFunc).length;
-  var comAtiv=day.ativos.filter(function(p){return !!p.atividade}).length;
-  var faltosos=day.ativos.length-comAtiv;
-  var previsto=day.ativos.length;
-  var pctPrevisto=previsto>0?(comAtiv/previsto*100).toFixed(0):'0';
-  document.getElementById('kpis').innerHTML=[
-    {i:'👷',l:'Pessoas trabalhando no dia',   v:comAtiv,           f:'de '+previsto+' previstos ('+pctPrevisto+'%)', c:'#059669'},
-    {i:'🌴',l:'De Ferias',      v:day.ferias.length, f:'excluidos do efetivo',              c:'var(--amber)'},
-    {i:'🚫',l:'Faltosos',       v:faltosos,          f:'sem atividade — excluidos',         c:'var(--red)'},
-    {i:'🏢',l:'Empresas',       v:empCnt,            f:'ativas hoje',                       c:'var(--blue)'},
-    {i:'⚒️',l:'Funcoes',        v:funcCnt,           f:'distintas',                         c:'var(--cyan)'}
-  ].map(function(k){return '<div class="kp" style="--kc:'+k.c+'"><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div></div>'}).join('');
+  var comAtiv=day.ativos.filter(function(p){return !!p.atividade}).length;var faltosos=day.ativos.length-comAtiv;var previsto=day.ativos.length;var pctPrevisto=previsto>0?(comAtiv/previsto*100).toFixed(0):'0';
+  document.getElementById('kpis').innerHTML=[{i:'👷',l:'Pessoas trabalhando no dia',v:comAtiv,f:'de '+previsto+' previstos ('+pctPrevisto+'%)',c:'#059669'},{i:'🌴',l:'De Ferias',v:day.ferias.length,f:'excluidos do efetivo',c:'var(--amber)'},{i:'🚫',l:'Faltosos',v:faltosos,f:'sem atividade — excluidos',c:'var(--red)'},{i:'🏢',l:'Empresas',v:empCnt,f:'ativas hoje',c:'var(--blue)'},{i:'⚒️',l:'Funcoes',v:funcCnt,f:'distintas',c:'var(--cyan)'}].map(function(k){return '<div class="kp" style="--kc:'+k.c+'"><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div></div>'}).join('');
 }
 
 function renderBars(elId,metaId,counts,colorMap){
@@ -742,24 +709,11 @@ function getFilteredPeople(day){
   var q=norm(document.getElementById('fq').value),emp=document.getElementById('femp').value,func=document.getElementById('ffunc').value,pav=document.getElementById('fpav').value,st=document.getElementById('fstatus').value||'ativo',prodF=document.getElementById('fprod').value;
   var active=[],ferias=[];
   day.all.forEach(function(p){
-    /* filtros de empresa/funcao/pavimento/busca valem para todo mundo, inclusive ferias */
-    if(emp&&p.empresa!==emp)return;
-    if(func&&p.funcao!==func)return;
-    if(pav&&p.pav!==pav)return;
+    if(emp&&p.empresa!==emp)return;if(func&&p.funcao!==func)return;if(pav&&p.pav!==pav)return;
     if(q){var full=norm(p.nome+' '+p.empresa+' '+p.funcao+' '+p.atividade+' '+p.regiao);if(full.indexOf(q)===-1)return}
-
-    if(p.ferias){
-      /* pessoas de ferias so aparecem quando o filtro "De ferias" ou "Mostrar tudo" esta ativo */
-      if(st==='ferias'||st==='todos')ferias.push(p);
-      return;
-    }
-
-    /* padrao ("ativo"): so quem tem atividade lancada — faltosos ficam escondidos ate filtrar */
-    if(st==='ativo'&&!p.atividade)return;
-    if(st==='sem'&&p.atividade)return;
-    if(st==='ferias')return; /* filtrando so ferias: ninguem que nao esta de ferias aparece */
-    if(prodF==='com'&&!temAtividade(p.prod))return;
-    if(prodF==='sem'&&temAtividade(p.prod))return;
+    if(p.ferias){if(st==='ferias'||st==='todos')ferias.push(p);return}
+    if(st==='ativo'&&!p.atividade)return;if(st==='sem'&&p.atividade)return;if(st==='ferias')return;
+    if(prodF==='com'&&!temAtividade(p.prod))return;if(prodF==='sem'&&temAtividade(p.prod))return;
     active.push(p);
   });
   return{active:active,ferias:ferias};
@@ -775,11 +729,8 @@ function prodBadge(prod){
   return '<span class="badge badge-red" style="animation:pulse 1.4s ease infinite" title="Producao nao preenchida">⚠ SEM PRODUCAO</span>';
 }
 
-function renderProdAlert(day){
-  document.getElementById('prod-alert').innerHTML='';
-}
+function renderProdAlert(day){document.getElementById('prod-alert').innerHTML=''}
 
-/* ═══ Marca .cd-b como scrollavel quando a tabela e mais larga que o container (mostra sombra de dica) ═══ */
 function markScrollable(container){
   requestAnimationFrame(function(){
     var tbl=container.querySelector('table.t');
@@ -794,27 +745,17 @@ function setSort(k){if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=1}renderTa
 function renderTable(){
   var day=getSelectedDay(),el=document.getElementById('tbl-box'),meta=document.getElementById('tbl-meta'),ct=document.getElementById('tbl-ct');
   if(!day){el.innerHTML='<div class="em">Sem dados</div>';return}
-  var r=getFilteredPeople(day),ferias=r.ferias;
-  var az=document.getElementById('faz').value;
-
-  /* Separar ativos reais dos faltosos (sem atividade) */
-  var ativos=r.active.filter(function(p){return !!p.atividade});
-  var faltosos=r.active.filter(function(p){return !p.atividade});
-
-  /* Ordenação */
+  var r=getFilteredPeople(day),ferias=r.ferias;var az=document.getElementById('faz').value;
+  var ativos=r.active.filter(function(p){return !!p.atividade});var faltosos=r.active.filter(function(p){return !p.atividade});
   function sortPpl(arr){
-    if(sortKey) return arr.slice().sort(function(a,b){return(a[sortKey]||'').localeCompare(b[sortKey]||'','pt-BR',{numeric:true})*sortDir});
-    if(az==='az') return arr.slice().sort(function(a,b){return(a.nome||'').localeCompare(b.nome||'','pt-BR')});
-    if(az==='za') return arr.slice().sort(function(a,b){return(b.nome||'').localeCompare(a.nome||'','pt-BR')});
+    if(sortKey)return arr.slice().sort(function(a,b){return(a[sortKey]||'').localeCompare(b[sortKey]||'','pt-BR',{numeric:true})*sortDir});
+    if(az==='az')return arr.slice().sort(function(a,b){return(a.nome||'').localeCompare(b.nome||'','pt-BR')});
+    if(az==='za')return arr.slice().sort(function(a,b){return(b.nome||'').localeCompare(a.nome||'','pt-BR')});
     return arr;
   }
-  ativos  = sortPpl(ativos);
-  faltosos= sortPpl(faltosos);
-  ferias  = sortPpl(ferias);
-
+  ativos=sortPpl(ativos);faltosos=sortPpl(faltosos);ferias=sortPpl(ferias);
   meta.textContent=ativos.length+' ativos'+(faltosos.length?' · '+faltosos.length+' faltosos':'')+(ferias.length?' · '+ferias.length+' ferias':'');
   ct.textContent=(ativos.length+faltosos.length+ferias.length)+' registro(s)';
-
   var sk=sortKey,sd=sortDir;
   var h='<table class="t"><thead><tr>'+
     '<th onclick="setSort(\'nome\')" class="'+(sk==='nome'?sd>0?'asc':'desc':'')+'">Nome</th>'+
@@ -824,66 +765,20 @@ function renderTable(){
     '<th onclick="setSort(\'pav\')" class="'+(sk==='pav'?sd>0?'asc':'desc':'')+'">Pav.</th>'+
     '<th onclick="setSort(\'regiao\')" class="'+(sk==='regiao'?sd>0?'asc':'desc':'')+'">Local</th>'+
     '</tr></thead><tbody>';
-
-  /* Ativos com atividade */
-  ativos.forEach(function(p){
-    h+='<tr>'+
-      '<td style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td>'+
-      '<td style="color:var(--ink2)">'+esc(p.funcao)+'</td>'+
-      '<td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
-      '<td style="min-width:280px;white-space:normal;line-height:1.5">'+esc(p.atividade)+'</td>'+
-      '<td>'+pavBadge(p.pav)+'</td>'+
-      '<td style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td>'+
-    '</tr>';
-  });
-
-  /* Faltosos */
-  if(faltosos.length){
-    h+='<tr style="background:#FEE2E2"><td colspan="6" style="padding:8px 12px;font-family:\'JetBrains Mono\';font-size:10px;color:#B91C1C;font-weight:700;letter-spacing:.04em;text-transform:uppercase">'+
-      '🚫 '+faltosos.length+' FALTOSO(S) — sem atividade (excluidos do efetivo real)</td></tr>';
-    faltosos.forEach(function(p){
-      h+='<tr style="background:#FFF5F5">'+
-        '<td style="font-weight:600;white-space:nowrap;color:#B91C1C">'+esc(p.nome)+'</td>'+
-        '<td style="color:#991B1B">'+esc(p.funcao)+'</td>'+
-        '<td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
-        '<td><span class="badge badge-red">FALTOSO</span>'+(p.atividadeRaw?'<span style="color:var(--ink3);font-size:10px;font-style:italic;margin-left:6px">'+esc(p.atividadeRaw)+'</span>':'')+'</td>'+
-        '<td>'+pavBadge(p.pav)+'</td>'+
-        '<td style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td>'+
-      '</tr>';
-    });
-  }
-
-  /* Ferias */
-  if(ferias.length){
-    h+='<tr class="ferias-header"><td colspan="6">★ '+ferias.length+' PESSOA(S) DE FERIAS (excluidas do efetivo)</td></tr>';
-    ferias.forEach(function(p){
-      h+='<tr class="ferias-row">'+
-        '<td style="font-weight:600;color:#92400E;white-space:nowrap">'+esc(p.nome)+'</td>'+
-        '<td style="color:#B45309">'+esc(p.funcao)+'</td>'+
-        '<td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
-        '<td colspan="2"><span class="badge badge-ferias">FERIAS</span></td>'+
-        '<td style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td>'+
-      '</tr>';
-    });
-  }
-
-  h+='</tbody></table>';
-  el.innerHTML=h;
-  markScrollable(el);
+  ativos.forEach(function(p){h+='<tr><td style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td><td style="color:var(--ink2)">'+esc(p.funcao)+'</td><td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td><td style="min-width:280px;white-space:normal;line-height:1.5">'+esc(p.atividade)+'</td><td>'+pavBadge(p.pav)+'</td><td style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td></tr>'});
+  if(faltosos.length){h+='<tr style="background:#FEE2E2"><td colspan="6" style="padding:8px 12px;font-family:\'JetBrains Mono\';font-size:10px;color:#B91C1C;font-weight:700;letter-spacing:.04em;text-transform:uppercase">🚫 '+faltosos.length+' FALTOSO(S) — sem atividade (excluidos do efetivo real)</td></tr>';faltosos.forEach(function(p){h+='<tr style="background:#FFF5F5"><td style="font-weight:600;white-space:nowrap;color:#B91C1C">'+esc(p.nome)+'</td><td style="color:#991B1B">'+esc(p.funcao)+'</td><td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td><td><span class="badge badge-red">FALTOSO</span>'+(p.atividadeRaw?'<span style="color:var(--ink3);font-size:10px;font-style:italic;margin-left:6px">'+esc(p.atividadeRaw)+'</span>':'')+'</td><td>'+pavBadge(p.pav)+'</td><td style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td></tr>'})}
+  if(ferias.length){h+='<tr class="ferias-header"><td colspan="6">★ '+ferias.length+' PESSOA(S) DE FERIAS (excluidas do efetivo)</td></tr>';ferias.forEach(function(p){h+='<tr class="ferias-row"><td style="font-weight:600;color:#92400E;white-space:nowrap">'+esc(p.nome)+'</td><td style="color:#B45309">'+esc(p.funcao)+'</td><td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td><td colspan="2"><span class="badge badge-ferias">FERIAS</span></td><td style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td></tr>'})}
+  h+='</tbody></table>';el.innerHTML=h;markScrollable(el);
 }
 
 function renderHist(days){
   var el=document.getElementById('hist-box'),meta=document.getElementById('hist-meta');
   if(!days||!days.length){el.innerHTML='<div class="em">Sem dados</div>';return}
-  meta.textContent=days.length+' dia(s)';
-  var selDay=getSelectedDay(),selDate=selDay?selDay.date:'';
+  meta.textContent=days.length+' dia(s)';var selDay=getSelectedDay(),selDate=selDay?selDay.date:'';
   var h='<table class="t"><thead><tr><th>Data</th><th>Efetivo (c/ atividade)</th><th>Presentes</th><th>Ferias</th><th>Empresas</th><th>Funcoes</th><th>C/ pavimento</th></tr></thead><tbody>';
-  days.forEach(function(d,di){
-    var comAtiv=comAtividadeCount(d),comPav=d.ativos.filter(function(p){return p.pav}).length,pctAtiv=d.ativos.length>0?(comAtiv/d.ativos.length*100).toFixed(0):'0',isSel=d.date===selDate;
-    h+='<tr style="cursor:pointer;'+(isSel?'background:#DBEAFE':'')+'" onclick="selectDateByValue('+di+')"><td style="font-family:JetBrains Mono;font-weight:700">'+(isSel?'▸ ':'')+esc(d.date)+'</td><td class="nr" style="font-size:16px;font-weight:700;color:#059669">'+comAtiv+' <span style="font-size:10px;color:var(--ink3);font-weight:400">('+pctAtiv+'%)</span></td><td class="nr" style="color:var(--ink2)">'+d.ativos.length+'</td><td class="nr" style="color:'+(d.ferias.length?'var(--amber)':'var(--ink3)')+'">'+d.ferias.length+'</td><td class="nr">'+Object.keys(d.byEmp).length+'</td><td class="nr">'+Object.keys(d.byFunc).length+'</td><td class="nr">'+comPav+'/'+d.ativos.length+'</td></tr>';
-  });
-  h+='</tbody></table>';el.innerHTML=h;
-  markScrollable(el);
+  days.forEach(function(d,di){var comAtiv=comAtividadeCount(d),comPav=d.ativos.filter(function(p){return p.pav}).length,pctAtiv=d.ativos.length>0?(comAtiv/d.ativos.length*100).toFixed(0):'0',isSel=d.date===selDate;
+  h+='<tr style="cursor:pointer;'+(isSel?'background:#DBEAFE':'')+'" onclick="selectDateByValue('+di+')"><td style="font-family:JetBrains Mono;font-weight:700">'+(isSel?'▸ ':'')+esc(d.date)+'</td><td class="nr" style="font-size:16px;font-weight:700;color:#059669">'+comAtiv+' <span style="font-size:10px;color:var(--ink3);font-weight:400">('+pctAtiv+'%)</span></td><td class="nr" style="color:var(--ink2)">'+d.ativos.length+'</td><td class="nr" style="color:'+(d.ferias.length?'var(--amber)':'var(--ink3)')+'">'+d.ferias.length+'</td><td class="nr">'+Object.keys(d.byEmp).length+'</td><td class="nr">'+Object.keys(d.byFunc).length+'</td><td class="nr">'+comPav+'/'+d.ativos.length+'</td></tr>'});
+  h+='</tbody></table>';el.innerHTML=h;markScrollable(el);
 }
 
 function selectDateByValue(idx){
@@ -918,23 +813,16 @@ var APPS_URL='https://script.google.com/macros/s/AKfycbwFLxduVg7tpCeBlfYThOrigDh
 function processRdoData(data){
   if(!data||data.status!=='ok')throw new Error('Status: '+(data?data.status:'null'));
   if(!data.rows||!data.headers)throw new Error('Sem dados na resposta');
-
   var hd=data.headers.map(function(h){return String(h||'')});
   var raw=[hd];
   var MONTHS={'Jan':'01','Feb':'02','Mar':'03','Apr':'04','May':'05','Jun':'06','Jul':'07','Aug':'08','Sep':'09','Oct':'10','Nov':'11','Dec':'12'};
   data.rows.forEach(function(obj){
     var row=hd.map(function(h){
-      var v=obj[h];
-      if(v===null||v===undefined)return '';
-      var s=String(v);
-      // ISO: 2026-08-13T03:00:00.000Z ou 2026-08-13
+      var v=obj[h];if(v===null||v===undefined)return '';var s=String(v);
       var mISO=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
       if(mISO)return mISO[3]+'/'+mISO[2]+'/'+mISO[1];
-      // String longa JS: "Wed Aug 12 2026 00:00:00 GMT-0300..."
       var mLong=s.match(/\w+\s+(\w{3})\s+(\d{1,2})\s+(\d{4})/);
-      if(mLong&&MONTHS[mLong[1]]){
-        return String(mLong[2]).padStart(2,'0')+'/'+MONTHS[mLong[1]]+'/'+mLong[3];
-      }
+      if(mLong&&MONTHS[mLong[1]])return String(mLong[2]).padStart(2,'0')+'/'+MONTHS[mLong[1]]+'/'+mLong[3];
       return s;
     });
     raw.push(row);
@@ -960,45 +848,29 @@ function onLoadSuccess(data,btn){
   }
 }
 
-/* ═══════ Mensagens de erro especificas por causa real da falha ═══════ */
 function onLoadFail(btn,reason,detail){
   btn.classList.remove('spin');
   setChip('err','erro');
   var msgs={
-    'timeout':{
-      title:'Tempo esgotado ao contatar o Apps Script.',
-      body:'A conexão demorou demais para responder. Isso é comum em redes móveis (4G/5G) mais lentas ou instáveis. Verifique sua conexão e toque em "Atualizar" novamente.'
-    },
-    'http':{
-      title:'O Apps Script respondeu com erro '+(detail||'')+'.',
-      body:'Isso normalmente indica um problema na implantação (deploy) do Web App, e não no site em si — no PC ele funciona porque pode estar usando uma versão em cache. Reimplante o Apps Script como "Novo deploy" (não apenas editar o existente).'
-    },
-    'json':{
-      title:'A resposta do servidor não é um JSON válido.',
-      body:'Provavelmente o Apps Script retornou uma página de login do Google em vez dos dados — sinal de que o Web App não está publicado como "Qualquer pessoa" (Anyone), ou a sessão/implantação expirou.'
-    },
-    'network':{
-      title:'Falha de rede ao acessar o Apps Script.',
-      body:'No celular isso costuma acontecer quando o link é aberto dentro do navegador embutido de apps como WhatsApp, Instagram ou Facebook — eles bloqueiam esse tipo de requisição. Tente abrir o link direto no Chrome ou Safari (toque em "⋮" ou compartilhar → "Abrir no navegador"). Também pode ser um bloqueador de rastreamento/anúncios ou DNS da operadora bloqueando script.google.com.'
-    },
-    'generic':{
-      title:'Não foi possível carregar os dados.',
-      body:detail||'Verifique se o Apps Script está publicado como "Qualquer pessoa" e teste o link diretamente.'
-    }
+    'timeout':{title:'Tempo esgotado ao contatar o Apps Script.',body:'A conexao demorou demais para responder. Isso e comum em redes moveis (4G/5G) mais lentas ou instaveis. Verifique sua conexao e toque em "Atualizar" novamente.'},
+    'http':{title:'O Apps Script respondeu com erro '+(detail||'')+'.',body:'Isso normalmente indica um problema na implantacao (deploy) do Web App. Reimplante o Apps Script como "Novo deploy".'},
+    'json':{title:'A resposta do servidor nao e um JSON valido.',body:'Provavelmente o Apps Script retornou uma pagina de login do Google em vez dos dados — sinal de que o Web App nao esta publicado como "Qualquer pessoa" (Anyone), ou a sessao/implantacao expirou.'},
+    'network':{title:'Falha de rede ao acessar o Apps Script.',body:'No celular isso costuma acontecer quando o link e aberto dentro do navegador embutido de apps como WhatsApp, Instagram ou Facebook — eles bloqueiam esse tipo de requisicao. Tente abrir o link direto no Chrome ou Safari. Tambem pode ser um bloqueador de rastreamento/anuncios ou DNS da operadora bloqueando script.google.com.'},
+    'generic':{title:'Nao foi possivel carregar os dados.',body:detail||'Verifique se o Apps Script esta publicado como "Qualquer pessoa" e teste o link direto.'}
   };
   var m=msgs[reason]||msgs.generic;
   document.getElementById('err-box').innerHTML='<div class="err-box"><b>'+esc(m.title)+'</b>'+esc(m.body)+'<br><br>Link para testar direto: <a href="'+APPS_URL+'" target="_blank" rel="noopener">abrir Apps Script</a></div>';
   toast(m.title,'err');
 }
 
-/* Fallback JSONP: usado quando fetch() falha (ex.: bloqueio de CORS em alguns navegadores) */
+/* ═══════ JSONP FALLBACK ═══════ */
 function loadViaJsonp(btn,prevErr){
   var old=document.querySelectorAll('script[data-rdo]');
   for(var i=0;i<old.length;i++)old[i].remove();
   var cbName='rdoCallback_'+Date.now();
   var ok=false;
   window[cbName]=function(data){
-    if(ok)return; ok=true;
+    if(ok)return;ok=true;
     delete window[cbName];
     onLoadSuccess(data,btn);
   };
@@ -1006,43 +878,36 @@ function loadViaJsonp(btn,prevErr){
   s.setAttribute('data-rdo','1');
   s.src=APPS_URL+'?callback='+cbName+'&_='+Date.now();
   s.onerror=function(){
-    if(ok)return; ok=true;
+    if(ok)return;ok=true;
     delete window[cbName];
-    // fetch E jsonp falharam -> quase sempre navegador in-app ou rede bloqueando o dominio
     onLoadFail(btn,'network');
   };
   setTimeout(function(){
-    if(ok)return; ok=true;
+    if(ok)return;ok=true;
     delete window[cbName];
     onLoadFail(btn,'timeout');
   },25000);
   document.head.appendChild(s);
 }
 
+/* ═══════ DO LOAD — FETCH SIMPLES (SEM OPÇÕES RESTRITIVAS) ═══════ */
 function doLoad(){
   var btn=document.getElementById('btn-reload');
   btn.classList.add('spin');
   setChip('warn','carregando');
   document.getElementById('err-box').innerHTML='';
 
-  // Metodo principal: fetch() direto — funciona mesmo dentro de iframes com
-  // sandbox restrito (ex.: paginas incorporadas no Google Sites), onde a
-  // injecao de <script> externo (JSONP) costuma ser bloqueada.
-  // Timeout maior (25s) para acomodar redes moveis mais lentas.
-  var ctrl=('AbortController' in window)?new AbortController():null;
+  /* ★ MUDANÇA ÚNICA: fetch sem opções restritivas ★
+     Antes tinha: cache:'no-store', mode:'cors', credentials:'omit'
+     Isso quebra no Safari/iOS e Chrome mobile por causa do redirect
+     cross-origin do Apps Script (script.google.com -> script.googleusercontent.com) */
   var timedOut=false;
-  var timer=setTimeout(function(){timedOut=true;if(ctrl)ctrl.abort()},25000);
+  var timer=setTimeout(function(){timedOut=true},25000);
 
-  fetch(APPS_URL+'?_='+Date.now(),{
-      method:'GET',
-      signal:ctrl?ctrl.signal:undefined,
-      cache:'no-store',
-      mode:'cors',
-      credentials:'omit',
-      redirect:'follow'
-    })
+  fetch(APPS_URL+'?_='+Date.now())
     .then(function(res){
-      if(!res.ok){var e=new Error('HTTP '+res.status);e.httpStatus=res.status;throw e}
+      clearTimeout(timer);
+      if(!res.ok)throw{httpStatus:res.status};
       return res.text();
     })
     .then(function(text){
@@ -1050,27 +915,19 @@ function doLoad(){
       var data;
       try{data=JSON.parse(text)}
       catch(parseErr){
-        var e=new Error('JSON invalido');e.isJsonError=true;throw e;
+        // JSON invalido -> tenta JSONP como fallback
+        loadViaJsonp(btn);
+        return;
       }
       onLoadSuccess(data,btn);
     })
     .catch(function(err){
       clearTimeout(timer);
-      if(err && err.isJsonError){
-        // resposta chegou (rede ok) mas nao e JSON -> normalmente tela de login do Google
-        // ainda tenta JSONP, que as vezes contorna esse cenario
-        loadViaJsonp(btn);
-        return;
-      }
-      if(err && err.httpStatus){
+      if(err&&err.httpStatus){
         onLoadFail(btn,'http',err.httpStatus);
         return;
       }
-      if(timedOut || (err && err.name==='AbortError')){
-        onLoadFail(btn,'timeout');
-        return;
-      }
-      // fetch falhou por rede/CORS — tenta o metodo antigo (JSONP) como reserva
+      // Fetch falhou por rede/CORS -> tenta JSONP
       loadViaJsonp(btn);
     });
 }
@@ -1079,7 +936,12 @@ function doPrint(){var now=new Date(),day=getSelectedDay(),ph=document.getElemen
 
 function doExportCSV(){
   if(VIEW_MODE==='range'){doExportRangeCSV();return}
-  var day=getSelectedDay();if(!day){toast('Sem dados','warn');return}var rows=[['Nome','Funcao','Empresa','Atividade','Pavimento','Local','Producao','Producao preenchida?','Status','Data']];day.all.forEach(function(p){rows.push([p.nome,p.funcao,p.empresa,p.atividade,p.pav||'',p.regiao||'',p.prod||'',p.ferias?'—':(temAtividade(p.prod)?'Sim':'NAO - ALERTA'),p.ferias?'Ferias':p.atividade?'Ativo':'Sem atividade',p.data])});var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v||'').replace(/"/g,'""')+'"'}).join(',')}).join('\r\n');var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='RDO_'+day.date+'.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);toast('CSV exportado','ok')}
+  var day=getSelectedDay();if(!day){toast('Sem dados','warn');return}
+  var rows=[['Nome','Funcao','Empresa','Atividade','Pavimento','Local','Producao','Producao preenchida?','Status','Data']];
+  day.all.forEach(function(p){rows.push([p.nome,p.funcao,p.empresa,p.atividade,p.pav||'',p.regiao||'',p.prod||'',p.ferias?'—':(temAtividade(p.prod)?'Sim':'NAO - ALERTA'),p.ferias?'Ferias':p.atividade?'Ativo':'Sem atividade',p.data])});
+  var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v||'').replace(/"/g,'""')+'"'}).join(',')}).join('\r\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='RDO_'+day.date+'.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);toast('CSV exportado','ok');
+}
 
 function updateTopbarH(){document.documentElement.style.setProperty('--topbar-h',document.querySelector('.topbar').offsetHeight+'px')}
 window.addEventListener('resize',function(){updateTopbarH();if(!PARSED)return;if(VIEW_MODE==='range'){var d=getRangeDays();if(d.length)renderChart(d,null,'rchart-box','rchart-meta')}else{renderChart(PARSED.days,getSelectedDay())}});
