@@ -143,56 +143,67 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 @media(max-width:480px){
   html{scroll-padding-top:calc(var(--topbar-h) + 8px)}
   .topbar{padding:0 8px}
-  .topbar-in{height:auto;min-height:44px;flex-wrap:wrap;padding:5px 0;gap:4px;row-gap:4px}
+  .topbar-in{height:44px;flex-wrap:nowrap}
   .brand{flex:1;min-width:0}
-  .brand h1{font-size:12px}
-  .brand small{font-size:8px}
+  .brand h1{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .brand small{font-size:7.5px}
   .logo{width:24px;height:24px;min-width:24px;font-size:9px}
-  .actions{gap:4px;width:100%;justify-content:flex-start;overflow-x:auto;flex-wrap:nowrap;padding-bottom:1px;scrollbar-width:none}
+  .actions{gap:4px;flex-shrink:0;flex-wrap:nowrap}
   .actions::-webkit-scrollbar{display:none}
-  .btn{padding:6px 8px;min-height:30px;font-size:9px}
-  .btn span.btn-label{display:none}
-  #clk{order:5;margin-left:auto;font-size:8px}
+  #btn-print,#btn-export{display:none}
+  #clk{font-size:8px}
+  .btn{padding:6px 8px;min-height:28px;font-size:9px;gap:3px}
+  .btn svg{width:12px;height:12px}
+  .btn-label{display:none}
+  .chip{font-size:8px;padding:2px 6px}
   .container{padding:8px 6px}
   .sec-h{margin-bottom:8px}
-  .sec-h h2{font-size:14px}
-  .kr{grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px}
-  .kp{padding:8px 10px}
-  .kp .ki{font-size:13px;margin-bottom:2px}
-  .kp .kv{font-size:16px}
-  .kp .kl{font-size:7.5px}
-  .kp .kf{font-size:8.5px}
-  .cd{margin-bottom:10px}
+  .sec-h h2{font-size:13px}
+  .sec-h p{font-size:10px}
+  .kr{grid-template-columns:repeat(2,1fr);gap:5px;margin-bottom:10px}
+  .kp{padding:8px}
+  .kp .ki{font-size:12px;margin-bottom:2px}
+  .kp .kv{font-size:15px}
+  .kp .kl{font-size:7px;letter-spacing:.03em}
+  .kp .kf{font-size:8px;margin-top:2px}
+  .cd{margin-bottom:8px;border-radius:3px}
   .cd-h{padding:7px 10px}
   .cd-h h3{font-size:11px}
   .cd-h .mt{font-size:8px}
-  .cd-t{flex-direction:column;padding:6px 8px;gap:5px}
-  .cd-t input,.cd-t select{width:100%;font-size:13px;padding:8px;min-height:38px}
+  .cd-t{flex-direction:column;padding:6px 8px;gap:4px}
+  .cd-t input,.cd-t select{width:100%;font-size:13px;padding:8px 10px;min-height:38px}
   .cd-t .ct{text-align:left;font-size:8px}
-  .date-bar{flex-direction:column;align-items:stretch;padding:8px 10px;gap:6px}
+  .date-bar{flex-direction:column;align-items:stretch;padding:8px 10px;gap:6px;margin-bottom:10px}
   .date-bar label{text-align:center;font-size:8px}
-  .date-bar select{max-width:100%;width:100%;font-size:13px}
+  .date-bar select{max-width:100%;width:100%;font-size:13px;min-height:38px}
   .date-bar .date-nav{justify-content:stretch}
-  .date-bar .date-nav button{flex:1;min-height:36px;width:auto;font-size:13px}
+  .date-bar .date-nav button{flex:1;min-height:36px;font-size:16px}
   .date-bar .date-badge{text-align:center;font-size:8px}
   .mode-tabs{gap:4px;margin-bottom:8px}
-  .mode-tab{flex:1;text-align:center;padding:7px 6px;font-size:9px}
-  table.t{min-width:360px;font-size:10px}
-  table.t th{padding:6px 7px;font-size:7.5px;letter-spacing:.02em}
+  .mode-tab{flex:1;text-align:center;padding:7px 4px;font-size:9px}
+  /* tabela geral */
+  table.t{min-width:340px;font-size:10px}
+  table.t th{padding:6px 7px;font-size:7.5px;letter-spacing:.02em;white-space:nowrap}
   table.t td{padding:5px 7px;font-size:10px}
-  .bar-label{min-width:65px;max-width:65px;font-size:8.5px}
-  .bar-track{height:14px}
-  .bar-val{font-size:9px;min-width:18px}
-  .bar-pct{font-size:7.5px;min-width:26px}
-  .bar-row{margin-bottom:4px}
+  /* barras */
+  .cb-r,.bar-row{margin-bottom:3px}
+  .bar-label{min-width:62px;max-width:62px;font-size:8px}
+  .bar-track{height:13px}
+  .bar-val{font-size:9px;min-width:16px}
+  .bar-pct{font-size:7.5px;min-width:24px;display:none}
+  /* grafico */
   .chart-wrap{padding:6px 4px}
-  .chart-wrap svg{max-height:120px;max-width:100%}
-  .cd-b{-webkit-overflow-scrolling:touch}
-  #hist-box table.t{min-width:320px}
-  #hist-box table.t th{font-size:7.5px;padding:6px 7px;position:relative;top:auto}
-  #hist-box table.t td{padding:5px 7px;font-size:10px}
-  .badge{font-size:8px;padding:1px 5px}
-  .em{padding:20px 10px;font-size:11px}
+  .chart-wrap svg{max-height:120px;max-width:100%;width:100%}
+  /* historico */
+  .cd-b{-webkit-overflow-scrolling:touch;overflow-x:auto}
+  #hist-box .cd-b{overflow-x:auto}
+  #hist-box table.t{min-width:300px;font-size:9.5px}
+  #hist-box table.t th{font-size:7px;padding:5px 6px;position:relative;top:auto;white-space:nowrap}
+  #hist-box table.t td{padding:5px 6px;font-size:9.5px}
+  /* cards vazios */
+  .em{padding:12px 10px;font-size:10px}
+  /* badges */
+  .badge{font-size:7.5px;padding:1px 4px}
 }
 
 @media(max-width:360px){
