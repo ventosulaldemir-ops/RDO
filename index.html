@@ -643,7 +643,7 @@ function renderRangeTable(){
   agg.forEach(function(p){
     var pavList=Object.keys(p.pavs).sort().map(function(pv){return pavBadge(pv)}).join(' ')||'<span class="badge badge-pav-none">—</span>';
     var prodHtml=p.producoes.length?('<div class="prod-list">'+p.producoes.slice().sort(function(a,b){return(a.data||'').localeCompare(b.data||'')}).map(function(pr){return '<div><span class="pd">'+esc(pr.data)+'</span>'+esc(pr.prod?pr.prod:(pr.atividade||'—'))+(pr.pav?' <span style="color:var(--ink3)">['+esc(pr.pav)+']</span>':'')+'</div>'}).join('')+'</div>'):'<span style="color:var(--ink3)">sem lancamentos</span>';
-    h+='<tr><td style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td><td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td><td style="color:var(--ink2)">'+esc(p.funcao)+'</td><td class="nr" style="font-weight:700;color:var(--navy)">'+p.diasPresente+'</td><td class="nr" style="color:var(--green)">'+p.diasAtivo+'</td><td class="nr" style="color:var(--red)">'+p.diasSem+'</td><td class="nr" style="color:'+(p.diasSemProd?'var(--red)':'var(--ink3)')+';font-weight:'+(p.diasSemProd?'700':'400')+'">'+(p.diasSemProd?'⚠ ':'')+p.diasSemProd+'</td><td class="nr" style="color:var(--amber)">'+p.diasFerias+'</td><td>'+pavList+'</td><td style="max-width:320px">'+prodHtml+'</td></tr>';
+    h+='<tr><td data-label="Nome" style="font-weight:600">'+esc(p.nome)+'</td><td data-label="Empresa"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td><td data-label="Funcao" style="color:var(--ink2)">'+esc(p.funcao)+'</td><td data-label="Dias presente" class="nr" style="font-weight:700;color:var(--navy)">'+p.diasPresente+'</td><td data-label="Dias c/ ativ." class="nr" style="color:var(--green)">'+p.diasAtivo+'</td><td data-label="Dias s/ ativ." class="nr" style="color:var(--red)">'+p.diasSem+'</td><td data-label="Dias s/ producao" class="nr" style="color:'+(p.diasSemProd?'var(--red)':'var(--ink3)')+';font-weight:'+(p.diasSemProd?'700':'400')+'">'+(p.diasSemProd?'⚠ ':'')+p.diasSemProd+'</td><td data-label="Dias ferias" class="nr" style="color:var(--amber)">'+p.diasFerias+'</td><td data-label="Pavimentos">'+pavList+'</td><td data-label="Producao / Atividades" style="max-width:none">'+prodHtml+'</td></tr>';
   });
   h+='</tbody></table>';el.innerHTML=h;
   markScrollable(el);
@@ -842,12 +842,12 @@ function renderTable(){
   /* Ativos com atividade */
   ativos.forEach(function(p){
     h+='<tr>'+
-      '<td style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td>'+
-      '<td style="color:var(--ink2)">'+esc(p.funcao)+'</td>'+
-      '<td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
-      '<td style="min-width:280px;white-space:normal;line-height:1.5">'+esc(p.atividade)+'</td>'+
-      '<td>'+pavBadge(p.pav)+'</td>'+
-      '<td style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td>'+
+      '<td data-label="Nome" style="font-weight:600">'+esc(p.nome)+'</td>'+
+      '<td data-label="Funcao" style="color:var(--ink2)">'+esc(p.funcao)+'</td>'+
+      '<td data-label="Empresa"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
+      '<td data-label="Atividade / Servico" style="white-space:normal;line-height:1.5">'+esc(p.atividade)+'</td>'+
+      '<td data-label="Pav.">'+pavBadge(p.pav)+'</td>'+
+      '<td data-label="Local" style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td>'+
     '</tr>';
   });
 
@@ -857,12 +857,12 @@ function renderTable(){
       '🚫 '+faltosos.length+' FALTOSO(S) — sem atividade (excluidos do efetivo real)</td></tr>';
     faltosos.forEach(function(p){
       h+='<tr style="background:#FFF5F5">'+
-        '<td style="font-weight:600;white-space:nowrap;color:#B91C1C">'+esc(p.nome)+'</td>'+
-        '<td style="color:#991B1B">'+esc(p.funcao)+'</td>'+
-        '<td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
-        '<td><span class="badge badge-red">FALTOSO</span>'+(p.atividadeRaw?'<span style="color:var(--ink3);font-size:10px;font-style:italic;margin-left:6px">'+esc(p.atividadeRaw)+'</span>':'')+'</td>'+
-        '<td>'+pavBadge(p.pav)+'</td>'+
-        '<td style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td>'+
+        '<td data-label="Nome" style="font-weight:600;color:#B91C1C">'+esc(p.nome)+'</td>'+
+        '<td data-label="Funcao" style="color:#991B1B">'+esc(p.funcao)+'</td>'+
+        '<td data-label="Empresa"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
+        '<td data-label="Atividade / Servico"><span class="badge badge-red">FALTOSO</span>'+(p.atividadeRaw?'<span style="color:var(--ink3);font-size:10px;font-style:italic;margin-left:6px">'+esc(p.atividadeRaw)+'</span>':'')+'</td>'+
+        '<td data-label="Pav.">'+pavBadge(p.pav)+'</td>'+
+        '<td data-label="Local" style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td>'+
       '</tr>';
     });
   }
@@ -872,11 +872,11 @@ function renderTable(){
     h+='<tr class="ferias-header"><td colspan="6">★ '+ferias.length+' PESSOA(S) DE FERIAS (excluidas do efetivo)</td></tr>';
     ferias.forEach(function(p){
       h+='<tr class="ferias-row">'+
-        '<td style="font-weight:600;color:#92400E;white-space:nowrap">'+esc(p.nome)+'</td>'+
-        '<td style="color:#B45309">'+esc(p.funcao)+'</td>'+
-        '<td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
-        '<td colspan="2"><span class="badge badge-ferias">FERIAS</span></td>'+
-        '<td style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td>'+
+        '<td data-label="Nome" style="font-weight:600;color:#92400E">'+esc(p.nome)+'</td>'+
+        '<td data-label="Funcao" style="color:#B45309">'+esc(p.funcao)+'</td>'+
+        '<td data-label="Empresa"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
+        '<td data-label="Status" colspan="2"><span class="badge badge-ferias">FERIAS</span></td>'+
+        '<td data-label="Local" style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td>'+
       '</tr>';
     });
   }
@@ -894,7 +894,7 @@ function renderHist(days){
   var h='<table class="t"><thead><tr><th>Data</th><th>Efetivo (c/ atividade)</th><th>Presentes</th><th>Ferias</th><th>Empresas</th><th>Funcoes</th><th>C/ pavimento</th></tr></thead><tbody>';
   days.forEach(function(d,di){
     var comAtiv=comAtividadeCount(d),comPav=d.ativos.filter(function(p){return p.pav}).length,pctAtiv=d.ativos.length>0?(comAtiv/d.ativos.length*100).toFixed(0):'0',isSel=d.date===selDate;
-    h+='<tr style="cursor:pointer;'+(isSel?'background:#DBEAFE':'')+'" onclick="selectDateByValue('+di+')"><td style="font-family:JetBrains Mono;font-weight:700">'+(isSel?'▸ ':'')+esc(d.date)+'</td><td class="nr" style="font-size:16px;font-weight:700;color:#059669">'+comAtiv+' <span style="font-size:10px;color:var(--ink3);font-weight:400">('+pctAtiv+'%)</span></td><td class="nr" style="color:var(--ink2)">'+d.ativos.length+'</td><td class="nr" style="color:'+(d.ferias.length?'var(--amber)':'var(--ink3)')+'">'+d.ferias.length+'</td><td class="nr">'+Object.keys(d.byEmp).length+'</td><td class="nr">'+Object.keys(d.byFunc).length+'</td><td class="nr">'+comPav+'/'+d.ativos.length+'</td></tr>';
+    h+='<tr style="cursor:pointer;'+(isSel?'background:#DBEAFE':'')+'" onclick="selectDateByValue('+di+')"><td data-label="Data" style="font-family:JetBrains Mono;font-weight:700">'+(isSel?'▸ ':'')+esc(d.date)+'</td><td data-label="Efetivo (c/ atividade)" class="nr" style="font-size:16px;font-weight:700;color:#059669">'+comAtiv+' <span style="font-size:10px;color:var(--ink3);font-weight:400">('+pctAtiv+'%)</span></td><td data-label="Presentes" class="nr" style="color:var(--ink2)">'+d.ativos.length+'</td><td data-label="Ferias" class="nr" style="color:'+(d.ferias.length?'var(--amber)':'var(--ink3)')+'">'+d.ferias.length+'</td><td data-label="Empresas" class="nr">'+Object.keys(d.byEmp).length+'</td><td data-label="Funcoes" class="nr">'+Object.keys(d.byFunc).length+'</td><td data-label="C/ pavimento" class="nr">'+comPav+'/'+d.ativos.length+'</td></tr>';
   });
   h+='</tbody></table>';el.innerHTML=h;
   markScrollable(el);
