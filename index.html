@@ -716,24 +716,13 @@ function renderBars(elId,metaId,counts,colorMap,ativCounts){
   if(!keys.length){el.innerHTML='<div class="em">Sem dados</div>';document.getElementById(metaId).textContent='';return}
   var max=counts[keys[0]];
   document.getElementById(metaId).textContent=keys.length+' categorias';
-  var isMobile=window.innerWidth<=640;
   el.innerHTML=keys.map(function(k,i){
     var total=counts[k];
     var atv=ativCounts?(ativCounts[k]||0):null;
     var barW=max>0?(total/max*100).toFixed(1):0;
     var c=(colorMap&&colorMap[k])?colorMap[k]:(typeof colorMap==='string'?colorMap:COLORS[i%COLORS.length]);
-    var valStr=atv!==null?('<b>'+atv+'</b><span style="color:var(--ink3);font-weight:400">/'+total+'</span>'):total;
-    if(isMobile){
-      return '<div style="margin-bottom:6px;padding:0 8px;width:100%;box-sizing:border-box">'+
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;gap:4px">'+
-        '<span style="font-family:JetBrains Mono;font-size:9px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0">'+esc(k)+'</span>'+
-        '<span style="font-family:JetBrains Mono;font-size:10px;font-weight:700;color:var(--navy);flex-shrink:0">'+valStr+'</span>'+
-        '</div>'+
-        '<div style="width:100%;height:10px;background:var(--paper);border-radius:2px;overflow:hidden">'+
-        '<div style="width:'+barW+'%;height:100%;background:'+c+';border-radius:2px"></div></div>'+
-        '</div>';
-    }
-    return '<div class="bar-row"><span class="bar-label" title="'+esc(k)+'">'+esc(k)+'</span><div class="bar-track"><div class="bar-fill" style="width:'+barW+'%;background:'+c+'"></div></div><span class="bar-val">'+valStr+'</span></div>';
+    var valStr=atv!==null?(atv+'/'+total):total;
+    return '<div class="bar-row"><span class="bar-label" title="'+esc(k)+'">'+(esc(k))+'</span><div class="bar-track"><div class="bar-fill" style="width:'+barW+'%;background:'+c+'"></div></div><span class="bar-val">'+valStr+'</span></div>';
   }).join('');
 }
 
