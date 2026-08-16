@@ -95,8 +95,8 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 .bar-fill{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.22,1,.36,1)}
 .bar-val{font-family:'JetBrains Mono';font-size:11px;font-weight:700;min-width:28px;color:var(--navy)}
 .bar-pct{font-family:'JetBrains Mono';font-size:9px;color:var(--ink3);min-width:36px}
-.chart-wrap{padding:14px;overflow-x:auto}
-.chart-wrap svg{display:block;width:100%;height:auto;max-height:240px}
+.chart-wrap{padding:14px;overflow-x:hidden}
+.chart-wrap svg{display:block;width:100%;height:auto;max-height:200px}
 .err-box{margin:16px;padding:14px 16px;background:var(--redBg);border:1px solid #FCA5A5;border-radius:4px;font-family:'JetBrains Mono';font-size:11px;color:var(--red);line-height:1.7}
 .err-box b{display:block;margin-bottom:4px}
 .err-box a{color:var(--red);text-decoration:underline}
@@ -186,7 +186,7 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
   .chart-wrap svg{max-height:160px}
   .cd-b{-webkit-overflow-scrolling:touch}
   #hist-box table.t{min-width:400px}
-  #hist-box table.t th{font-size:8px;padding:7px 8px;position:sticky;top:0;z-index:3}
+  #hist-box table.t th{font-size:8px;padding:7px 8px;position:relative;top:auto}
   #hist-box table.t td{padding:6px 8px;font-size:11px}
 }
 
@@ -723,8 +723,8 @@ function renderChart(days,selectedDay,boxId,metaId){
   var el=document.getElementById(boxId),meta=document.getElementById(metaId);
   if(!days||!days.length){el.innerHTML='<div class="em">Sem dados</div>';return}
   meta.textContent=days.length+' dia(s)';
-  var isMobile=window.innerWidth<=480;
-  var W=640,H=isMobile?170:220,pL=isMobile?32:44,pR=12,pT=16,pB=isMobile?38:48;
+  var isMobile=window.innerWidth<=640;
+  var W=Math.min(640,window.innerWidth-32),H=isMobile?150:200,pL=isMobile?28:40,pR=10,pT=14,pB=isMobile?32:44;
   var vals=days.map(function(d){return comAtividadeCount(d)}).reverse();
   var labels=days.map(function(d){return d.date}).reverse();
   var selIdx=-1;if(selectedDay){for(var si=0;si<labels.length;si++){if(labels[si]===selectedDay.date){selIdx=si;break}}}
