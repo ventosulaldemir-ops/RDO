@@ -177,15 +177,18 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
   table.t th{padding:5px 6px;font-size:7px;position:relative;top:auto;white-space:nowrap}
   table.t td{padding:4px 6px;font-size:9.5px;word-break:break-word}
   /* barras — forcar dentro da tela */
-  .bar-row{display:flex;align-items:center;gap:3px;margin-bottom:3px;width:100%;overflow:visible}
-  .bar-label{min-width:46px;max-width:46px;font-size:7px;flex-shrink:0}
-  .bar-track{flex:1;min-width:0;height:11px}
-  .bar-val{font-size:7.5px;min-width:18px;flex-shrink:0;text-align:right}
+  .bar-row{display:flex;align-items:center;gap:3px;margin-bottom:4px;width:100%;overflow:visible}
+  .bar-label{min-width:70px;max-width:70px;font-size:8px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;text-align:right}
+  .bar-track{flex:1;min-width:30px;height:13px}
+  .bar-val{font-size:9px;min-width:20px;flex-shrink:0;text-align:right;color:var(--navy);font-weight:700}
   .bar-pct{display:none}
-  #emp-bars,#func-bars,#pav-bars,#reg-bars{padding:6px 8px!important;width:100%;box-sizing:border-box;overflow:visible}
+  #emp-bars,#func-bars,#pav-bars,#reg-bars{padding:8px 10px!important;width:100%;box-sizing:border-box;overflow:visible}
   /* tabela equipe — scroll horizontal */
   #tbl-box{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;display:block}
   #tbl-box table.t{min-width:480px;width:max-content}
+  #tbl-box table.t td{white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis}
+  #tbl-box table.t td:first-child{max-width:100px}
+  #tbl-box table.t td:nth-child(4){max-width:120px}
   /* cd-b geral — scroll horizontal em todas as tabelas */
   .cd-b{overflow-x:auto;-webkit-overflow-scrolling:touch;display:block;width:100%}
   .cd-b table.t{min-width:420px}
