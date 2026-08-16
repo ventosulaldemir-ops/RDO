@@ -143,7 +143,6 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 @media(max-width:480px){
   html{font-size:11px;scroll-padding-top:calc(var(--topbar-h) + 8px)}
   body{font-size:11px;overflow-x:hidden;max-width:100vw}
-  *{max-width:100%;box-sizing:border-box}
   #btn-print,#btn-export{display:none}
   .topbar-in{height:44px;flex-wrap:nowrap}
   .brand h1{font-size:12px}
@@ -185,8 +184,11 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
   .bar-pct{display:none}
   #emp-bars,#func-bars,#pav-bars,#reg-bars{padding:6px 8px!important;width:100%;box-sizing:border-box;overflow:visible}
   /* tabela equipe — scroll horizontal */
-  #tbl-box{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%}
-  #tbl-box table.t{min-width:480px}
+  #tbl-box{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;display:block}
+  #tbl-box table.t{min-width:480px;width:max-content}
+  /* cd-b geral — scroll horizontal em todas as tabelas */
+  .cd-b{overflow-x:auto;-webkit-overflow-scrolling:touch;display:block;width:100%}
+  .cd-b table.t{min-width:420px}
   /* grafico */
   .chart-wrap{padding:5px 3px;width:100%;overflow:hidden}
   .chart-wrap svg{width:100%;max-width:100%;height:auto;max-height:110px;display:block}
