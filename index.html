@@ -141,8 +141,8 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 }
 
 @media(max-width:480px){
-  html{font-size:11px;scroll-padding-top:calc(var(--topbar-h) + 8px)}
-  body{font-size:11px;overflow-x:hidden;max-width:100vw}
+  html{scroll-padding-top:52px}
+  body{overflow-x:hidden}
   #btn-print,#btn-export{display:none}
   .topbar-in{height:44px;flex-wrap:nowrap}
   .brand h1{font-size:12px}
@@ -151,7 +151,7 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
   .btn{padding:5px 7px;min-height:28px;font-size:8.5px}
   .btn-label{display:none}
   .chip{font-size:7.5px;padding:2px 5px}
-  .container{padding:6px 5px;width:100%;max-width:100vw;overflow-x:hidden}
+  .container{padding:6px 5px}
   .sec-h h2{font-size:13px}
   .kr{grid-template-columns:repeat(2,1fr);gap:5px;margin-bottom:8px}
   .kp{padding:7px 8px}
@@ -159,53 +159,37 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
   .kp .kv{font-size:15px}
   .kp .kl{font-size:7px}
   .kp .kf{font-size:8px}
-  .cd{margin-bottom:8px;width:100%;max-width:100%}
+  .cd{margin-bottom:8px}
   .cd-h{padding:6px 9px}
   .cd-h h3{font-size:11px}
   .cd-h .mt{font-size:7.5px}
-  .cd-t{flex-direction:column;padding:5px 7px;gap:4px;width:100%}
-  .cd-t input,.cd-t select{width:100%;font-size:13px;padding:8px;min-height:38px;max-width:100%}
-  .date-bar{flex-direction:column;align-items:stretch;padding:7px 9px;gap:5px;margin-bottom:8px;width:100%}
-  .date-bar select{width:100%;font-size:13px;min-height:36px;max-width:100%}
-  .date-bar .date-nav{display:flex;width:100%}
+  .cd-t{flex-direction:column;padding:5px 7px;gap:4px}
+  .cd-t input,.cd-t select{width:100%;font-size:13px;padding:8px;min-height:38px}
+  .date-bar{flex-direction:column;align-items:stretch;padding:7px 9px;gap:5px;margin-bottom:8px}
+  .date-bar select{width:100%;font-size:13px;min-height:36px}
   .date-bar .date-nav button{flex:1;min-height:34px;font-size:15px}
-  .mode-tabs{gap:3px;margin-bottom:7px;width:100%}
+  .mode-tabs{gap:3px;margin-bottom:7px}
   .mode-tab{flex:1;text-align:center;padding:6px 3px;font-size:8.5px}
-  /* tabelas — scroll horizontal dentro do card */
-  .cd-b{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;max-width:100%}
-  table.t{min-width:0;width:100%;font-size:9.5px;table-layout:auto}
-  table.t th{padding:5px 6px;font-size:7px;position:relative;top:auto;white-space:nowrap}
-  table.t td{padding:4px 6px;font-size:9.5px;word-break:break-word}
-  /* barras — empilhar rotulo acima da barra para nao cortar texto */
-  .bar-row{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;margin-bottom:9px;width:100%;overflow:visible}
-  .bar-label{order:1;flex:1 1 100%;max-width:100%;min-width:0;font-size:9.5px;line-height:1.3;white-space:normal;overflow:visible;text-overflow:clip;word-break:break-word;text-align:left;color:var(--ink);font-weight:600}
-  .bar-track{order:2;flex:1 1 auto;min-width:0;height:13px}
-  .bar-val{order:3;font-size:9px;flex-shrink:0;text-align:right;color:var(--navy);font-weight:700}
-  .bar-pct{display:none}
-  #emp-bars,#func-bars,#pav-bars,#reg-bars{
-    padding:4px 8px!important;
-    width:100%;
-    box-sizing:border-box;
-    overflow:hidden;
-  }
-  /* tabela equipe — scroll horizontal, sem cortar texto das celulas */
-  #tbl-box{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;display:block}
-  #tbl-box table.t{min-width:500px}
-  #tbl-box table.t td{white-space:nowrap}
-  #tbl-box table.t td:nth-child(4){max-width:150px;overflow:hidden;text-overflow:ellipsis}
-  /* cd-b geral — scroll horizontal em todas as tabelas */
+  .gg,.g2{grid-template-columns:1fr}
   .cd-b{overflow-x:auto;-webkit-overflow-scrolling:touch;display:block;width:100%}
-  .cd-b table.t{min-width:420px}
-  /* grafico */
-  .chart-wrap{padding:5px 3px;width:100%;overflow:hidden}
+  table.t{font-size:9.5px}
+  table.t th{padding:5px 6px;font-size:7px;position:static;white-space:nowrap}
+  table.t td{padding:4px 6px;font-size:9.5px;white-space:nowrap}
+  #tbl-box table.t{min-width:500px}
+  #hist-box table.t{min-width:380px}
+  #hist-box table.t th{font-size:7px;padding:5px 5px}
+  #hist-box table.t td{font-size:9px;padding:4px 5px}
+  .bar-row{display:block;margin-bottom:7px;width:100%}
+  .bar-label{display:block;font-size:9px;color:var(--ink);font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .bar-track{display:block;width:100%;height:11px;margin-bottom:0}
+  .bar-val{display:inline-block;font-size:9px;font-weight:700;color:var(--navy);margin-top:1px}
+  .bar-pct{display:none}
+  #emp-bars,#func-bars,#pav-bars,#reg-bars{padding:6px 10px!important;display:block;width:100%;box-sizing:border-box}
+  .chart-wrap{padding:5px 3px;overflow:hidden}
   .chart-wrap svg{width:100%;max-width:100%;height:auto;max-height:110px;display:block}
-  /* cards vazios */
   .em{padding:10px;font-size:10px}
   .badge{font-size:7.5px;padding:1px 4px}
-  /* gg e gg layouts — coluna unica */
-  .gg,.g2{grid-template-columns:1fr}
 }
-
 @media(max-width:360px){
   .kr{grid-template-columns:1fr}
   .btn span.btn-label{display:none}
