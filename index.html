@@ -96,7 +96,8 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 .bar-val{font-family:'JetBrains Mono';font-size:11px;font-weight:700;min-width:28px;color:var(--navy)}
 .bar-pct{font-family:'JetBrains Mono';font-size:9px;color:var(--ink3);min-width:36px}
 .chart-wrap{padding:14px;overflow-x:hidden}
-.chart-wrap svg{display:block;width:100%;height:auto;max-height:200px}
+.chart-wrap svg{display:block;width:100%;max-width:100%;height:auto;max-height:200px}
+@media(max-width:640px){.chart-wrap{padding:8px 6px}.chart-wrap svg{max-height:120px;max-width:100vw}}
 .err-box{margin:16px;padding:14px 16px;background:var(--redBg);border:1px solid #FCA5A5;border-radius:4px;font-family:'JetBrains Mono';font-size:11px;color:var(--red);line-height:1.7}
 .err-box b{display:block;margin-bottom:4px}
 .err-box a{color:var(--red);text-decoration:underline}
@@ -724,7 +725,7 @@ function renderChart(days,selectedDay,boxId,metaId){
   if(!days||!days.length){el.innerHTML='<div class="em">Sem dados</div>';return}
   meta.textContent=days.length+' dia(s)';
   var isMobile=window.innerWidth<=640;
-  var W=Math.min(640,window.innerWidth-32),H=isMobile?150:200,pL=isMobile?28:40,pR=10,pT=14,pB=isMobile?32:44;
+  var W=Math.min(640,window.innerWidth-24),H=isMobile?110:200,pL=isMobile?24:40,pR=8,pT=10,pB=isMobile?28:44;
   var vals=days.map(function(d){return comAtividadeCount(d)}).reverse();
   var labels=days.map(function(d){return d.date}).reverse();
   var selIdx=-1;if(selectedDay){for(var si=0;si<labels.length;si++){if(labels[si]===selectedDay.date){selIdx=si;break}}}
