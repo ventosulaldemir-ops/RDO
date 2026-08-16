@@ -187,13 +187,29 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
     width:100%;
     box-sizing:border-box;
   }
-  /* tabela equipe — scroll horizontal, sem cortar texto das celulas */
-  #tbl-box{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;display:block}
-  #tbl-box table.t{min-width:480px;width:max-content}
-  #tbl-box table.t td{white-space:nowrap;max-width:none;overflow:visible;text-overflow:clip}
-  /* cd-b geral — scroll horizontal em todas as tabelas */
+  /* tabela equipe — vira cartao empilhado no celular, sem rolagem lateral e sem cortar nada */
+  #tbl-box{overflow-x:visible;width:100%;display:block}
+  #tbl-box table.t{min-width:0;width:100%}
+  #tbl-box table.t thead{position:absolute;left:-9999px;top:-9999px}
+  #tbl-box table.t tbody{display:block;width:100%}
+  #tbl-box table.t tr{display:block;width:100%;border:1px solid var(--line);border-radius:5px;margin-bottom:8px;padding:2px 0;background:var(--w)}
+  #tbl-box table.t tr.ferias-header td,#tbl-box table.t tr[style*="FEE2E2"] td{display:block!important;width:100%}
+  #tbl-box table.t td{display:flex;align-items:flex-start;gap:8px;width:100%;white-space:normal;max-width:none;overflow:visible;text-overflow:clip;padding:5px 10px;border-bottom:1px solid #F1F5F9}
+  #tbl-box table.t tr:last-child td:last-child,#tbl-box table.t td:last-child{border-bottom:none}
+  #tbl-box table.t td::before{content:attr(data-label);flex:0 0 84px;max-width:84px;font-family:'JetBrains Mono';font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--ink3);padding-top:1px}
+  #tbl-box table.t td:not([data-label])::before{content:none;display:none}
+  #tbl-box table.t td:not([data-label]){padding:8px 10px}
+  /* cd-b geral — scroll horizontal apenas para tabelas que nao viraram cartao */
   .cd-b{overflow-x:auto;-webkit-overflow-scrolling:touch;display:block;width:100%}
   .cd-b table.t{min-width:420px}
+  /* tabela do periodo — mesmo tratamento de cartao empilhado do #tbl-box */
+  #range-tbl-box{overflow-x:visible!important}
+  #range-tbl-box table.t{min-width:0!important;width:100%}
+  #range-tbl-box table.t thead{position:absolute;left:-9999px;top:-9999px}
+  #range-tbl-box table.t tbody{display:block;width:100%}
+  #range-tbl-box table.t tr{display:block;width:100%;border:1px solid var(--line);border-radius:5px;margin-bottom:8px;padding:2px 0;background:var(--w)}
+  #range-tbl-box table.t td{display:flex;align-items:flex-start;gap:8px;width:100%;white-space:normal;max-width:none;overflow:visible;text-overflow:clip;padding:5px 10px;border-bottom:1px solid #F1F5F9;text-align:left}
+  #range-tbl-box table.t td::before{content:attr(data-label);flex:0 0 100px;max-width:100px;font-family:'JetBrains Mono';font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--ink3);padding-top:1px}
   /* grafico */
   .chart-wrap{padding:5px 3px;width:100%;overflow:hidden}
   .chart-wrap svg{width:100%;max-width:100%;height:auto;max-height:110px;display:block}
@@ -657,7 +673,7 @@ function renderRangeTable(){
   agg.forEach(function(p){
     var pavList=Object.keys(p.pavs).sort().map(function(pv){return pavBadge(pv)}).join(' ')||'<span class="badge badge-pav-none">—</span>';
     var prodHtml=p.producoes.length?('<div class="prod-list">'+p.producoes.slice().sort(function(a,b){return(a.data||'').localeCompare(b.data||'')}).map(function(pr){return '<div><span class="pd">'+esc(pr.data)+'</span>'+esc(pr.prod?pr.prod:(pr.atividade||'—'))+(pr.pav?' <span style="color:var(--ink3)">['+esc(pr.pav)+']</span>':'')+'</div>'}).join('')+'</div>'):'<span style="color:var(--ink3)">sem lancamentos</span>';
-    h+='<tr><td style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td><td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td><td style="color:var(--ink2)">'+esc(p.funcao)+'</td><td class="nr" style="font-weight:700;color:var(--navy)">'+p.diasPresente+'</td><td class="nr" style="color:var(--green)">'+p.diasAtivo+'</td><td class="nr" style="color:var(--red)">'+p.diasSem+'</td><td class="nr" style="color:'+(p.diasSemProd?'var(--red)':'var(--ink3)')+';font-weight:'+(p.diasSemProd?'700':'400')+'">'+(p.diasSemProd?'⚠ ':'')+p.diasSemProd+'</td><td class="nr" style="color:var(--amber)">'+p.diasFerias+'</td><td>'+pavList+'</td><td style="max-width:320px">'+prodHtml+'</td></tr>';
+    h+='<tr><td data-label="Nome" style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td><td data-label="Empresa"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td><td data-label="Funcao" style="color:var(--ink2)">'+esc(p.funcao)+'</td><td data-label="Dias presente" class="nr" style="font-weight:700;color:var(--navy)">'+p.diasPresente+'</td><td data-label="Dias c/ ativ." class="nr" style="color:var(--green)">'+p.diasAtivo+'</td><td data-label="Dias s/ ativ." class="nr" style="color:var(--red)">'+p.diasSem+'</td><td data-label="Dias s/ producao" class="nr" style="color:'+(p.diasSemProd?'var(--red)':'var(--ink3)')+';font-weight:'+(p.diasSemProd?'700':'400')+'">'+(p.diasSemProd?'⚠ ':'')+p.diasSemProd+'</td><td data-label="Dias ferias" class="nr" style="color:var(--amber)">'+p.diasFerias+'</td><td data-label="Pavimentos">'+pavList+'</td><td data-label="Producao / Atividades" style="max-width:none">'+prodHtml+'</td></tr>';
   });
   h+='</tbody></table>';el.innerHTML=h;
   markScrollable(el);
@@ -865,12 +881,12 @@ function renderTable(){
   /* Ativos com atividade */
   ativos.forEach(function(p){
     h+='<tr>'+
-      '<td style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td>'+
-      '<td style="color:var(--ink2)">'+esc(p.funcao)+'</td>'+
-      '<td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
-      '<td style="min-width:280px;white-space:normal;line-height:1.5">'+esc(p.atividade)+'</td>'+
-      '<td>'+pavBadge(p.pav)+'</td>'+
-      '<td style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td>'+
+      '<td data-label="Nome" style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td>'+
+      '<td data-label="Funcao" style="color:var(--ink2)">'+esc(p.funcao)+'</td>'+
+      '<td data-label="Empresa"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
+      '<td data-label="Atividade / Servico" style="min-width:280px;white-space:normal;line-height:1.5">'+esc(p.atividade)+'</td>'+
+      '<td data-label="Pav.">'+pavBadge(p.pav)+'</td>'+
+      '<td data-label="Local" style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td>'+
     '</tr>';
   });
 
@@ -880,12 +896,12 @@ function renderTable(){
       '🚫 '+faltosos.length+' FALTOSO(S) — sem atividade (excluidos do efetivo real)</td></tr>';
     faltosos.forEach(function(p){
       h+='<tr style="background:#FFF5F5">'+
-        '<td style="font-weight:600;white-space:nowrap;color:#B91C1C">'+esc(p.nome)+'</td>'+
-        '<td style="color:#991B1B">'+esc(p.funcao)+'</td>'+
-        '<td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
-        '<td><span class="badge badge-red">FALTOSO</span>'+(p.atividadeRaw?'<span style="color:var(--ink3);font-size:10px;font-style:italic;margin-left:6px">'+esc(p.atividadeRaw)+'</span>':'')+'</td>'+
-        '<td>'+pavBadge(p.pav)+'</td>'+
-        '<td style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td>'+
+        '<td data-label="Nome" style="font-weight:600;white-space:nowrap;color:#B91C1C">'+esc(p.nome)+'</td>'+
+        '<td data-label="Funcao" style="color:#991B1B">'+esc(p.funcao)+'</td>'+
+        '<td data-label="Empresa"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
+        '<td data-label="Atividade / Servico"><span class="badge badge-red">FALTOSO</span>'+(p.atividadeRaw?'<span style="color:var(--ink3);font-size:10px;font-style:italic;margin-left:6px">'+esc(p.atividadeRaw)+'</span>':'')+'</td>'+
+        '<td data-label="Pav.">'+pavBadge(p.pav)+'</td>'+
+        '<td data-label="Local" style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td>'+
       '</tr>';
     });
   }
@@ -895,11 +911,11 @@ function renderTable(){
     h+='<tr class="ferias-header"><td colspan="6">★ '+ferias.length+' PESSOA(S) DE FERIAS (excluidas do efetivo)</td></tr>';
     ferias.forEach(function(p){
       h+='<tr class="ferias-row">'+
-        '<td style="font-weight:600;color:#92400E;white-space:nowrap">'+esc(p.nome)+'</td>'+
-        '<td style="color:#B45309">'+esc(p.funcao)+'</td>'+
-        '<td><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
-        '<td colspan="2"><span class="badge badge-ferias">FERIAS</span></td>'+
-        '<td style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td>'+
+        '<td data-label="Nome" style="font-weight:600;color:#92400E;white-space:nowrap">'+esc(p.nome)+'</td>'+
+        '<td data-label="Funcao" style="color:#B45309">'+esc(p.funcao)+'</td>'+
+        '<td data-label="Empresa"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
+        '<td data-label="Status" colspan="2"><span class="badge badge-ferias">FERIAS</span></td>'+
+        '<td data-label="Local" style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td>'+
       '</tr>';
     });
   }
