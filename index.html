@@ -171,11 +171,12 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
   .date-bar .date-nav button{flex:1;min-height:34px;font-size:15px}
   .mode-tabs{gap:3px;margin-bottom:7px;width:100%}
   .mode-tab{flex:1;text-align:center;padding:6px 3px;font-size:8.5px}
-  /* tabelas — scroll horizontal dentro do card */
-  .cd-b{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;max-width:100%}
+  /* tabelas — nada de scroll lateral: tudo cabe na largura da tela */
+  .cd-b{overflow-x:hidden!important;width:100%;max-width:100%}
   table.t{min-width:0;width:100%;font-size:9.5px;table-layout:auto}
   table.t th{padding:5px 6px;font-size:7px;position:relative;top:auto;white-space:nowrap}
   table.t td{padding:4px 6px;font-size:9.5px;word-break:break-word}
+  .badge{white-space:normal;word-break:break-word;max-width:100%;line-height:1.3}
   /* barras — empilhar rotulo acima da barra para nao cortar texto */
   .bar-row{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;margin-bottom:9px;width:100%;overflow:visible}
   .bar-label{order:1;flex:1 1 100%;max-width:100%;min-width:0;font-size:9.5px;line-height:1.3;white-space:normal;overflow:visible;text-overflow:clip;word-break:break-word;text-align:left;color:var(--ink);font-weight:600}
@@ -187,29 +188,17 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
     width:100%;
     box-sizing:border-box;
   }
-  /* tabela equipe — vira cartao empilhado no celular, sem rolagem lateral e sem cortar nada */
-  #tbl-box{overflow-x:visible;width:100%;display:block}
-  #tbl-box table.t{min-width:0;width:100%}
-  #tbl-box table.t thead{position:absolute;left:-9999px;top:-9999px}
-  #tbl-box table.t tbody{display:block;width:100%}
-  #tbl-box table.t tr{display:block;width:100%;border:1px solid var(--line);border-radius:5px;margin-bottom:8px;padding:2px 0;background:var(--w)}
-  #tbl-box table.t tr.ferias-header td,#tbl-box table.t tr[style*="FEE2E2"] td{display:block!important;width:100%}
-  #tbl-box table.t td{display:flex;align-items:flex-start;gap:8px;width:100%;white-space:normal;max-width:none;overflow:visible;text-overflow:clip;padding:5px 10px;border-bottom:1px solid #F1F5F9}
-  #tbl-box table.t tr:last-child td:last-child,#tbl-box table.t td:last-child{border-bottom:none}
-  #tbl-box table.t td::before{content:attr(data-label);flex:0 0 84px;max-width:84px;font-family:'JetBrains Mono';font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--ink3);padding-top:1px}
+  /* todas as tabelas de registros viram cartao empilhado — nada de rolagem lateral */
+  #tbl-box,#range-tbl-box,#hist-box{overflow-x:visible!important;width:100%;display:block}
+  #tbl-box table.t,#range-tbl-box table.t,#hist-box table.t{min-width:0!important;width:100%}
+  #tbl-box table.t thead,#range-tbl-box table.t thead,#hist-box table.t thead{position:absolute;left:-9999px;top:-9999px}
+  #tbl-box table.t tbody,#range-tbl-box table.t tbody,#hist-box table.t tbody{display:block;width:100%}
+  #tbl-box table.t tr,#range-tbl-box table.t tr,#hist-box table.t tr{display:block;width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:5px;margin-bottom:8px;padding:2px 0;background:var(--w)}
+  #tbl-box table.t td,#range-tbl-box table.t td,#hist-box table.t td{display:flex;align-items:flex-start;gap:8px;width:100%;box-sizing:border-box;white-space:normal;max-width:100%;overflow:visible;text-overflow:clip;padding:5px 10px;border-bottom:1px solid #F1F5F9;text-align:left}
+  #tbl-box table.t tr:last-child td:last-child,#tbl-box table.t td:last-child,#range-tbl-box table.t td:last-child,#hist-box table.t td:last-child{border-bottom:none}
+  #tbl-box table.t td::before,#range-tbl-box table.t td::before,#hist-box table.t td::before{content:attr(data-label);flex:0 0 92px;max-width:92px;font-family:'JetBrains Mono';font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--ink3);padding-top:1px}
   #tbl-box table.t td:not([data-label])::before{content:none;display:none}
   #tbl-box table.t td:not([data-label]){padding:8px 10px}
-  /* cd-b geral — scroll horizontal apenas para tabelas que nao viraram cartao */
-  .cd-b{overflow-x:auto;-webkit-overflow-scrolling:touch;display:block;width:100%}
-  .cd-b table.t{min-width:420px}
-  /* tabela do periodo — mesmo tratamento de cartao empilhado do #tbl-box */
-  #range-tbl-box{overflow-x:visible!important}
-  #range-tbl-box table.t{min-width:0!important;width:100%}
-  #range-tbl-box table.t thead{position:absolute;left:-9999px;top:-9999px}
-  #range-tbl-box table.t tbody{display:block;width:100%}
-  #range-tbl-box table.t tr{display:block;width:100%;border:1px solid var(--line);border-radius:5px;margin-bottom:8px;padding:2px 0;background:var(--w)}
-  #range-tbl-box table.t td{display:flex;align-items:flex-start;gap:8px;width:100%;white-space:normal;max-width:none;overflow:visible;text-overflow:clip;padding:5px 10px;border-bottom:1px solid #F1F5F9;text-align:left}
-  #range-tbl-box table.t td::before{content:attr(data-label);flex:0 0 100px;max-width:100px;font-family:'JetBrains Mono';font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--ink3);padding-top:1px}
   /* grafico */
   .chart-wrap{padding:5px 3px;width:100%;overflow:hidden}
   .chart-wrap svg{width:100%;max-width:100%;height:auto;max-height:110px;display:block}
@@ -884,7 +873,7 @@ function renderTable(){
       '<td data-label="Nome" style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td>'+
       '<td data-label="Funcao" style="color:var(--ink2)">'+esc(p.funcao)+'</td>'+
       '<td data-label="Empresa"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
-      '<td data-label="Atividade / Servico" style="min-width:280px;white-space:normal;line-height:1.5">'+esc(p.atividade)+'</td>'+
+      '<td data-label="Atividade / Servico" style="white-space:normal;line-height:1.5">'+esc(p.atividade)+'</td>'+
       '<td data-label="Pav.">'+pavBadge(p.pav)+'</td>'+
       '<td data-label="Local" style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td>'+
     '</tr>';
@@ -933,7 +922,7 @@ function renderHist(days){
   var h='<table class="t"><thead><tr><th>Data</th><th>Efetivo (c/ atividade)</th><th>Presentes</th><th>Ferias</th><th>Empresas</th><th>Funcoes</th><th>C/ pavimento</th></tr></thead><tbody>';
   days.forEach(function(d,di){
     var comAtiv=comAtividadeCount(d),comPav=d.ativos.filter(function(p){return p.pav}).length,pctAtiv=d.ativos.length>0?(comAtiv/d.ativos.length*100).toFixed(0):'0',isSel=d.date===selDate;
-    h+='<tr style="cursor:pointer;'+(isSel?'background:#DBEAFE':'')+'" onclick="selectDateByValue('+di+')"><td style="font-family:JetBrains Mono;font-weight:700">'+(isSel?'▸ ':'')+esc(d.date)+'</td><td class="nr" style="font-size:16px;font-weight:700;color:#059669">'+comAtiv+' <span style="font-size:10px;color:var(--ink3);font-weight:400">('+pctAtiv+'%)</span></td><td class="nr" style="color:var(--ink2)">'+d.ativos.length+'</td><td class="nr" style="color:'+(d.ferias.length?'var(--amber)':'var(--ink3)')+'">'+d.ferias.length+'</td><td class="nr">'+Object.keys(d.byEmp).length+'</td><td class="nr">'+Object.keys(d.byFunc).length+'</td><td class="nr">'+comPav+'/'+d.ativos.length+'</td></tr>';
+    h+='<tr style="cursor:pointer;'+(isSel?'background:#DBEAFE':'')+'" onclick="selectDateByValue('+di+')"><td data-label="Data" style="font-family:JetBrains Mono;font-weight:700">'+(isSel?'▸ ':'')+esc(d.date)+'</td><td data-label="Efetivo (c/ atividade)" class="nr" style="font-size:16px;font-weight:700;color:#059669">'+comAtiv+' <span style="font-size:10px;color:var(--ink3);font-weight:400">('+pctAtiv+'%)</span></td><td data-label="Presentes" class="nr" style="color:var(--ink2)">'+d.ativos.length+'</td><td data-label="Ferias" class="nr" style="color:'+(d.ferias.length?'var(--amber)':'var(--ink3)')+'">'+d.ferias.length+'</td><td data-label="Empresas" class="nr">'+Object.keys(d.byEmp).length+'</td><td data-label="Funcoes" class="nr">'+Object.keys(d.byFunc).length+'</td><td data-label="C/ pavimento" class="nr">'+comPav+'/'+d.ativos.length+'</td></tr>';
   });
   h+='</tbody></table>';el.innerHTML=h;
   markScrollable(el);
