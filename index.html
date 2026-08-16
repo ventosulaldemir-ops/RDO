@@ -183,7 +183,7 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
   .bar-val{font-size:9px;min-width:20px;flex-shrink:0;text-align:right;color:var(--navy);font-weight:700}
   .bar-pct{display:none}
   #emp-bars,#func-bars,#pav-bars,#reg-bars{
-    padding:8px 10px!important;
+    padding:0!important;
     overflow-x:auto;
     -webkit-overflow-scrolling:touch;
     display:block;
@@ -191,7 +191,9 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
     box-sizing:border-box;
   }
   #emp-bars .bar-row,#func-bars .bar-row,#pav-bars .bar-row,#reg-bars .bar-row{
-    min-width:260px;
+    min-width:320px;
+    padding:0 8px;
+    flex-wrap:nowrap;
   }
   /* tabela equipe — scroll horizontal */
   #tbl-box{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;display:block}
