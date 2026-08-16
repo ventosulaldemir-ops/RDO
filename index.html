@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=390, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>RDO - Relatorio Diario de Obra</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -735,11 +735,28 @@ function renderKPIs(day){
 }
 
 function renderBars(elId,metaId,counts,colorMap){
-  var el=document.getElementById(elId);var keys=Object.keys(counts).sort(function(a,b){return counts[b]-counts[a]});
+  var el=document.getElementById(elId);
+  var keys=Object.keys(counts).sort(function(a,b){return counts[b]-counts[a]});
   if(!keys.length){el.innerHTML='<div class="em">Sem dados</div>';document.getElementById(metaId).textContent='';return}
   var total=keys.reduce(function(s,k){return s+counts[k]},0),max=counts[keys[0]];
   document.getElementById(metaId).textContent=keys.length+' categorias';
-  el.innerHTML=keys.map(function(k,i){var v=counts[k],pct=total>0?(v/total*100).toFixed(0):'0';var barW=max>0?(v/max*100).toFixed(1):0;var c=(colorMap&&colorMap[k])?colorMap[k]:(typeof colorMap==='string'?colorMap:COLORS[i%COLORS.length]);return '<div class="bar-row"><span class="bar-label" title="'+esc(k)+'">'+esc(k)+'</span><div class="bar-track"><div class="bar-fill" style="width:'+barW+'%;background:'+c+'"></div></div><span class="bar-val">'+v+'</span><span class="bar-pct">('+pct+'%)</span></div>'}).join('');
+  var isMobile=window.innerWidth<=640;
+  el.innerHTML=keys.map(function(k,i){
+    var v=counts[k],pct=total>0?(v/total*100).toFixed(0):'0';
+    var barW=max>0?(v/max*100).toFixed(1):0;
+    var c=(colorMap&&colorMap[k])?colorMap[k]:(typeof colorMap==='string'?colorMap:COLORS[i%COLORS.length]);
+    if(isMobile){
+      // Mobile: label em cima, barra + numero na mesma linha
+      return '<div style="margin-bottom:5px">'+
+        '<div style="font-family:JetBrains Mono;font-size:9px;color:var(--ink2);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(k)+'</div>'+
+        '<div style="display:flex;align-items:center;gap:4px">'+
+        '<div style="flex:1;height:12px;background:var(--paper);border-radius:2px;overflow:hidden">'+
+        '<div style="width:'+barW+'%;height:100%;background:'+c+';border-radius:2px"></div></div>'+
+        '<span style="font-family:JetBrains Mono;font-size:10px;font-weight:700;color:var(--navy);min-width:20px;text-align:right">'+v+'</span>'+
+        '</div></div>';
+    }
+    return '<div class="bar-row"><span class="bar-label" title="'+esc(k)+'">'+esc(k)+'</span><div class="bar-track"><div class="bar-fill" style="width:'+barW+'%;background:'+c+'"></div></div><span class="bar-val">'+v+'</span><span class="bar-pct">('+pct+'%)</span></div>';
+  }).join('');
 }
 
 function renderChart(days,selectedDay,boxId,metaId){
