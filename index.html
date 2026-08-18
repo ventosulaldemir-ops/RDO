@@ -397,6 +397,26 @@ function findCol(hd,kws){for(var i=0;i<hd.length;i++){var n=norm(hd[i]);for(var 
 /* ═══════ NORMALIZACAO SILENCIOSA ═══════ */
 function limparParaMatch(s){return norm(s).replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,' ').trim()}
 
+/* junta variacoes do mesmo rotulo (funcao/empresa) num unico texto, usando a
+   versao sem acento/minuscula/espaco duplicado como chave e mantendo a
+   primeira grafia encontrada na planilha, exibida em Title Case consistente */
+var FUNCAO_CANON={};
+var EMPRESA_CANON={};
+function tituloConsistente(raw){
+  return raw.toLowerCase().replace(/\s+/g,' ').trim().replace(/(^|[\s\/\-])\S/g,function(c){return c.toUpperCase()});
+}
+function normalizarRotulo(cru,cache){
+  if(!cru)return '';
+  var raw=String(cru).replace(/\s+/g,' ').trim();
+  if(!raw)return '';
+  var chave=limparParaMatch(raw);
+  if(!chave)return raw;
+  if(!cache[chave])cache[chave]=tituloConsistente(raw);
+  return cache[chave];
+}
+function normalizarFuncao(cru){return normalizarRotulo(cru,FUNCAO_CANON)}
+function normalizarEmpresa(cru){return normalizarRotulo(cru,EMPRESA_CANON)}
+
 function normalizarPavimento(cru){
   if(!cru)return '';var raw=String(cru).trim();if(!raw)return '';
   var limpo=limparParaMatch(raw);
@@ -430,9 +450,13 @@ function detectarDoTexto(texto){
   return '';
 }
 
-/* ═══════ FERIAS ═══════ */
-var KW_FERIAS=['ferias','férias','de ferias','em ferias','feria'];
-function isFerias(row,ci){var fields=[ci.status,ci.atividade];for(var fi=0;fi<fields.length;fi++){if(fields[fi]>-1){var v=norm(row[fields[fi]]||'');for(var k=0;k<KW_FERIAS.length;k++){if(v.indexOf(KW_FERIAS[k])>-1)return true}}}return false}
+/* ═══════ AUSENCIAS (ferias / afastado) — tiram do efetivo ═══════ */
+var KW_MOTIVOS=[
+  {tag:'FERIAS',kws:['ferias','férias','de ferias','em ferias','feria']},
+  {tag:'AFASTADO',kws:['afastado','afastada','atestado','licenca','licença','atestado medico']}
+];
+function motivoAusencia(row,ci){var fields=[ci.status,ci.atividade];for(var fi=0;fi<fields.length;fi++){if(fields[fi]>-1){var v=norm(row[fields[fi]]||'');for(var m=0;m<KW_MOTIVOS.length;m++){var kws=KW_MOTIVOS[m].kws;for(var k=0;k<kws.length;k++){if(v.indexOf(kws[k])>-1)return KW_MOTIVOS[m].tag}}}}return ''}
+function isFerias(row,ci){return !!motivoAusencia(row,ci)}
 
 /* ═══════ PARSE ═══════ */
 function parseData(raw){
@@ -443,12 +467,12 @@ function parseData(raw){
   for(var r=1;r<raw.length;r++){
     var row=raw[r];var nome=(ci.nome>-1?row[ci.nome]||'':'').trim();
     if(!nome||nome.length<2)continue;if(norm(nome).indexOf('total')>-1)continue;
-    var vac=isFerias(row,ci);
+    var motivo=motivoAusencia(row,ci);var vac=!!motivo;
     var atividadeRaw=(ci.atividade>-1?row[ci.atividade]||'':'').trim();
     var pavRaw=(ci.pav>-1?row[ci.pav]||'':'').trim();
     var pavNorm=normalizarPavimento(pavRaw);
     if(!pavNorm&&atividadeRaw)pavNorm=detectarDoTexto(atividadeRaw);
-    people.push({nome:nome,empresa:(ci.empresa>-1?row[ci.empresa]||'':'').trim()||'—',funcao:(ci.funcao>-1?row[ci.funcao]||'':'').trim()||'—',atividade:temAtividade(atividadeRaw)?atividadeRaw:'',atividadeRaw:atividadeRaw,regiao:(ci.regiao>-1?row[ci.regiao]||'':'').trim(),pav:pavNorm,pavRaw:pavRaw,prod:(ci.prod>-1?row[ci.prod]||'':'').trim(),data:(ci.data>-1?row[ci.data]||'':'').trim(),status:(ci.status>-1?row[ci.status]||'':'').trim(),ferias:vac});
+    people.push({nome:nome,empresa:normalizarEmpresa((ci.empresa>-1?row[ci.empresa]||'':'').trim())||'—',funcao:normalizarFuncao((ci.funcao>-1?row[ci.funcao]||'':'').trim())||'—',atividade:temAtividade(atividadeRaw)?atividadeRaw:'',atividadeRaw:atividadeRaw,regiao:(ci.regiao>-1?row[ci.regiao]||'':'').trim(),pav:pavNorm,pavRaw:pavRaw,prod:(ci.prod>-1?row[ci.prod]||'':'').trim(),data:(ci.data>-1?row[ci.data]||'':'').trim(),status:(ci.status>-1?row[ci.status]||'':'').trim(),ferias:vac,motivo:motivo});
   }
   var byDate={};
   people.forEach(function(p){var d=p.data||'(sem data)';if(!byDate[d])byDate[d]={date:d,all:[],ativos:[],ferias:[],byEmp:{},byFunc:{},byPav:{},byRegiao:{}};byDate[d].all.push(p);if(p.ferias){byDate[d].ferias.push(p);return}byDate[d].ativos.push(p);byDate[d].byEmp[p.empresa]=(byDate[d].byEmp[p.empresa]||0)+1;byDate[d].byFunc[p.funcao]=(byDate[d].byFunc[p.funcao]||0)+1;if(!byDate[d].byEmpAtiv)byDate[d].byEmpAtiv={};if(!byDate[d].byFuncAtiv)byDate[d].byFuncAtiv={};if(p.atividade){byDate[d].byEmpAtiv[p.empresa]=(byDate[d].byEmpAtiv[p.empresa]||0)+1;byDate[d].byFuncAtiv[p.funcao]=(byDate[d].byFuncAtiv[p.funcao]||0)+1;}if(p.pav)byDate[d].byPav[p.pav]=(byDate[d].byPav[p.pav]||0)+1;if(p.regiao)byDate[d].byRegiao[p.regiao]=(byDate[d].byRegiao[p.regiao]||0)+1});
@@ -891,15 +915,15 @@ function renderTable(){
     });
   }
 
-  /* Ferias */
+  /* Ferias / ausencias */
   if(ferias.length){
-    h+='<tr class="ferias-header"><td colspan="6">★ '+ferias.length+' PESSOA(S) DE FERIAS (excluidas do efetivo)</td></tr>';
+    h+='<tr class="ferias-header"><td colspan="6">★ '+ferias.length+' PESSOA(S) AUSENTE(S) (ferias/afastado — excluidas do efetivo)</td></tr>';
     ferias.forEach(function(p){
       h+='<tr class="ferias-row">'+
         '<td data-label="Nome" style="font-weight:600;color:#92400E;white-space:nowrap">'+esc(p.nome)+'</td>'+
         '<td data-label="Funcao" style="color:#B45309">'+esc(p.funcao)+'</td>'+
         '<td data-label="Empresa"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
-        '<td data-label="Status" colspan="2"><span class="badge badge-ferias">FERIAS</span></td>'+
+        '<td data-label="Status" colspan="2"><span class="badge badge-ferias">'+esc(p.motivo||'FERIAS')+'</span></td>'+
         '<td data-label="Local" style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td>'+
       '</tr>';
     });
