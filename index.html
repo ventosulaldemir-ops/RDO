@@ -84,7 +84,7 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 .badge-pav-1{background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7}
 .badge-pav-2{background:#FEF3C7;color:#92400E;border:1px solid #FCD34D}
 .badge-pav-3{background:#EDE9FE;color:#5B21B6;border:1px solid #C4B5FD}
-.badge-pav-enae{background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5}
+.badge-pav-eane{background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5}
 .badge-pav-inf{background:#F0FDFA;color:#115E59;border:1px solid #5EEAD4}
 .badge-pav-none{background:#F1F5F9;color:var(--ink3);border:1px solid var(--line);font-style:italic}
 .gg{display:grid;grid-template-columns:1.618fr 1fr;gap:14px}
@@ -365,9 +365,9 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 <script>
 var SHEET_ID='1uYl5jd-0eMqxnCpXZI2Rm7VtOdCmrd6CWKFfGX_sgTU';
 var SHEET_GID='286377544';
-var PAVIMENTOS=['TÉRREO','1º','2º','3º','ENAE','INF'];
-var PAV_CORES={'TÉRREO':'#2563EB','1º':'#0D9F4F','2º':'#D97706','3º':'#7C3AED','ENAE':'#DC2626','INF':'#0891B2'};
-var PAV_BADGE={'TÉRREO':'badge-pav-terreo','1º':'badge-pav-1','2º':'badge-pav-2','3º':'badge-pav-3','ENAE':'badge-pav-enae','INF':'badge-pav-inf'};
+var PAVIMENTOS=['TÉRREO','1º','2º','3º','EANE','INF'];
+var PAV_CORES={'TÉRREO':'#2563EB','1º':'#0D9F4F','2º':'#D97706','3º':'#7C3AED','EANE':'#DC2626','INF':'#0891B2'};
+var PAV_BADGE={'TÉRREO':'badge-pav-terreo','1º':'badge-pav-1','2º':'badge-pav-2','3º':'badge-pav-3','EANE':'badge-pav-eane','INF':'badge-pav-inf'};
 var PARSED=null;
 var SELECTED_DATE_IDX=0;
 var COLORS=['#2563EB','#D97706','#0D9F4F','#7C3AED','#DC2626','#0891B2','#DB2777','#65A30D','#EA580C','#0284C7'];
@@ -422,10 +422,10 @@ function normalizarPavimento(cru){
     '1':'1º','1o':'1º','1 p':'1º','1p':'1º','1 pav':'1º','1 pavimento':'1º','1 andar':'1º','1pav':'1º','1pavimento':'1º','1andar':'1º','p1':'1º','p 1':'1º','pav 1':'1º','pavimento 1':'1º','primeiro':'1º','pav 1o':'1º',
     '2':'2º','2o':'2º','2 p':'2º','2p':'2º','2 pav':'2º','2 pavimento':'2º','2 andar':'2º','2pav':'2º','2pavimento':'2º','2andar':'2º','p2':'2º','p 2':'2º','pav 2':'2º','pavimento 2':'2º','segundo':'2º','pav 2o':'2º',
     '3':'3º','3o':'3º','3 p':'3º','3p':'3º','3 pav':'3º','3 pavimento':'3º','3 andar':'3º','3pav':'3º','3pavimento':'3º','3andar':'3º','p3':'3º','p 3':'3º','pav 3':'3º','pavimento 3':'3º','terceiro':'3º','pav 3o':'3º',
-    'enae':'ENAE','enea':'ENAE','ene':'ENAE','ena':'ENAE','eane':'ENAE','ean':'ENAE',
+    'enae':'EANE','enea':'EANE','ene':'EANE','ena':'EANE','eane':'EANE','ean':'EANE',
     'inf':'INF','infr':'INF','infra':'INF','infraestrutura':'INF'};
   if(MAPA[limpo]!==undefined)return MAPA[limpo];
-  if(/enae|eane|enea|ena[^a-z]/.test(limpo))return 'ENAE';
+  if(/enae|eane|enea|ena[^a-z]/.test(limpo))return 'EANE';
   if(/(^|\s)inf[a-z]*($|\s)/.test(limpo))return 'INF';
   if(/terr[eo]{1,3}/.test(limpo))return 'TÉRREO';
   if(/\b3/.test(limpo))return '3º';
@@ -436,7 +436,7 @@ function normalizarPavimento(cru){
 
 function detectarDoTexto(texto){
   if(!texto)return '';var t=norm(texto);
-  if(/enae|eane/.test(t))return 'ENAE';
+  if(/enae|eane/.test(t))return 'EANE';
   if(/inf\b|infra/.test(t))return 'INF';
   if(/terr[eo]/.test(t))return 'TÉRREO';
   if(/\b3[ºo°]?\s*(pav|andar)/.test(t)||/terceiro\s*(pav|andar)/.test(t))return '3º';
