@@ -718,6 +718,32 @@ function renderRangeAll(){
   document.getElementById('upd-ts').textContent='atualizado '+fmtNow();
 }
 
+function doPrint(){
+  window.print();
+}
+
+function doExportCSV(){
+  var day=getSelectedDay();
+  if(!day){toast('Sem dados para exportar','warn');return}
+  var r=getFilteredPeople(day);
+  var ativos=r.active.filter(function(p){return !!p.atividade});
+  var faltosos=r.active.filter(function(p){return !p.atividade});
+  var ferias=r.ferias;
+  var rows=[['Nome','Funcao','Empresa','Status','Atividade/Servico','Pavimento','Local','Producao']];
+  ativos.forEach(function(p){rows.push([p.nome,p.funcao,p.empresa,'ATIVO',p.atividade,p.pav,p.regiao,p.prod])});
+  faltosos.forEach(function(p){rows.push([p.nome,p.funcao,p.empresa,'FALTOSO',p.atividadeRaw||'',p.pav,p.regiao,p.prod])});
+  ferias.forEach(function(p){rows.push([p.nome,p.funcao,p.empresa,p.motivo||'FERIAS','','','',''])});
+  var csv=rows.map(function(row){return row.map(function(v){return '"'+String(v||'').replace(/"/g,'""')+'"'}).join(',')}).join('\r\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='RDO_'+(day.date||'dia').replace(/\//g,'-')+'.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('CSV do dia exportado','ok');
+}
+
 function doExportRangeCSV(){
   var days=getRangeDays();if(!days.length){toast('Selecione ao menos um dia','warn');return}
   var agg=getFilteredRangeAgg();
