@@ -842,7 +842,7 @@ function populateFilters(day){
   fill('femp',uniq(day.ativos.map(function(p){return p.empresa})),'Todas empresas');
   fill('ffunc',uniq(day.ativos.map(function(p){return p.funcao})),'Todas funcoes');
   var pavSel=document.getElementById('fpav');var curPav=pavSel.value;
-  pavSel.innerHTML='<option value="">Todos pavimentos</option>'+PAVIMENTOS.map(function(v){var cnt=day.byPav[v]||0;return '<option value="'+esc(v)+'">'+esc(v)+(cnt>0?' ('+cnt+')':' (0)')+'</option>'}).join('');
+  pavSel.innerHTML='<option value="">Todos pavimentos</option>'+PAVIMENTOS.map(function(v){var cnt=day.byPav[v]||0;return cnt>0?'<option value="'+esc(v)+'">'+esc(v)+'</option>':''}).join('');
   pavSel.value=(PAVIMENTOS.indexOf(curPav)>-1)?curPav:'';
 }
 
