@@ -368,7 +368,7 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
         <div style="padding:12px 14px" id="func-bars"></div>
       </div>
       <div class="cd">
-        <div class="cd-h"><h3>Por pavimento</h3><span class="mt" id="pav-meta"></span></div>
+        <div class="cd-h"><h3>Por pavimento</h3><span class="mt" id="pav-meta" title="Clique em um pavimento para ver as funções"></span></div>
         <div style="padding:12px 14px" id="pav-bars"></div>
       </div>
       <div class="cd">
@@ -893,12 +893,15 @@ function renderBars(elId,metaId,counts,colorMap,ativCounts,clickMode){
     var c=(colorMap&&colorMap[k])?colorMap[k]:(typeof colorMap==='string'?colorMap:COLORS[i%COLORS.length]);
     var valStr=atv!==null?(atv+'/'+total):total;
     var clickCls=clickMode?' bar-row-click':'';
-    var dataAttr=clickMode?' data-emp-key="'+esc(k)+'" title="'+esc(k)+' — clique para ver os cargos"':' title="'+esc(k)+'"';
+    var clickTitle=clickMode==='pav'?(' — clique para ver as funções'):(' — clique para ver os cargos');
+    var dataAttr=clickMode?' data-bar-key="'+esc(k)+'" title="'+esc(k)+clickTitle+'"':' title="'+esc(k)+'"';
     return '<div class="bar-row'+clickCls+'"'+dataAttr+'><span class="bar-label">'+(esc(k))+'</span><div class="bar-track"><div class="bar-fill" style="width:'+barW+'%;background:'+c+'"></div></div><span class="bar-val">'+valStr+'</span></div>';
   }).join('');
   if(clickMode){
     Array.prototype.forEach.call(el.querySelectorAll('.bar-row-click'),function(row){
-      row.addEventListener('click',function(){openEmpModal(row.getAttribute('data-emp-key'),clickMode)});
+      var key=row.getAttribute('data-bar-key');
+      if(clickMode==='pav') row.addEventListener('click',function(){openPavModal(key)});
+      else row.addEventListener('click',function(){openEmpModal(key,clickMode)});
     });
   }
 }
@@ -943,8 +946,73 @@ function openEmpModal(empKey,mode){
 
 function closeEmpModal(){
   document.getElementById('emp-modal-overlay').classList.remove('on');
+  document.getElementById('emp-modal-overlay').querySelector('.modal-h').style.background='';
 }
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeEmpModal();closePeopleModal()}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeEmpModal();closePeopleModal();closePavModal()}});
+
+/* ═══════ MODAL POR PAVIMENTO → funções ═══════ */
+function openPavModal(pavKey){
+  if(!pavKey)return;
+  var day=getSelectedDay();
+  if(!day)return;
+
+  /* pessoas ativas neste pavimento */
+  var pessoas=day.ativos.filter(function(p){return p.pav===pavKey});
+
+  /* agrupa por função */
+  var funcCounts={}, funcAtiv={};
+  pessoas.forEach(function(p){
+    var f=p.funcao||'(sem função)';
+    funcCounts[f]=(funcCounts[f]||0)+1;
+    if(p.atividade) funcAtiv[f]=(funcAtiv[f]||0)+1;
+  });
+  var funcs=Object.keys(funcCounts).sort(function(a,b){return funcCounts[b]-funcCounts[a]});
+  var total=pessoas.length;
+  var comAtiv=pessoas.filter(function(p){return !!p.atividade}).length;
+
+  /* cabeçalho com a cor do pavimento */
+  var corPav=PAV_CORES[pavKey]||'var(--navy)';
+  var hdr=document.getElementById('emp-modal-hdr-inner');
+  document.getElementById('emp-modal-overlay').querySelector('.modal-h').style.background=corPav;
+  document.getElementById('emp-modal-title').textContent=pavKey+' — Por Função';
+  document.getElementById('emp-modal-sub').textContent=
+    day.date+' · '+total+' pessoa(s) · '+comAtiv+' c/ atividade · '+funcs.length+' função(ões)';
+
+  var body=document.getElementById('emp-modal-body');
+  if(!funcs.length){
+    body.innerHTML='<div class="modal-empty">Nenhuma pessoa neste pavimento.</div>';
+  }else{
+    var maxV=funcCounts[funcs[0]];
+    /* barras de função + lista de nomes abaixo de cada uma */
+    body.innerHTML=funcs.map(function(f,i){
+      var cnt=funcCounts[f], atv=funcAtiv[f]||0;
+      var barW=maxV>0?(cnt/maxV*100).toFixed(1):0;
+      var nomes=pessoas.filter(function(p){return (p.funcao||'(sem função)')===f});
+      var nomesHtml=nomes.map(function(p){
+        var badge=p.atividade
+          ?'<span style="color:#059669;font-size:9px">✔</span>'
+          :'<span style="color:#DC2626;font-size:9px">✖</span>';
+        return '<span style="display:inline-block;margin:2px 4px 2px 0;font-size:11px;color:var(--ink2)">'+badge+' '+esc(p.nome)+'</span>';
+      }).join('');
+      return '<div style="margin-bottom:14px">'+
+        '<div class="bar-row" style="margin-bottom:4px">'+
+          '<span class="bar-label" title="'+esc(f)+'">'+esc(f)+'</span>'+
+          '<div class="bar-track"><div class="bar-fill" style="width:'+barW+'%;background:'+corPav+'"></div></div>'+
+          '<span class="bar-val">'+atv+'/'+cnt+'</span>'+
+        '</div>'+
+        '<div style="padding-left:148px;line-height:1.8">'+nomesHtml+'</div>'+
+      '</div>';
+    }).join('');
+  }
+  document.getElementById('emp-modal-overlay').classList.add('on');
+}
+
+function closePavModal(){
+  /* reutiliza o mesmo overlay do modal de empresa */
+  document.getElementById('emp-modal-overlay').classList.remove('on');
+  /* restaura cor padrão do header */
+  document.getElementById('emp-modal-overlay').querySelector('.modal-h').style.background='';
+}
 
 /* ═══════ MODAL FALTOSOS / FÉRIAS ═══════ */
 function openPeopleModal(tipo){
@@ -1301,7 +1369,7 @@ function renderAllForDate(){
   var day=getSelectedDay();
   document.getElementById('sub-date').textContent=day?('Dados de '+day.date):'Sem dados';
   renderKPIs(day);
-  if(day){populateFilters(day);renderBars('emp-bars','emp-meta',day.byEmp,COLORS,day.byEmpAtiv,'day');renderBars('func-bars','func-meta',day.byFunc,COLORS,day.byFuncAtiv);renderBars('pav-bars','pav-meta',day.byPav,PAV_CORES);renderBars('reg-bars','reg-meta',day.byRegiao,COLORS)}
+  if(day){populateFilters(day);renderBars('emp-bars','emp-meta',day.byEmp,COLORS,day.byEmpAtiv,'day');renderBars('func-bars','func-meta',day.byFunc,COLORS,day.byFuncAtiv);renderBars('pav-bars','pav-meta',day.byPav,PAV_CORES,null,'pav');renderBars('reg-bars','reg-meta',day.byRegiao,COLORS)}
   else{['emp-bars','func-bars','pav-bars','reg-bars'].forEach(function(id){document.getElementById(id).innerHTML=''});['emp-meta','func-meta','pav-meta','reg-meta'].forEach(function(id){document.getElementById(id).textContent=''})}
   renderChart(PARSED.days,day);renderTable();renderHist(PARSED.days);renderProdAlert(day);
   document.getElementById('upd-ts').textContent='atualizado '+fmtNow();
