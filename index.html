@@ -55,6 +55,10 @@ input,select,button{-webkit-appearance:none;appearance:none}
 .kr{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
 .kp{background:var(--w);border:1px solid var(--line);padding:14px;position:relative;overflow:hidden;border-radius:4px;transition:box-shadow .2s}
 .kp:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.kp.kp-click{cursor:pointer;transition:box-shadow .2s,transform .12s}
+.kp.kp-click:hover{box-shadow:0 6px 20px rgba(0,0,0,.13);transform:translateY(-2px)}
+.kp.kp-click:active{transform:translateY(0)}
+.kp.kp-click::after{content:'↗';position:absolute;top:8px;right:10px;font-size:10px;opacity:.35;font-family:'JetBrains Mono'}
 .kp::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:var(--kc,var(--navy))}
 .kp .ki{font-size:18px;margin-bottom:6px}
 .kp .kl{font-family:'JetBrains Mono';font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:4px}
@@ -401,6 +405,16 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
       <button class="modal-close" onclick="closeEmpModal()" aria-label="Fechar">&times;</button>
     </div>
     <div class="modal-b" id="emp-modal-body"></div>
+  </div>
+</div>
+
+<div id="people-modal-overlay" class="modal-overlay" onclick="if(event.target===this)closePeopleModal()">
+  <div class="modal-card" style="max-width:520px" role="dialog" aria-modal="true">
+    <div class="modal-h" id="people-modal-hdr">
+      <div><h4 id="people-modal-title">—</h4><div class="mt2" id="people-modal-sub"></div></div>
+      <button class="modal-close" onclick="closePeopleModal()" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="modal-b" id="people-modal-body"></div>
   </div>
 </div>
 
@@ -854,12 +868,16 @@ function renderKPIs(day){
   var previsto=day.ativos.length;
   var pctPrevisto=previsto>0?(comAtiv/previsto*100).toFixed(0):'0';
   document.getElementById('kpis').innerHTML=[
-    {i:'👷',l:'Pessoas trabalhando no dia',   v:comAtiv,           f:'de '+previsto+' previstos ('+pctPrevisto+'%)', c:'#059669'},
-    {i:'🌴',l:'De Ferias',      v:day.ferias.length, f:'excluidos do efetivo',              c:'var(--amber)'},
-    {i:'🚫',l:'Faltosos',       v:faltosos,          f:'sem atividade — excluidos',         c:'var(--red)'},
-    {i:'🏢',l:'Empresas',       v:empCnt,            f:'ativas hoje',                       c:'var(--blue)'},
-    {i:'⚒️',l:'Funcoes',        v:funcCnt,           f:'distintas',                         c:'var(--cyan)'}
-  ].map(function(k){return '<div class="kp" style="--kc:'+k.c+'"><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div></div>'}).join('');
+    {i:'👷',l:'Pessoas trabalhando no dia',   v:comAtiv,           f:'de '+previsto+' previstos ('+pctPrevisto+'%)', c:'#059669', click:''},
+    {i:'🌴',l:'De Ferias',      v:day.ferias.length, f:'excluidos do efetivo',              c:'var(--amber)', click:'openPeopleModal(\'ferias\')'},
+    {i:'🚫',l:'Faltosos',       v:faltosos,          f:'sem atividade — excluidos',         c:'var(--red)',   click:'openPeopleModal(\'faltosos\')'},
+    {i:'🏢',l:'Empresas',       v:empCnt,            f:'ativas hoje',                       c:'var(--blue)',  click:''},
+    {i:'⚒️',l:'Funcoes',        v:funcCnt,           f:'distintas',                         c:'var(--cyan)',  click:''}
+  ].map(function(k){
+    var clickAttr=k.click?(' onclick="'+k.click+'" role="button" tabindex="0"'):'';
+    var cls='kp'+(k.click?' kp-click':'');
+    return '<div class="'+cls+'" style="--kc:'+k.c+'"'+clickAttr+'><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div></div>';
+  }).join('');
 }
 
 function renderBars(elId,metaId,counts,colorMap,ativCounts,clickMode){
@@ -926,7 +944,79 @@ function openEmpModal(empKey,mode){
 function closeEmpModal(){
   document.getElementById('emp-modal-overlay').classList.remove('on');
 }
-document.addEventListener('keydown',function(e){if(e.key==='Escape')closeEmpModal()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeEmpModal();closePeopleModal()}});
+
+/* ═══════ MODAL FALTOSOS / FÉRIAS ═══════ */
+function openPeopleModal(tipo){
+  var day=getSelectedDay();
+  if(!day)return;
+
+  var hdr=document.getElementById('people-modal-hdr');
+  var title=document.getElementById('people-modal-title');
+  var sub=document.getElementById('people-modal-sub');
+  var body=document.getElementById('people-modal-body');
+
+  if(tipo==='ferias'){
+    var lista=day.ferias;
+    hdr.style.background='#92400E';
+    title.textContent='🌴 De Férias / Ausentes';
+    sub.textContent=day.date+' · '+lista.length+' pessoa(s) excluída(s) do efetivo';
+    if(!lista.length){
+      body.innerHTML='<div class="modal-empty">Nenhuma pessoa de férias ou afastada neste dia.</div>';
+    }else{
+      body.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:12px">'+
+        '<thead><tr>'+
+        '<th style="text-align:left;padding:8px 10px;background:#FEF3C7;color:#92400E;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Nome</th>'+
+        '<th style="text-align:left;padding:8px 10px;background:#FEF3C7;color:#92400E;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Função</th>'+
+        '<th style="text-align:left;padding:8px 10px;background:#FEF3C7;color:#92400E;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Empresa</th>'+
+        '<th style="text-align:left;padding:8px 10px;background:#FEF3C7;color:#92400E;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Motivo</th>'+
+        '</tr></thead><tbody>'+
+        lista.map(function(p,i){
+          var bg=i%2===0?'#fff':'#FFFBEB';
+          return '<tr style="background:'+bg+'">'+
+            '<td style="padding:8px 10px;font-weight:600;border-bottom:1px solid #FEF3C7">'+esc(p.nome)+'</td>'+
+            '<td style="padding:8px 10px;color:#92400E;border-bottom:1px solid #FEF3C7">'+esc(p.funcao)+'</td>'+
+            '<td style="padding:8px 10px;border-bottom:1px solid #FEF3C7"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
+            '<td style="padding:8px 10px;border-bottom:1px solid #FEF3C7"><span class="badge badge-ferias">'+esc(p.motivo||'FÉRIAS')+'</span></td>'+
+          '</tr>';
+        }).join('')+
+        '</tbody></table>';
+    }
+
+  }else{ /* faltosos */
+    var faltososList=day.ativos.filter(function(p){return !p.atividade});
+    hdr.style.background='#991B1B';
+    title.textContent='🚫 Faltosos / Sem Atividade';
+    sub.textContent=day.date+' · '+faltososList.length+' pessoa(s) excluída(s) do efetivo';
+    if(!faltososList.length){
+      body.innerHTML='<div class="modal-empty">Nenhum faltoso neste dia. 👍</div>';
+    }else{
+      body.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:12px">'+
+        '<thead><tr>'+
+        '<th style="text-align:left;padding:8px 10px;background:#FEE2E2;color:#991B1B;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Nome</th>'+
+        '<th style="text-align:left;padding:8px 10px;background:#FEE2E2;color:#991B1B;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Função</th>'+
+        '<th style="text-align:left;padding:8px 10px;background:#FEE2E2;color:#991B1B;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Empresa</th>'+
+        '<th style="text-align:left;padding:8px 10px;background:#FEE2E2;color:#991B1B;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Reg. Atividade</th>'+
+        '</tr></thead><tbody>'+
+        faltososList.map(function(p,i){
+          var bg=i%2===0?'#fff':'#FFF5F5';
+          return '<tr style="background:'+bg+'">'+
+            '<td style="padding:8px 10px;font-weight:600;color:#B91C1C;border-bottom:1px solid #FEE2E2">'+esc(p.nome)+'</td>'+
+            '<td style="padding:8px 10px;color:#991B1B;border-bottom:1px solid #FEE2E2">'+esc(p.funcao)+'</td>'+
+            '<td style="padding:8px 10px;border-bottom:1px solid #FEE2E2"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
+            '<td style="padding:8px 10px;border-bottom:1px solid #FEE2E2;color:var(--ink3);font-size:11px;font-style:italic">'+esc(p.atividadeRaw||'—')+'</td>'+
+          '</tr>';
+        }).join('')+
+        '</tbody></table>';
+    }
+  }
+
+  document.getElementById('people-modal-overlay').classList.add('on');
+}
+
+function closePeopleModal(){
+  document.getElementById('people-modal-overlay').classList.remove('on');
+}
 
 function renderChart(days,selectedDay,boxId,metaId){
   boxId=boxId||'chart-box';metaId=metaId||'chart-meta';
