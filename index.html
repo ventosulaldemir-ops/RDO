@@ -121,6 +121,22 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 .bar-row-click .bar-label{transition:color .12s}
 .modal-overlay{position:fixed;inset:0;background:rgba(11,29,51,.55);z-index:300;display:none;align-items:center;justify-content:center;padding:16px}
 .modal-overlay.on{display:flex}
+/* ── modal de impressão ── */
+.pm-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.pm-row:last-child{border-bottom:none}
+.pm-row label{font-size:12px;color:var(--ink);flex:1;cursor:pointer}
+.pm-row select{font-family:'Inter';font-size:12px;padding:6px 10px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:3px;min-height:34px;flex:1}
+.pm-row select:focus{outline:2px solid var(--amber);outline-offset:-1px}
+.pm-check{width:16px;height:16px;accent-color:var(--navy);cursor:pointer;flex-shrink:0}
+.pm-section{font-family:'JetBrains Mono';font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);padding:10px 0 4px}
+.pm-preview{font-family:'JetBrains Mono';font-size:10px;color:var(--ink2);padding:8px 12px;background:var(--paper);border-radius:3px;margin-top:8px;border:1px solid var(--line)}
+.pm-checklist{display:flex;flex-wrap:wrap;gap:6px;padding:6px 0}
+.pm-chip-label{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-family:'JetBrains Mono';padding:4px 10px;border-radius:20px;border:1px solid var(--line);background:var(--paper);color:var(--ink2);cursor:pointer;user-select:none;transition:all .12s}
+.pm-chip-label:hover{border-color:var(--navy)}
+.pm-chip-label input{display:none}
+.pm-chip-label.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.pm-selall{font-family:'JetBrains Mono';font-size:9px;color:var(--blue);cursor:pointer;text-decoration:underline;margin-left:4px}
+.pm-selall:hover{color:var(--navy)}
 .modal-card{background:#fff;border-radius:6px;max-width:420px;width:100%;max-height:80vh;overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:0 20px 60px rgba(0,0,0,.35);animation:modalIn .15s ease}
 @keyframes modalIn{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
 .modal-h{padding:14px 18px;background:var(--navy);color:#fff;display:flex;justify-content:space-between;align-items:flex-start;border-radius:6px 6px 0 0;position:sticky;top:0}
@@ -147,16 +163,21 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   body{background:#fff!important;padding:0!important}
-  .topbar,.cd-t,#toast,#btn-reload,#btn-print,#btn-export,.date-bar,.range-box,.mode-tabs{display:none!important}
-  .print-header{display:block!important;padding:10px 0 8px;border-bottom:3px solid var(--navy);margin-bottom:12px}
+  /* esconde absolutamente tudo... */
+  .topbar,.container,#toast,footer{display:none!important}
+  /* ...e mostra só o cabeçalho de impressão e a seção gerada */
+  .print-header{display:block!important;padding:10px 0 8px;border-bottom:3px solid var(--navy);margin-bottom:14px}
   .print-header h1{font-family:'Space Grotesk';font-size:18px;font-weight:700;color:var(--navy)}
-  .print-header p{font-family:'JetBrains Mono';font-size:10px;color:var(--ink2);margin-top:3px}
-  .container{padding:0!important}
-  .cd{page-break-inside:avoid;border:1px solid #ccc!important}
-  table.t th{background:#2a3f5f!important;position:static!important;font-size:8px!important;padding:6px 8px!important}
-  table.t td{padding:5px 8px!important;font-size:10px!important}
-  .gg{grid-template-columns:1fr 1fr!important;gap:8px!important}
-  @page{size:A4 portrait;margin:10mm 8mm 12mm 8mm}
+  .print-header p{font-family:'JetBrains Mono';font-size:10px;color:#475569;margin-top:3px}
+  #print-db-section{display:block!important;padding:0 7mm}
+  #print-db-section .cd{border:1px solid #ccc!important;margin-bottom:10px;page-break-inside:auto}
+  #print-db-section .cd-h{background:#f0f2f5!important;padding:8px 12px!important}
+  #print-db-section .cd-h h3{font-size:12px!important}
+  #print-db-section table.t{min-width:0!important;width:100%}
+  #print-db-section table.t th{background:#2a3f5f!important;position:static!important;font-size:8px!important;padding:5px 8px!important}
+  #print-db-section table.t td{padding:4px 8px!important;font-size:9px!important;border-bottom:1px solid #EEF2F6!important}
+  #print-db-section table.t tr{page-break-inside:avoid}
+  @page{size:A4 portrait;margin:10mm 0 12mm 0}
 }
 @media(max-width:900px){.gg{grid-template-columns:1fr}.bar-label{min-width:100px;max-width:100px}}
 
@@ -255,6 +276,7 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
       <span style="font-family:'JetBrains Mono';font-size:9px;color:#8BADC4" id="clk">--:--</span>
       <span style="font-family:'JetBrains Mono';font-size:8px;color:#4A6580;white-space:nowrap" title="Proximo auto-refresh em">↻ <span id="auto-countdown">--:--</span></span>
       <button class="btn btn-a" id="btn-reload" onclick="doLoad()" aria-label="Atualizar"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 11-2.6-6.4M21 3v6h-6"/></svg><span class="btn-label">Atualizar</span></button>
+      <button class="btn btn-bl" id="btn-print" onclick="doPrint()" aria-label="Imprimir"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg><span class="btn-label">Imprimir</span></button>
     </div>
   </div>
 </div>
@@ -385,7 +407,7 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
       <select id="remp" onchange="renderRangeTable()"><option value="">Todas empresas</option></select>
       <select id="rfunc" onchange="renderRangeTable()"><option value="">Todas funcoes</option></select>
       <select id="rpav" onchange="renderRangeTable()"><option value="">Todos pavimentos</option></select>
-      <button class="btn btn-gr" onclick="doExportRangeCSV()">CSV do periodo</button>
+      <button class="btn btn-gr" onclick="doExportRangeCSV()" style="display:none">CSV</button>
       <span class="ct" id="range-tbl-ct"></span>
     </div>
     <div class="cd-b" id="range-tbl-box"></div>
@@ -395,9 +417,66 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
     <div class="cd-h"><h3>Historico por data</h3><span class="mt" id="hist-meta"></span></div>
     <div class="cd-b" id="hist-box"></div>
   </div>
+
+  <!-- Seção gerada dinamicamente apenas para impressão — FORA do container -->
 </div>
+<div id="print-db-section" style="display:none"></div>
 <footer style="max-width:1280px;margin:0 auto;padding:12px 14px;font-size:9px;color:var(--ink3);font-family:'JetBrains Mono';border-top:1px solid var(--line)">RDO - Painel de Mao de Obra</footer>
 <div id="toast"></div>
+<div id="print-modal-overlay" class="modal-overlay" onclick="if(event.target===this)closePrintModal()">
+  <div class="modal-card" style="max-width:500px" role="dialog" aria-modal="true">
+    <div class="modal-h" style="background:var(--blue)">
+      <div><h4>🖨️ Configurar Impressão</h4><div class="mt2" id="pm-sub">—</div></div>
+      <button class="modal-close" onclick="closePrintModal()" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="modal-b">
+
+      <div class="pm-section">
+        Empresa
+        <span class="pm-selall" onclick="pmToggleAll('pm-emps',true)">todos</span>
+        <span class="pm-selall" onclick="pmToggleAll('pm-emps',false)">nenhum</span>
+      </div>
+      <div class="pm-checklist" id="pm-emps"></div>
+
+      <div class="pm-section" style="margin-top:4px">
+        Função
+        <span class="pm-selall" onclick="pmToggleAll('pm-funcs',true)">todos</span>
+        <span class="pm-selall" onclick="pmToggleAll('pm-funcs',false)">nenhum</span>
+      </div>
+      <div class="pm-checklist" id="pm-funcs"></div>
+
+      <div class="pm-section" style="margin-top:4px">
+        Pavimento
+        <span class="pm-selall" onclick="pmToggleAll('pm-pavs',true)">todos</span>
+        <span class="pm-selall" onclick="pmToggleAll('pm-pavs',false)">nenhum</span>
+      </div>
+      <div class="pm-checklist" id="pm-pavs"></div>
+
+      <div class="pm-section" style="margin-top:4px">Incluir na impressão</div>
+      <div class="pm-checklist">
+        <label class="pm-chip-label on" id="pm-lbl-faltosos">
+          <input type="checkbox" id="pm-faltosos" checked onchange="this.closest('label').className='pm-chip-label'+(this.checked?' on':'');updatePrintPreview()">
+          🚫 Faltosos
+        </label>
+        <label class="pm-chip-label on" id="pm-lbl-ferias">
+          <input type="checkbox" id="pm-ferias" checked onchange="this.closest('label').className='pm-chip-label'+(this.checked?' on':'');updatePrintPreview()">
+          🌴 Férias
+        </label>
+      </div>
+
+      <div class="pm-preview" id="pm-preview">—</div>
+
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn btn-bl" style="flex:1;justify-content:center;font-size:11px" onclick="executePrint()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
+          Imprimir
+        </button>
+        <button class="btn" style="background:var(--paper);color:var(--ink2);border:1px solid var(--line)" onclick="closePrintModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="emp-modal-overlay" class="modal-overlay" onclick="if(event.target===this)closeEmpModal()">
   <div class="modal-card" role="dialog" aria-modal="true">
     <div class="modal-h">
@@ -811,42 +890,103 @@ function renderRangeAll(){
   document.getElementById('upd-ts').textContent='atualizado '+fmtNow();
 }
 
+/* abre modal de configuracao de impressao */
 function doPrint(){
-  window.print();
-}
-
-function doExportCSV(){
   var day=getSelectedDay();
-  if(!day){toast('Sem dados para exportar','warn');return}
-  var r=getFilteredPeople(day);
-  var ativos=r.active.filter(function(p){return !!p.atividade});
-  var faltosos=r.active.filter(function(p){return !p.atividade});
-  var ferias=r.ferias;
-  var rows=[['Nome','Funcao','Empresa','Status','Atividade/Servico','Pavimento','Local','Producao']];
-  ativos.forEach(function(p){rows.push([p.nome,p.funcao,p.empresa,'ATIVO',p.atividade,p.pav,p.regiao,p.prod])});
-  faltosos.forEach(function(p){rows.push([p.nome,p.funcao,p.empresa,'FALTOSO',p.atividadeRaw||'',p.pav,p.regiao,p.prod])});
-  ferias.forEach(function(p){rows.push([p.nome,p.funcao,p.empresa,p.motivo||'FERIAS','','','',''])});
-  var csv=rows.map(function(row){return row.map(function(v){return '"'+String(v||'').replace(/"/g,'""')+'"'}).join(',')}).join('\r\n');
-  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url;
-  a.download='RDO_'+(day.date||'dia').replace(/\//g,'-')+'.csv';
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  toast('CSV do dia exportado','ok');
+  if(!day){toast('Selecione um dia primeiro','warn');return}
+  document.getElementById('pm-sub').textContent='Dia '+day.date+' \u00b7 '+day.all.length+' pessoas no total';
+  pmBuildChips('pm-emps',uniq(day.all.map(function(p){return p.empresa})));
+  pmBuildChips('pm-funcs',uniq(day.all.map(function(p){return p.funcao})));
+  pmBuildChips('pm-pavs',PAVIMENTOS.filter(function(v){return day.byPav[v]>0}));
+  document.getElementById('pm-faltosos').checked=true;
+  document.getElementById('pm-lbl-faltosos').className='pm-chip-label on';
+  document.getElementById('pm-ferias').checked=true;
+  document.getElementById('pm-lbl-ferias').className='pm-chip-label on';
+  document.getElementById('print-modal-overlay').classList.add('on');
+  updatePrintPreview();
 }
 
-function doExportRangeCSV(){
-  var days=getRangeDays();if(!days.length){toast('Selecione ao menos um dia','warn');return}
-  var agg=getFilteredRangeAgg();
-  var rows=[['Nome','Empresa','Funcao','Dias presente','Dias c/ atividade','Dias s/ atividade','Dias s/ producao (ALERTA)','Dias ferias','Pavimentos','Detalhe por dia (data: producao/atividade [pav])']];
-  agg.forEach(function(p){
-    var detalhe=p.producoes.map(function(pr){return pr.data+': '+(pr.prod?pr.prod:(pr.atividade||'—'))+(pr.pav?' ['+pr.pav+']':'')}).join(' | ');
-    rows.push([p.nome,p.empresa,p.funcao,p.diasPresente,p.diasAtivo,p.diasSem,p.diasSemProd,p.diasFerias,Object.keys(p.pavs).join('/'),detalhe]);
+function pmBuildChips(id,vals){
+  var b=document.getElementById(id);if(!b)return;
+  b.innerHTML=vals.map(function(v){
+    return '<label class="pm-chip-label on" title="'+esc(v)+'"><input type="checkbox" value="'+esc(v)+'" checked onchange="this.closest(\'label\').className=\'pm-chip-label\'+(this.checked?\' on\':\'\');updatePrintPreview()">'+esc(v)+'</label>';
+  }).join('');
+}
+
+function pmToggleAll(id,state){
+  var b=document.getElementById(id);if(!b)return;
+  b.querySelectorAll('input').forEach(function(cb){cb.checked=state;cb.closest('label').className='pm-chip-label'+(state?' on':'');});
+  updatePrintPreview();
+}
+
+function pmGetSelected(id){
+  var b=document.getElementById(id);if(!b)return[];
+  var v=[];b.querySelectorAll('input:checked').forEach(function(c){v.push(c.value)});return v;
+}
+
+function closePrintModal(){document.getElementById('print-modal-overlay').classList.remove('on');}
+
+function updatePrintPreview(){
+  var day=getSelectedDay();if(!day)return;
+  var emps=pmGetSelected('pm-emps'),funcs=pmGetSelected('pm-funcs'),pavs=pmGetSelected('pm-pavs');
+  var iF=document.getElementById('pm-faltosos').checked,iV=document.getElementById('pm-ferias').checked;
+  function match(p){
+    if(emps.length&&emps.indexOf(p.empresa)===-1)return false;
+    if(funcs.length&&funcs.indexOf(p.funcao)===-1)return false;
+    if(pavs.length&&p.pav&&pavs.indexOf(p.pav)===-1)return false;
+    return true;
+  }
+  var a=day.ativos.filter(function(p){return !!p.atividade&&match(p)});
+  var f=iF?day.ativos.filter(function(p){return !p.atividade&&match(p)}):[];
+  var v=iV?day.ferias.filter(function(p){return match(p)}):[];
+  document.getElementById('pm-preview').textContent=
+    (a.length+f.length+v.length)+' pessoa(s) — '+a.length+' ativo(s)'+(iF?' \u00b7 '+f.length+' faltoso(s)':'')+(iV?' \u00b7 '+v.length+' f\u00e9rias':'');
+}
+
+function executePrint(){
+  var day=getSelectedDay();if(!day)return;
+  var emps=pmGetSelected('pm-emps'),funcs=pmGetSelected('pm-funcs'),pavs=pmGetSelected('pm-pavs');
+  var iF=document.getElementById('pm-faltosos').checked,iV=document.getElementById('pm-ferias').checked;
+  function match(p){
+    if(emps.length&&emps.indexOf(p.empresa)===-1)return false;
+    if(funcs.length&&funcs.indexOf(p.funcao)===-1)return false;
+    if(pavs.length&&p.pav&&pavs.indexOf(p.pav)===-1)return false;
+    return true;
+  }
+  function srt(a,b){return(a.nome||'').localeCompare(b.nome||'','pt-BR')}
+  var ativos=day.ativos.filter(function(p){return !!p.atividade&&match(p)}).sort(srt);
+  var semAtiv=iF?day.ativos.filter(function(p){return !p.atividade&&match(p)}).sort(srt):[];
+  var ferias=iV?day.ferias.filter(function(p){return match(p)}).sort(srt):[];
+  var tE=document.getElementById('pm-emps').querySelectorAll('input').length;
+  var tF=document.getElementById('pm-funcs').querySelectorAll('input').length;
+  var tP=document.getElementById('pm-pavs').querySelectorAll('input').length;
+  var fl=[];
+  if(emps.length&&emps.length<tE)fl.push('Empresa: '+emps.join(', '));
+  if(funcs.length&&funcs.length<tF)fl.push('Fun\u00e7\u00e3o: '+funcs.join(', '));
+  if(pavs.length&&pavs.length<tP)fl.push('Pav.: '+pavs.join(', '));
+  var sf=fl.length?' \u00b7 '+fl.join(' / '):'';
+  document.getElementById('print-header').innerHTML=
+    '<h1>RDO \u2014 Relatorio Diario de Obra</h1>'+
+    '<p>Data: '+esc(day.date)+' \u00b7 Efetivo: '+ativos.length+' \u00b7 Faltosos: '+semAtiv.length+' \u00b7 F\u00e9rias: '+ferias.length+sf+' \u00b7 Impresso em '+fmtNow()+'</p>';
+  var h='<div class="cd"><div class="cd-h"><h3>Equipe do dia \u2014 '+esc(day.date)+'</h3>'+
+    '<span class="mt">'+ativos.length+' ativo(s)'+(semAtiv.length?' \u00b7 '+semAtiv.length+' faltoso(s)':'')+(ferias.length?' \u00b7 '+ferias.length+' f\u00e9rias':'')+'</span></div>'+
+    '<table class="t"><thead><tr><th>#</th><th>Nome</th><th>Fun\u00e7\u00e3o</th><th>Empresa</th><th>Atividade / Servi\u00e7o</th><th>Pav.</th><th>Local</th></tr></thead><tbody>';
+  var num=1;
+  ativos.forEach(function(p){
+    h+='<tr><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td><td style="color:#475569">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td style="white-space:normal">'+esc(p.atividade)+'</td><td>'+esc(p.pav||'\u2014')+'</td><td style="color:#475569">'+esc(p.regiao||'\u2014')+'</td></tr>';
   });
-  var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v||'').replace(/"/g,'""')+'"'}).join(',')}).join('\r\n');
-  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='RDO_periodo_'+days.length+'dias.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);toast('CSV do periodo exportado','ok');
+  if(semAtiv.length){
+    h+='<tr style="background:#FEE2E2"><td colspan="7" style="font-family:JetBrains Mono;font-size:9px;font-weight:700;color:#B91C1C;text-transform:uppercase;padding:6px 10px">🚫 '+semAtiv.length+' FALTOSO(S)</td></tr>';
+    semAtiv.forEach(function(p){h+='<tr style="background:#FFF5F5"><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;color:#B91C1C">'+esc(p.nome)+'</td><td style="color:#991B1B">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td style="color:#94A3B8;font-style:italic">'+esc(p.atividadeRaw||'\u2014')+'</td><td>'+esc(p.pav||'\u2014')+'</td><td>'+esc(p.regiao||'\u2014')+'</td></tr>';});
+  }
+  if(ferias.length){
+    h+='<tr style="background:#FEF3C7"><td colspan="7" style="font-family:JetBrains Mono;font-size:9px;font-weight:700;color:#92400E;text-transform:uppercase;padding:6px 10px">🌴 '+ferias.length+' FÉRIAS / AUSENTE(S)</td></tr>';
+    ferias.forEach(function(p){h+='<tr style="background:#FFFBEB"><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;color:#92400E">'+esc(p.nome)+'</td><td style="color:#B45309">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td colspan="3"><span style="font-family:JetBrains Mono;font-size:9px;font-weight:700;background:#FEF3C7;padding:2px 6px;border-radius:10px;color:#92400E">'+esc(p.motivo||'F\u00c9RIAS')+'</span></td></tr>';});
+  }
+  h+='</tbody></table></div>';
+  var sec=document.getElementById('print-db-section');
+  sec.innerHTML=h;sec.style.display='block';closePrintModal();
+  requestAnimationFrame(function(){window.print();setTimeout(function(){sec.style.display='none'},500);});
 }
 
 /* ═══════ RENDERING (single day) ═══════ */
@@ -948,7 +1088,7 @@ function closeEmpModal(){
   document.getElementById('emp-modal-overlay').classList.remove('on');
   document.getElementById('emp-modal-overlay').querySelector('.modal-h').style.background='';
 }
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeEmpModal();closePeopleModal();closePavModal()}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeEmpModal();closePeopleModal();closePavModal();closePrintModal()}});
 
 /* ═══════ MODAL POR PAVIMENTO → funções ═══════ */
 function openPavModal(pavKey){
