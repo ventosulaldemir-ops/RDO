@@ -58,7 +58,6 @@ input,select,button{-webkit-appearance:none;appearance:none}
 .kp.kp-click{cursor:pointer;transition:box-shadow .2s,transform .12s}
 .kp.kp-click:hover{box-shadow:0 6px 20px rgba(0,0,0,.13);transform:translateY(-2px)}
 .kp.kp-click:active{transform:translateY(0)}
-.kp.kp-filter-active{outline:2px solid var(--blue);outline-offset:-2px;background:var(--blueBg)}
 .kp.kp-click::after{content:'↗';position:absolute;top:8px;right:10px;font-size:10px;opacity:.35;font-family:'JetBrains Mono'}
 .kp::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:var(--kc,var(--navy))}
 .kp .ki{font-size:18px;margin-bottom:6px}
@@ -261,6 +260,46 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
   }
 }
 
+/* Modal de Presença Única */
+#unicos-modal-overlay .modal-card{max-width:760px}
+#unicos-modal-overlay .modal-h{background:#7C3AED}
+#unicos-modal-overlay .unicos-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+#unicos-modal-overlay .unicos-stat{background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:10px}
+#unicos-modal-overlay .unicos-stat .us-k{font-family:'JetBrains Mono';font-size:8px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3)}
+#unicos-modal-overlay .unicos-stat .us-v{font-family:'Space Grotesk';font-size:20px;font-weight:700;color:#7C3AED;margin-top:2px}
+#unicos-modal-overlay .unicos-table-wrap{overflow:auto;max-height:55vh;-webkit-overflow-scrolling:touch}
+#unicos-modal-overlay table{width:100%;border-collapse:collapse;font-size:11px}
+#unicos-modal-overlay th{position:sticky;top:0;background:#7C3AED;color:#fff;font-family:'JetBrains Mono';font-size:8px;text-transform:uppercase;letter-spacing:.04em;text-align:left;padding:8px 9px;z-index:2}
+#unicos-modal-overlay td{padding:8px 9px;border-bottom:1px solid #EEF2F6;vertical-align:top}
+#unicos-modal-overlay tr:hover td{background:#F8FAFC}
+@media(max-width:640px){
+  #unicos-modal-overlay{padding:8px;align-items:center;justify-content:center}
+  #unicos-modal-overlay .modal-card{width:100%;max-width:none!important;height:auto;max-height:calc(100vh - 16px);border-radius:8px;display:flex;flex-direction:column}
+  #unicos-modal-overlay .modal-h{padding:12px 14px;min-height:58px;flex-shrink:0}
+  #unicos-modal-overlay .modal-h h4{font-size:14px;line-height:1.25;padding-right:8px}
+  #unicos-modal-overlay .modal-h .mt2{font-size:8px;line-height:1.35;white-space:normal}
+  #unicos-modal-overlay .modal-b{padding:10px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+  #unicos-modal-overlay .unicos-summary{grid-template-columns:1fr 1fr;gap:6px;flex-shrink:0}
+  #unicos-modal-overlay .unicos-stat{padding:8px}
+  #unicos-modal-overlay .unicos-stat .us-v{font-size:17px}
+  #unicos-modal-overlay .unicos-table-wrap{max-height:none;overflow:auto;flex:1;min-height:0;-webkit-overflow-scrolling:touch}
+  #unicos-modal-overlay table{width:100%;min-width:0;border-collapse:separate;border-spacing:0 7px;font-size:11px}
+  #unicos-modal-overlay thead{display:none}
+  #unicos-modal-overlay tbody{display:block;width:100%}
+  #unicos-modal-overlay tr{display:block;width:100%;border:1px solid #E5E7EB;border-radius:7px;background:#fff;margin-bottom:7px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  #unicos-modal-overlay td{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;width:100%;min-width:0;padding:8px 9px;border-bottom:1px solid #EEF2F6;vertical-align:top;line-height:1.35;overflow-wrap:anywhere}
+  #unicos-modal-overlay td:last-child{border-bottom:none}
+  #unicos-modal-overlay td::before{content:attr(data-label);flex:0 0 76px;text-align:left;font-family:'JetBrains Mono';font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#94A3B8;padding-top:1px}
+  #unicos-modal-overlay td > *{max-width:calc(100% - 86px);overflow-wrap:anywhere}
+  #unicos-modal-overlay .badge{white-space:normal;text-align:right;max-width:calc(100% - 86px)}
+}
+@media(max-width:360px){
+  #unicos-modal-overlay{padding:6px}
+  #unicos-modal-overlay .modal-b{padding:7px}
+  #unicos-modal-overlay .unicos-summary{grid-template-columns:1fr}
+  #unicos-modal-overlay td::before{flex-basis:68px}
+  #unicos-modal-overlay td > *,#unicos-modal-overlay .badge{max-width:calc(100% - 78px)}
+}
 .print-header{display:none}
 .mode-tabs{display:flex;gap:6px;margin-bottom:12px}
 .mode-tab{font-family:'JetBrains Mono';font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:8px 14px;border-radius:3px;border:1px solid var(--line);background:var(--w);color:var(--ink2);cursor:pointer;transition:all .15s}
@@ -543,6 +582,16 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 <div id="print-db-section" style="display:none"></div>
 <footer style="max-width:1280px;margin:0 auto;padding:12px 14px;font-size:9px;color:var(--ink3);font-family:'JetBrains Mono';border-top:1px solid var(--line)">RDO - Painel de Mao de Obra</footer>
 <div id="toast"></div>
+<div id="unicos-modal-overlay" class="modal-overlay" onclick="if(event.target===this)closeUnicosModal()">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-h">
+      <div><h4 id="unicos-modal-title">🔄 Presença Única</h4><div class="mt2" id="unicos-modal-sub">—</div></div>
+      <button class="modal-close" onclick="closeUnicosModal()" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="modal-b" id="unicos-modal-body"></div>
+  </div>
+</div>
+
 <div id="print-modal-overlay" class="modal-overlay" onclick="if(event.target===this)closePrintModal()">
   <div class="modal-card" style="max-width:500px" role="dialog" aria-modal="true">
     <div class="modal-h" style="background:var(--blue)">
@@ -628,7 +677,6 @@ var SELECTED_DATE_IDX=0;
 var COLORS=['#2563EB','#D97706','#0D9F4F','#7C3AED','#DC2626','#0891B2','#DB2777','#65A30D','#EA580C','#0284C7'];
 var VIEW_MODE='single';
 var RANGE_SELECTED=new Set();
-var RANGE_UNICOS_ONLY=false;
 var rangeSortKey=null,rangeSortDir=1;
 
 function norm(s){return(s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim()}
@@ -932,20 +980,83 @@ function renderRangeKPIs2(days,agg){
     {i:'🔺',l:'Pico de efetivo',v:maxV,f:maxDay?maxDay.date:'—',c:'var(--green)'},
     {i:'🔻',l:'Menor efetivo',v:minV,f:minDay?minDay.date:'—',c:'var(--red)'},
     {i:'🎯',l:'Taxa de atividade',v:taxaAtividade+'%',f:'dias c/ atividade vs presenca',c:'var(--blue)'},
-    {i:'🔄',l:'Presenca unica',v:unicos,f:RANGE_UNICOS_ONLY?'filtro ativo · clique para limpar':'pessoas com so 1 dia no periodo',c:'#7C3AED',click:'toggleUnicosFilter()'}
+    {i:'🔄',l:'Presenca unica',v:unicos,f:'clique para ver as pessoas',c:'#7C3AED',click:'openUnicosModal()'}
   ].map(function(k){
-    var clickAttr=k.click?(' onclick="'+k.click+'" role="button" tabindex="0" title="Clique para filtrar pessoas com presença única"'):'';
-    var cls='kp'+(k.click?' kp-click':'')+(k.click&&RANGE_UNICOS_ONLY?' kp-filter-active':'');
+    var clickAttr=k.click?(' onclick="'+k.click+'" role="button" tabindex="0" title="Clique para ver as pessoas com presença única"'):'';
+    var cls='kp'+(k.click?' kp-click':'');
     return '<div class="'+cls+'" style="--kc:'+k.c+'"'+clickAttr+'><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div></div>';
   }).join('');
 }
 
-function toggleUnicosFilter(){
-  RANGE_UNICOS_ONLY=!RANGE_UNICOS_ONLY;
+function openUnicosModal(){
   var days=getRangeDays();
+  if(!days.length){toast('Selecione um ou mais dias no periodo','warn');return}
+
+  /* IMPORTANTE: a lista da tela deve usar EXATAMENTE a mesma regra do KPI.
+     Presença única = pessoa com diasPresente === 1 no período selecionado.
+     Antes o modal fazia apenas distinct(nome+empresa), por isso mostrava 120
+     pessoas mesmo quando o KPI informava 17. */
   var agg=computeRangeAgg(days);
-  renderRangeKPIs2(days,agg);
-  renderRangeTable();
+  var unicosAgg=agg.filter(function(p){return p.diasPresente===1});
+
+  /* Recupera os dados do único dia em que cada pessoa apareceu. */
+  var mapaDados={};
+  days.forEach(function(day){
+    day.all.forEach(function(p){
+      var key=norm(p.nome)+'|'+norm(p.empresa);
+      if(!mapaDados[key])mapaDados[key]=[];
+      mapaDados[key].push({
+        nome:p.nome,empresa:p.empresa,funcao:p.funcao,data:day.date,
+        pav:p.pav,atividade:p.atividade||p.atividadeRaw||''
+      });
+    });
+  });
+
+  var lista=unicosAgg.map(function(p){
+    var key=norm(p.nome)+'|'+norm(p.empresa);
+    var registro=(mapaDados[key]&&mapaDados[key][0])?mapaDados[key][0]:{};
+    return {
+      nome:p.nome,
+      empresa:p.empresa,
+      funcao:p.funcao,
+      data:registro.data||'—',
+      pav:registro.pav||'',
+      atividade:registro.atividade||''
+    };
+  });
+
+  lista.sort(function(a,b){return(a.nome||'').localeCompare(b.nome||'','pt-BR')});
+
+  var body=document.getElementById('unicos-modal-body');
+  document.getElementById('unicos-modal-title').textContent='🔄 Presença Única';
+  document.getElementById('unicos-modal-sub').textContent=days.length+' dia(s) selecionados · '+lista.length+' pessoa(s) presente(s) em apenas 1 dia';
+
+  if(!lista.length){
+    body.innerHTML='<div class="modal-empty">Nenhuma pessoa com presença única no período selecionado.</div>';
+  }else{
+    var empresas=uniq(lista.map(function(p){return p.empresa})).length;
+    var funcoes=uniq(lista.map(function(p){return p.funcao})).length;
+    body.innerHTML='<div class="unicos-summary">'+
+      '<div class="unicos-stat"><div class="us-k">Pessoas</div><div class="us-v">'+lista.length+'</div></div>'+
+      '<div class="unicos-stat"><div class="us-k">Empresas</div><div class="us-v">'+empresas+'</div></div>'+
+      '<div class="unicos-stat"><div class="us-k">Funções</div><div class="us-v">'+funcoes+'</div></div>'+
+    '</div>'+
+    '<div class="unicos-table-wrap"><table><thead><tr><th>Nome</th><th>Empresa</th><th>Função</th><th>Data</th><th>Pavimento</th><th>Atividade</th></tr></thead><tbody>'+
+    lista.map(function(p){return '<tr>'+
+      '<td data-label="Nome" style="font-weight:600">'+esc(p.nome)+'</td>'+
+      '<td data-label="Empresa"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
+      '<td data-label="Função" style="color:var(--ink2)">'+esc(p.funcao)+'</td>'+
+      '<td data-label="Data" style="font-family:JetBrains Mono">'+esc(p.data||'—')+'</td>'+
+      '<td data-label="Pavimento">'+pavBadge(p.pav)+'</td>'+
+      '<td data-label="Atividade" style="color:var(--ink2)">'+esc(p.atividade||'—')+'</td>'+
+    '</tr>'}).join('')+
+    '</tbody></table></div>';
+  }
+  document.getElementById('unicos-modal-overlay').classList.add('on');
+}
+
+function closeUnicosModal(){
+  document.getElementById('unicos-modal-overlay').classList.remove('on');
 }
 
 function aggregateAcrossDays(days,field){
@@ -958,7 +1069,6 @@ function getFilteredRangeAgg(){
   var q=norm(document.getElementById('rq').value),emp=document.getElementById('remp').value,func=document.getElementById('rfunc').value,pav=document.getElementById('rpav').value;
   var days=getRangeDays();var agg=computeRangeAgg(days);
   return agg.filter(function(p){
-    if(RANGE_UNICOS_ONLY&&p.diasPresente!==1)return false;
     if(emp&&p.empresa!==emp)return false;
     if(func&&p.funcao!==func)return false;
     if(pav&&!p.pavs[pav])return false;
@@ -977,7 +1087,7 @@ function renderRangeTable(){
   if(rangeSortKey==='nome'||rangeSortKey==='empresa'||rangeSortKey==='funcao')agg=agg.slice().sort(function(a,b){return(a[rangeSortKey]||'').localeCompare(b[rangeSortKey]||'','pt-BR')*rangeSortDir});
   else if(rangeSortKey)agg=agg.slice().sort(function(a,b){return((a[rangeSortKey]||0)-(b[rangeSortKey]||0))*rangeSortDir});
   else agg=agg.slice().sort(function(a,b){return b.diasPresente-a.diasPresente});
-  meta.textContent=days.length+' dia(s) selecionados · '+agg.length+' pessoa(s)'+(RANGE_UNICOS_ONLY?' · Presença única':'');
+  meta.textContent=days.length+' dia(s) selecionados · '+agg.length+' pessoa(s)';
   ct.textContent=agg.length+' registro(s)';
   var sk=rangeSortKey,sd=rangeSortDir;
   function th(label,key){return '<th onclick="setRangeSort(\''+key+'\')" class="'+(sk===key?(sd>0?'asc':'desc'):'')+'">'+label+'</th>'}
@@ -1231,7 +1341,7 @@ function closeEmpModal(){
   document.getElementById('emp-modal-overlay').classList.remove('on');
   document.getElementById('emp-modal-overlay').querySelector('.modal-h').style.background='';
 }
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeEmpModal();closePeopleModal();closePavModal();closePrintModal()}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeEmpModal();closePeopleModal();closePavModal();closeUnicosModal();closePrintModal()}});
 
 /* ═══════ MODAL POR PAVIMENTO → funções ═══════ */
 function openPavModal(pavKey){
