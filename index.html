@@ -58,6 +58,7 @@ input,select,button{-webkit-appearance:none;appearance:none}
 .kp.kp-click{cursor:pointer;transition:box-shadow .2s,transform .12s}
 .kp.kp-click:hover{box-shadow:0 6px 20px rgba(0,0,0,.13);transform:translateY(-2px)}
 .kp.kp-click:active{transform:translateY(0)}
+.kp.kp-filter-active{outline:2px solid var(--blue);outline-offset:-2px;background:var(--blueBg)}
 .kp.kp-click::after{content:'↗';position:absolute;top:8px;right:10px;font-size:10px;opacity:.35;font-family:'JetBrains Mono'}
 .kp::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:var(--kc,var(--navy))}
 .kp .ki{font-size:18px;margin-bottom:6px}
@@ -146,7 +147,120 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 .modal-close:hover{opacity:1}
 .modal-b{padding:16px 18px}
 .modal-empty{text-align:center;color:var(--ink3);font-size:12px;padding:20px 0}
-@media(max-width:480px){.modal-card{max-height:85vh}.modal-h{padding:11px 14px}.modal-h h4{font-size:13px}.modal-b{padding:12px 14px}}
+@media(max-width:640px){
+  /* Modal de faltosos/férias: layout em cartões no Android.
+     Evita 4 colunas espremidas e texto quebrando de forma ruim. */
+  #people-modal-overlay{padding:10px}
+  #people-modal-overlay .modal-card{
+    width:100%;
+    max-width:none!important;
+    max-height:calc(100vh - 20px);
+    border-radius:8px;
+  }
+  #people-modal-overlay .modal-h{
+    padding:12px 14px;
+    min-height:58px;
+  }
+  #people-modal-overlay .modal-h h4{
+    font-size:14px;
+    line-height:1.25;
+    padding-right:8px;
+  }
+  #people-modal-overlay .modal-h .mt2{
+    font-size:8px;
+    line-height:1.35;
+    white-space:normal;
+  }
+  #people-modal-overlay .modal-close{
+    width:36px;
+    height:36px;
+    min-width:36px;
+    padding:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+  }
+  #people-modal-overlay .modal-b{
+    padding:10px;
+    overflow-x:hidden;
+  }
+  #people-modal-overlay .people-modal-table{
+    width:100%!important;
+    border-collapse:separate!important;
+    border-spacing:0 7px!important;
+    font-size:12px!important;
+  }
+  #people-modal-overlay .people-modal-table thead{
+    display:none;
+  }
+  #people-modal-overlay .people-modal-table tbody,
+  #people-modal-overlay .people-modal-table tr{
+    display:block;
+    width:100%;
+  }
+  #people-modal-overlay .people-modal-table tr{
+    border:1px solid #E5E7EB;
+    border-radius:7px;
+    overflow:hidden;
+    background:#fff!important;
+    box-shadow:0 1px 2px rgba(0,0,0,.04);
+  }
+  #people-modal-overlay .people-modal-table td{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+    width:100%;
+    min-width:0!important;
+    padding:8px 9px!important;
+    border-bottom:1px solid #EEF2F6!important;
+    background:transparent!important;
+    text-align:right;
+    line-height:1.35;
+  }
+  #people-modal-overlay .people-modal-table td:last-child{
+    border-bottom:none!important;
+  }
+  #people-modal-overlay .people-modal-table td::before{
+    content:attr(data-label);
+    flex:0 0 88px;
+    text-align:left;
+    font-family:'JetBrains Mono';
+    font-size:8px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    color:#94A3B8;
+  }
+  #people-modal-overlay .people-modal-table td > *{
+    max-width:calc(100% - 98px);
+    overflow-wrap:anywhere;
+  }
+  #people-modal-overlay .people-modal-table td{
+    overflow-wrap:anywhere;
+  }
+  #people-modal-overlay .people-modal-table .badge{
+    white-space:normal;
+    text-align:right;
+    max-width:calc(100% - 98px);
+  }
+}
+@media(max-width:360px){
+  #people-modal-overlay{padding:6px}
+  #people-modal-overlay .modal-b{padding:7px}
+  #people-modal-overlay .people-modal-table td{
+    padding:7px!important;
+  }
+  #people-modal-overlay .people-modal-table td::before{
+    flex-basis:76px;
+  }
+  #people-modal-overlay .people-modal-table td > *,
+  #people-modal-overlay .people-modal-table .badge{
+    max-width:calc(100% - 84px);
+  }
+}
+
 .print-header{display:none}
 .mode-tabs{display:flex;gap:6px;margin-bottom:12px}
 .mode-tab{font-family:'JetBrains Mono';font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:8px 14px;border-radius:3px;border:1px solid var(--line);background:var(--w);color:var(--ink2);cursor:pointer;transition:all .15s}
@@ -163,20 +277,26 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   body{background:#fff!important;padding:0!important}
-  /* esconde absolutamente tudo... */
-  .topbar,.container,#toast,footer{display:none!important}
-  /* ...e mostra só o cabeçalho de impressão e a seção gerada */
-  .print-header{display:block!important;padding:10px 0 8px;border-bottom:3px solid var(--navy);margin-bottom:14px}
-  .print-header h1{font-family:'Space Grotesk';font-size:18px;font-weight:700;color:var(--navy)}
-  .print-header p{font-family:'JetBrains Mono';font-size:10px;color:#475569;margin-top:3px}
-  #print-db-section{display:block!important;padding:0 7mm}
-  #print-db-section .cd{border:1px solid #ccc!important;margin-bottom:10px;page-break-inside:auto}
-  #print-db-section .cd-h{background:#f0f2f5!important;padding:8px 12px!important}
-  #print-db-section .cd-h h3{font-size:12px!important}
-  #print-db-section table.t{min-width:0!important;width:100%}
-  #print-db-section table.t th{background:#2a3f5f!important;position:static!important;font-size:8px!important;padding:5px 8px!important}
-  #print-db-section table.t td{padding:4px 8px!important;font-size:9px!important;border-bottom:1px solid #EEF2F6!important}
-  #print-db-section table.t tr{page-break-inside:avoid}
+
+  /* Ctrl+P: imprime a pagina que esta na tela. */
+  .topbar,#toast,footer,.modal-overlay{display:none!important}
+  .container{display:block!important;max-width:100%!important;padding:0 7mm!important}
+  .print-header{display:none!important}
+  #print-db-section{display:none!important}
+
+  /* Botao Imprimir: usa a tabela especialmente montada. */
+  body.custom-print .container{display:none!important}
+  body.custom-print .print-header{display:block!important;padding:10px 0 8px;border-bottom:3px solid var(--navy);margin-bottom:14px}
+  body.custom-print .print-header h1{font-family:'Space Grotesk';font-size:18px;font-weight:700;color:var(--navy)}
+  body.custom-print .print-header p{font-family:'JetBrains Mono';font-size:10px;color:#475569;margin-top:3px}
+  body.custom-print #print-db-section{display:block!important;padding:0 7mm}
+  body.custom-print #print-db-section .cd{border:1px solid #ccc!important;margin-bottom:10px;page-break-inside:auto}
+  body.custom-print #print-db-section .cd-h{background:#f0f2f5!important;padding:8px 12px!important}
+  body.custom-print #print-db-section .cd-h h3{font-size:12px!important}
+  body.custom-print #print-db-section table.t{min-width:0!important;width:100%}
+  body.custom-print #print-db-section table.t th{background:#2a3f5f!important;position:static!important;font-size:8px!important;padding:5px 8px!important}
+  body.custom-print #print-db-section table.t td{padding:4px 8px!important;font-size:9px!important;border-bottom:1px solid #EEF2F6!important}
+  body.custom-print #print-db-section table.t tr{page-break-inside:avoid}
   @page{size:A4 portrait;margin:10mm 0 12mm 0}
 }
 @media(max-width:900px){.gg{grid-template-columns:1fr}.bar-label{min-width:100px;max-width:100px}}
@@ -508,6 +628,7 @@ var SELECTED_DATE_IDX=0;
 var COLORS=['#2563EB','#D97706','#0D9F4F','#7C3AED','#DC2626','#0891B2','#DB2777','#65A30D','#EA580C','#0284C7'];
 var VIEW_MODE='single';
 var RANGE_SELECTED=new Set();
+var RANGE_UNICOS_ONLY=false;
 var rangeSortKey=null,rangeSortDir=1;
 
 function norm(s){return(s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim()}
@@ -811,8 +932,20 @@ function renderRangeKPIs2(days,agg){
     {i:'🔺',l:'Pico de efetivo',v:maxV,f:maxDay?maxDay.date:'—',c:'var(--green)'},
     {i:'🔻',l:'Menor efetivo',v:minV,f:minDay?minDay.date:'—',c:'var(--red)'},
     {i:'🎯',l:'Taxa de atividade',v:taxaAtividade+'%',f:'dias c/ atividade vs presenca',c:'var(--blue)'},
-    {i:'🔄',l:'Presenca unica',v:unicos,f:'pessoas com so 1 dia no periodo',c:'#7C3AED'}
-  ].map(function(k){return '<div class="kp" style="--kc:'+k.c+'"><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div></div>'}).join('');
+    {i:'🔄',l:'Presenca unica',v:unicos,f:RANGE_UNICOS_ONLY?'filtro ativo · clique para limpar':'pessoas com so 1 dia no periodo',c:'#7C3AED',click:'toggleUnicosFilter()'}
+  ].map(function(k){
+    var clickAttr=k.click?(' onclick="'+k.click+'" role="button" tabindex="0" title="Clique para filtrar pessoas com presença única"'):'';
+    var cls='kp'+(k.click?' kp-click':'')+(k.click&&RANGE_UNICOS_ONLY?' kp-filter-active':'');
+    return '<div class="'+cls+'" style="--kc:'+k.c+'"'+clickAttr+'><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div></div>';
+  }).join('');
+}
+
+function toggleUnicosFilter(){
+  RANGE_UNICOS_ONLY=!RANGE_UNICOS_ONLY;
+  var days=getRangeDays();
+  var agg=computeRangeAgg(days);
+  renderRangeKPIs2(days,agg);
+  renderRangeTable();
 }
 
 function aggregateAcrossDays(days,field){
@@ -825,6 +958,7 @@ function getFilteredRangeAgg(){
   var q=norm(document.getElementById('rq').value),emp=document.getElementById('remp').value,func=document.getElementById('rfunc').value,pav=document.getElementById('rpav').value;
   var days=getRangeDays();var agg=computeRangeAgg(days);
   return agg.filter(function(p){
+    if(RANGE_UNICOS_ONLY&&p.diasPresente!==1)return false;
     if(emp&&p.empresa!==emp)return false;
     if(func&&p.funcao!==func)return false;
     if(pav&&!p.pavs[pav])return false;
@@ -843,7 +977,7 @@ function renderRangeTable(){
   if(rangeSortKey==='nome'||rangeSortKey==='empresa'||rangeSortKey==='funcao')agg=agg.slice().sort(function(a,b){return(a[rangeSortKey]||'').localeCompare(b[rangeSortKey]||'','pt-BR')*rangeSortDir});
   else if(rangeSortKey)agg=agg.slice().sort(function(a,b){return((a[rangeSortKey]||0)-(b[rangeSortKey]||0))*rangeSortDir});
   else agg=agg.slice().sort(function(a,b){return b.diasPresente-a.diasPresente});
-  meta.textContent=days.length+' dia(s) selecionados · '+agg.length+' pessoa(s)';
+  meta.textContent=days.length+' dia(s) selecionados · '+agg.length+' pessoa(s)'+(RANGE_UNICOS_ONLY?' · Presença única':'');
   ct.textContent=agg.length+' registro(s)';
   var sk=rangeSortKey,sd=rangeSortDir;
   function th(label,key){return '<th onclick="setRangeSort(\''+key+'\')" class="'+(sk===key?(sd>0?'asc':'desc'):'')+'">'+label+'</th>'}
@@ -985,8 +1119,17 @@ function executePrint(){
   }
   h+='</tbody></table></div>';
   var sec=document.getElementById('print-db-section');
-  sec.innerHTML=h;sec.style.display='block';closePrintModal();
-  requestAnimationFrame(function(){window.print();setTimeout(function(){sec.style.display='none'},500);});
+  sec.innerHTML=h;
+  sec.style.display='block';
+  document.body.classList.add('custom-print');
+  closePrintModal();
+  requestAnimationFrame(function(){
+    window.print();
+    setTimeout(function(){
+      sec.style.display='none';
+      document.body.classList.remove('custom-print');
+    },500);
+  });
 }
 
 /* ═══════ RENDERING (single day) ═══════ */
@@ -1138,7 +1281,7 @@ function openPavModal(pavKey){
         '<div class="bar-row" style="margin-bottom:4px">'+
           '<span class="bar-label" title="'+esc(f)+'">'+esc(f)+'</span>'+
           '<div class="bar-track"><div class="bar-fill" style="width:'+barW+'%;background:'+corPav+'"></div></div>'+
-          '<span class="bar-val">'+atv+'/'+cnt+'</span>'+
+          '<span class="bar-val">'+cnt+'</span>'+
         '</div>'+
         '<div style="padding-left:148px;line-height:1.8">'+nomesHtml+'</div>'+
       '</div>';
@@ -1172,7 +1315,7 @@ function openPeopleModal(tipo){
     if(!lista.length){
       body.innerHTML='<div class="modal-empty">Nenhuma pessoa de férias ou afastada neste dia.</div>';
     }else{
-      body.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:12px">'+
+      body.innerHTML='<table class="people-modal-table" style="width:100%;border-collapse:collapse;font-size:12px">'+
         '<thead><tr>'+
         '<th style="text-align:left;padding:8px 10px;background:#FEF3C7;color:#92400E;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Nome</th>'+
         '<th style="text-align:left;padding:8px 10px;background:#FEF3C7;color:#92400E;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Função</th>'+
@@ -1182,10 +1325,10 @@ function openPeopleModal(tipo){
         lista.map(function(p,i){
           var bg=i%2===0?'#fff':'#FFFBEB';
           return '<tr style="background:'+bg+'">'+
-            '<td style="padding:8px 10px;font-weight:600;border-bottom:1px solid #FEF3C7">'+esc(p.nome)+'</td>'+
-            '<td style="padding:8px 10px;color:#92400E;border-bottom:1px solid #FEF3C7">'+esc(p.funcao)+'</td>'+
-            '<td style="padding:8px 10px;border-bottom:1px solid #FEF3C7"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
-            '<td style="padding:8px 10px;border-bottom:1px solid #FEF3C7"><span class="badge badge-ferias">'+esc(p.motivo||'FÉRIAS')+'</span></td>'+
+            '<td data-label="Nome" style="padding:8px 10px;font-weight:600;border-bottom:1px solid #FEF3C7">'+esc(p.nome)+'</td>'+
+            '<td data-label="Função" style="padding:8px 10px;color:#92400E;border-bottom:1px solid #FEF3C7">'+esc(p.funcao)+'</td>'+
+            '<td data-label="Empresa" style="padding:8px 10px;border-bottom:1px solid #FEF3C7"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
+            '<td data-label="Motivo" style="padding:8px 10px;border-bottom:1px solid #FEF3C7"><span class="badge badge-ferias">'+esc(p.motivo||'FÉRIAS')+'</span></td>'+
           '</tr>';
         }).join('')+
         '</tbody></table>';
@@ -1199,7 +1342,7 @@ function openPeopleModal(tipo){
     if(!faltososList.length){
       body.innerHTML='<div class="modal-empty">Nenhum faltoso neste dia. 👍</div>';
     }else{
-      body.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:12px">'+
+      body.innerHTML='<table class="people-modal-table" style="width:100%;border-collapse:collapse;font-size:12px">'+
         '<thead><tr>'+
         '<th style="text-align:left;padding:8px 10px;background:#FEE2E2;color:#991B1B;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Nome</th>'+
         '<th style="text-align:left;padding:8px 10px;background:#FEE2E2;color:#991B1B;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Função</th>'+
@@ -1209,10 +1352,10 @@ function openPeopleModal(tipo){
         faltososList.map(function(p,i){
           var bg=i%2===0?'#fff':'#FFF5F5';
           return '<tr style="background:'+bg+'">'+
-            '<td style="padding:8px 10px;font-weight:600;color:#B91C1C;border-bottom:1px solid #FEE2E2">'+esc(p.nome)+'</td>'+
-            '<td style="padding:8px 10px;color:#991B1B;border-bottom:1px solid #FEE2E2">'+esc(p.funcao)+'</td>'+
-            '<td style="padding:8px 10px;border-bottom:1px solid #FEE2E2"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
-            '<td style="padding:8px 10px;border-bottom:1px solid #FEE2E2;color:var(--ink3);font-size:11px;font-style:italic">'+esc(p.atividadeRaw||'—')+'</td>'+
+            '<td data-label="Nome" style="padding:8px 10px;font-weight:600;color:#B91C1C;border-bottom:1px solid #FEE2E2">'+esc(p.nome)+'</td>'+
+            '<td data-label="Função" style="padding:8px 10px;color:#991B1B;border-bottom:1px solid #FEE2E2">'+esc(p.funcao)+'</td>'+
+            '<td data-label="Empresa" style="padding:8px 10px;border-bottom:1px solid #FEE2E2"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
+            '<td data-label="Reg. Atividade" style="padding:8px 10px;border-bottom:1px solid #FEE2E2;color:var(--ink3);font-size:11px;font-style:italic">'+esc(p.atividadeRaw||'—')+'</td>'+
           '</tr>';
         }).join('')+
         '</tbody></table>';
