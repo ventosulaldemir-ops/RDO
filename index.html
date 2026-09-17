@@ -91,8 +91,6 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 .badge-red{background:var(--redBg);color:#991B1B}
 .badge-gray{background:#F1F5F9;color:var(--ink2);border:1px solid var(--line)}
 .badge-ferias{background:#FEF3C7;color:#92400E}
-.badge-ativo{background:var(--greenBg);color:#065F46}
-.badge-semativ{background:#F1F5F9;color:var(--ink3);border:1px solid var(--line)}
 .badge-pav-terreo{background:#DBEAFE;color:#1E40AF;border:1px solid #93C5FD}
 .badge-pav-1{background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7}
 .badge-pav-2{background:#FEF3C7;color:#92400E;border:1px solid #FCD34D}
@@ -107,24 +105,21 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 .bar-track{flex:1;height:18px;background:var(--paper);border-radius:3px;overflow:hidden;position:relative}
 .bar-fill{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.22,1,.36,1)}
 .bar-val{font-family:'JetBrains Mono';font-size:11px;font-weight:700;min-width:28px;color:var(--navy)}
-.bar-pct{font-family:'JetBrains Mono';font-size:9px;color:var(--ink3);min-width:36px}
 .chart-wrap{padding:14px;overflow-x:hidden}
 .chart-wrap svg{display:block;width:100%;max-width:100%;height:auto;max-height:250px}
-@media(max-width:640px){.chart-wrap{padding:8px 6px}.chart-wrap svg{max-height:140px;max-width:100vw}}
-.err-box{margin:16px;padding:14px 16px;background:var(--redBg);border:1px solid #FCA5A5;border-radius:4px;font-family:'JetBrains Mono';font-size:11px;color:var(--red);line-height:1.7}
-.err-box b{display:block;margin-bottom:4px}
-.err-box a{color:var(--red);text-decoration:underline}
-#toast{position:fixed;bottom:calc(var(--safe-b) + 14px);left:14px;right:14px;z-index:200;display:none;padding:12px 18px;border-radius:6px;font-family:'JetBrains Mono';font-size:11px;font-weight:700;color:#fff;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:480px;margin:0 auto}
 .bar-row-click{cursor:pointer;border-radius:4px;padding:2px 4px;margin:0 -4px 6px;transition:background .12s}
 .bar-row-click:hover{background:#F1F5F9}
 .bar-row-click:hover .bar-label{color:var(--navy)}
 .bar-row-click .bar-label{transition:color .12s}
+.err-box{margin:16px;padding:14px 16px;background:var(--redBg);border:1px solid #FCA5A5;border-radius:4px;font-family:'JetBrains Mono';font-size:11px;color:var(--red);line-height:1.7}
+.err-box b{display:block;margin-bottom:4px}
+.err-box a{color:var(--red);text-decoration:underline}
+#toast{position:fixed;bottom:calc(var(--safe-b) + 14px);left:14px;right:14px;z-index:200;display:none;padding:12px 18px;border-radius:6px;font-family:'JetBrains Mono';font-size:11px;font-weight:700;color:#fff;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:480px;margin:0 auto}
 
 /* ===== UI EXPANSIVA — EMPRESA / LOCAL / CARGO ===== */
 .accordion-group{border:1px solid #E5EAF0;border-radius:10px;overflow:hidden;margin:0 0 10px;background:#fff;box-shadow:0 2px 8px rgba(11,29,51,.05)}
 .accordion-head{display:flex;align-items:center;gap:9px;padding:10px 11px;cursor:pointer;background:linear-gradient(180deg,#fff,#F8FAFC);transition:.15s}
-.accordion-head:hover{background:#F1F5F9}
-.accordion-head.open{background:#F1F5F9}
+.accordion-head:hover,.accordion-head.open{background:#F1F5F9}
 .accordion-arrow{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;background:#EAF0F6;color:#486176;font-size:10px;transition:transform .16s;flex:none}
 .accordion-head.open .accordion-arrow{transform:rotate(90deg);background:#DCE8F3;color:#0B1D33}
 .accordion-title{font-family:'Space Grotesk';font-size:12px;font-weight:700;color:var(--ink);min-width:92px;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -143,10 +138,20 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 .local-stat{padding:9px;border:1px solid #E6EBF0;border-radius:8px;background:#F8FAFC}
 .local-stat b{display:block;font-family:'JetBrains Mono';font-size:15px;color:var(--navy)}
 .local-stat span{font-size:9px;color:var(--ink3)}
-.modal-card{max-width:540px}
-@media(max-width:520px){.accordion-title{min-width:70px;max-width:105px}.accordion-hint{display:none}.person-activity{display:none}.local-summary{grid-template-columns:repeat(3,1fr)}}
+
 .modal-overlay{position:fixed;inset:0;background:rgba(11,29,51,.62);z-index:99999;display:none;align-items:center;justify-content:center;padding:16px;isolation:isolate;overflow:hidden}
 .modal-overlay.on{display:flex}
+.modal-card{position:relative;z-index:1;background:#fff;border-radius:6px;max-width:420px;width:100%;max-height:80vh;overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:0 20px 60px rgba(0,0,0,.35);animation:modalIn .15s ease;isolation:isolate}
+@keyframes modalIn{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.modal-h{padding:14px 18px;background:var(--navy);color:#fff;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-radius:6px 6px 0 0;position:sticky;top:0;z-index:5;overflow:hidden;min-width:0}
+.modal-h > div:first-child{flex:1 1 auto;min-width:0;display:block}
+.modal-h h4{font-family:'Space Grotesk';font-size:15px;font-weight:700;line-height:1.25;margin:0;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.modal-h .mt2{display:block;min-width:0;white-space:normal;font-family:'JetBrains Mono';font-size:9px;color:#8BADC4;margin-top:3px;letter-spacing:.02em}
+.modal-close{background:transparent;border:none;color:#fff;font-size:20px;cursor:pointer;padding:2px 6px;line-height:1;opacity:.75;border-radius:3px;transition:opacity .12s;flex:0 0 auto;position:relative;z-index:2}
+.modal-close:hover{opacity:1}
+.modal-b{padding:16px 18px}
+.modal-empty{text-align:center;color:var(--ink3);font-size:12px;padding:20px 0}
+
 /* ── modal de impressão ── */
 .pm-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
 .pm-row:last-child{border-bottom:none}
@@ -163,127 +168,74 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 .pm-chip-label.on{background:var(--navy);color:#fff;border-color:var(--navy)}
 .pm-selall{font-family:'JetBrains Mono';font-size:9px;color:var(--blue);cursor:pointer;text-decoration:underline;margin-left:4px}
 .pm-selall:hover{color:var(--navy)}
-.modal-card{position:relative;z-index:1;background:#fff;border-radius:6px;max-width:420px;width:100%;max-height:80vh;overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:0 20px 60px rgba(0,0,0,.35);animation:modalIn .15s ease;isolation:isolate}
-@keyframes modalIn{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
-.modal-h{padding:14px 18px;background:var(--navy);color:#fff;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-radius:6px 6px 0 0;position:sticky;top:0;z-index:5;overflow:hidden;min-width:0}
-.modal-h > div:first-child{flex:1 1 auto;min-width:0;display:block}.modal-h h4{font-family:'Space Grotesk';font-size:15px;font-weight:700;line-height:1.25;margin:0;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.modal-h .mt2{display:block;min-width:0;white-space:normal}
-.modal-h .mt2{font-family:'JetBrains Mono';font-size:9px;color:#8BADC4;margin-top:3px;letter-spacing:.02em}
-.modal-close{background:transparent;border:none;color:#fff;font-size:20px;cursor:pointer;padding:2px 6px;line-height:1;opacity:.75;border-radius:3px;transition:opacity .12s;flex:0 0 auto;position:relative;z-index:2}
-.modal-close:hover{opacity:1}
-.modal-b{padding:16px 18px}
-.modal-empty{text-align:center;color:var(--ink3);font-size:12px;padding:20px 0}
+
+/* ═══ Modal genérico para Empresa/Pavimento/Local — 3 classes, sem duplicar CSS ═══ */
+#emp-modal-overlay .modal-card{max-width:700px;width:min(700px,calc(100vw - 24px));max-height:86vh;border-radius:10px}
+#emp-modal-overlay .modal-h{padding:15px 18px;min-height:64px}
+#emp-modal-overlay .modal-h h4{font-size:16px;line-height:1.2}
+#emp-modal-overlay .modal-b{padding:12px 14px}
+#emp-modal-overlay .accordion-head{grid-template-columns:28px minmax(140px,1fr) 150px 52px 30px}
+#emp-modal-overlay .accordion-title{font-size:12px}
+#emp-modal-overlay .accordion-body{padding:5px 10px 7px 44px}
+#emp-modal-overlay .person-row{display:grid;grid-template-columns:8px minmax(150px,1.15fr) minmax(0,1fr) auto;align-items:center;min-height:42px;padding:8px 5px;gap:9px}
+#emp-modal-overlay .person-name{font-size:12px;font-weight:700;min-width:0;overflow:visible;text-overflow:clip;white-space:nowrap}
+#emp-modal-overlay .person-name:hover{white-space:normal;overflow-wrap:anywhere}
+#emp-modal-overlay .person-activity{display:block;min-width:0;max-width:none;font-size:10px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#emp-modal-overlay .person-row:not(.pav-person-row) .person-activity{display:none!important}
+#emp-modal-overlay .person-row .badge{white-space:nowrap;flex:none}
+#emp-modal-overlay .pav-person-row{grid-template-columns:8px minmax(155px,1.1fr) minmax(180px,1fr) auto}
+#emp-modal-overlay .pav-person-row .person-activity{font-size:10px;color:var(--ink2);line-height:1.3}
+#emp-modal-overlay .accordion-hint{font-size:8px}
+
 @media(max-width:640px){
-  /* Modal de faltosos/férias: layout em cartões no Android.
-     Evita 4 colunas espremidas e texto quebrando de forma ruim. */
+  #emp-modal-overlay{padding:8px}
+  #emp-modal-overlay .modal-card{width:calc(100vw - 16px);max-width:none!important;max-height:calc(100vh - 16px)}
+  #emp-modal-overlay .modal-h{padding:12px 14px;min-height:68px;align-items:center;gap:10px}
+  #emp-modal-overlay .modal-h > div:first-child{min-width:0;flex:1 1 auto}
+  #emp-modal-overlay .modal-h h4{font-size:15px;line-height:1.2;margin:0 0 4px}
+  #emp-modal-overlay .modal-h .mt2{font-size:8px;line-height:1.35;margin:0;white-space:normal;overflow-wrap:anywhere}
+}
+@media(max-width:560px){
+  #emp-modal-overlay .modal-card{width:calc(100vw - 16px);max-height:90vh}
+  #emp-modal-overlay .accordion-head{grid-template-columns:28px minmax(100px,1fr) 46px 28px}
+  #emp-modal-overlay .accordion-bar{display:none}
+  #emp-modal-overlay .accordion-body{padding-left:34px}
+  #emp-modal-overlay .person-row{grid-template-columns:8px minmax(115px,1fr) auto;gap:7px}
+  #emp-modal-overlay .person-row .badge-gray{display:none}
+  #emp-modal-overlay .person-name{font-size:11px}
+  #emp-modal-overlay .pav-person-row{grid-template-columns:8px minmax(105px,1fr) minmax(120px,1.1fr) auto}
+  #emp-modal-overlay .pav-person-row .person-activity{display:block!important;font-size:9px;white-space:normal;line-height:1.25;max-height:2.5em;overflow:hidden}
+  #emp-modal-overlay .pav-person-row .badge{font-size:8px;padding:4px 6px}
+  #emp-modal-overlay .accordion-count{font-size:9px}
+}
+
+/* Modal de Faltosos / Férias (people-modal) */
+@media(max-width:640px){
   #people-modal-overlay{padding:10px}
-  #people-modal-overlay .modal-card{
-    width:100%;
-    max-width:none!important;
-    max-height:calc(100vh - 20px);
-    border-radius:8px;
-  }
-  #people-modal-overlay .modal-h{
-    padding:12px 14px;
-    min-height:58px;
-  }
-  #people-modal-overlay .modal-h h4{
-    font-size:14px;
-    line-height:1.25;
-    padding-right:8px;
-  }
-  #people-modal-overlay .modal-h .mt2{
-    font-size:8px;
-    line-height:1.35;
-    white-space:normal;
-  }
-  #people-modal-overlay .modal-close{
-    width:36px;
-    height:36px;
-    min-width:36px;
-    padding:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:22px;
-  }
-  #people-modal-overlay .modal-b{
-    padding:10px;
-    overflow-x:hidden;
-  }
-  #people-modal-overlay .people-modal-table{
-    width:100%!important;
-    border-collapse:separate!important;
-    border-spacing:0 7px!important;
-    font-size:12px!important;
-  }
-  #people-modal-overlay .people-modal-table thead{
-    display:none;
-  }
+  #people-modal-overlay .modal-card{width:100%;max-width:none!important;max-height:calc(100vh - 20px);border-radius:8px}
+  #people-modal-overlay .modal-h{padding:12px 14px;min-height:58px}
+  #people-modal-overlay .modal-h h4{font-size:14px;line-height:1.25;padding-right:8px}
+  #people-modal-overlay .modal-h .mt2{font-size:8px;line-height:1.35;white-space:normal}
+  #people-modal-overlay .modal-close{width:36px;height:36px;min-width:36px;padding:0;display:flex;align-items:center;justify-content:center;font-size:22px}
+  #people-modal-overlay .modal-b{padding:10px;overflow-x:hidden}
+  #people-modal-overlay .people-modal-table{width:100%!important;border-collapse:separate!important;border-spacing:0 7px!important;font-size:12px!important}
+  #people-modal-overlay .people-modal-table thead{display:none}
   #people-modal-overlay .people-modal-table tbody,
-  #people-modal-overlay .people-modal-table tr{
-    display:block;
-    width:100%;
-  }
-  #people-modal-overlay .people-modal-table tr{
-    border:1px solid #E5E7EB;
-    border-radius:7px;
-    overflow:hidden;
-    background:#fff!important;
-    box-shadow:0 1px 2px rgba(0,0,0,.04);
-  }
-  #people-modal-overlay .people-modal-table td{
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:10px;
-    width:100%;
-    min-width:0!important;
-    padding:8px 9px!important;
-    border-bottom:1px solid #EEF2F6!important;
-    background:transparent!important;
-    text-align:right;
-    line-height:1.35;
-  }
-  #people-modal-overlay .people-modal-table td:last-child{
-    border-bottom:none!important;
-  }
-  #people-modal-overlay .people-modal-table td::before{
-    content:attr(data-label);
-    flex:0 0 88px;
-    text-align:left;
-    font-family:'JetBrains Mono';
-    font-size:8px;
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:.04em;
-    color:#94A3B8;
-  }
-  #people-modal-overlay .people-modal-table td > *{
-    max-width:calc(100% - 98px);
-    overflow-wrap:anywhere;
-  }
-  #people-modal-overlay .people-modal-table td{
-    overflow-wrap:anywhere;
-  }
-  #people-modal-overlay .people-modal-table .badge{
-    white-space:normal;
-    text-align:right;
-    max-width:calc(100% - 98px);
-  }
+  #people-modal-overlay .people-modal-table tr{display:block;width:100%}
+  #people-modal-overlay .people-modal-table tr{border:1px solid #E5E7EB;border-radius:7px;overflow:hidden;background:#fff!important;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  #people-modal-overlay .people-modal-table td{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;width:100%;min-width:0!important;padding:8px 9px!important;border-bottom:1px solid #EEF2F6!important;background:transparent!important;text-align:right;line-height:1.35;overflow-wrap:anywhere}
+  #people-modal-overlay .people-modal-table td:last-child{border-bottom:none!important}
+  #people-modal-overlay .people-modal-table td::before{content:attr(data-label);flex:0 0 88px;text-align:left;font-family:'JetBrains Mono';font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#94A3B8}
+  #people-modal-overlay .people-modal-table td > *{max-width:calc(100% - 98px);overflow-wrap:anywhere}
+  #people-modal-overlay .people-modal-table .badge{white-space:normal;text-align:right;max-width:calc(100% - 98px)}
 }
 @media(max-width:360px){
   #people-modal-overlay{padding:6px}
   #people-modal-overlay .modal-b{padding:7px}
-  #people-modal-overlay .people-modal-table td{
-    padding:7px!important;
-  }
-  #people-modal-overlay .people-modal-table td::before{
-    flex-basis:76px;
-  }
+  #people-modal-overlay .people-modal-table td{padding:7px!important}
+  #people-modal-overlay .people-modal-table td::before{flex-basis:76px}
   #people-modal-overlay .people-modal-table td > *,
-  #people-modal-overlay .people-modal-table .badge{
-    max-width:calc(100% - 84px);
-  }
+  #people-modal-overlay .people-modal-table .badge{max-width:calc(100% - 84px)}
 }
 
 /* Modal de Presença Única */
@@ -308,7 +260,7 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
   #unicos-modal-overlay .unicos-summary{grid-template-columns:1fr 1fr;gap:6px;flex-shrink:0}
   #unicos-modal-overlay .unicos-stat{padding:8px}
   #unicos-modal-overlay .unicos-stat .us-v{font-size:17px}
-  #unicos-modal-overlay .unicos-table-wrap{max-height:none;overflow:auto;flex:1;min-height:0;-webkit-overflow-scrolling:touch}
+  #unicos-modal-overlay .unicos-table-wrap{max-height:none;overflow:auto;flex:1;min-height:0}
   #unicos-modal-overlay table{width:100%;min-width:0;border-collapse:separate;border-spacing:0 7px;font-size:11px}
   #unicos-modal-overlay thead{display:none}
   #unicos-modal-overlay tbody{display:block;width:100%}
@@ -326,6 +278,7 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
   #unicos-modal-overlay td::before{flex-basis:68px}
   #unicos-modal-overlay td > *,#unicos-modal-overlay .badge{max-width:calc(100% - 78px)}
 }
+
 .print-header{display:none}
 .mode-tabs{display:flex;gap:6px;margin-bottom:12px}
 .mode-tab{font-family:'JetBrains Mono';font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:8px 14px;border-radius:3px;border:1px solid var(--line);background:var(--w);color:var(--ink2);cursor:pointer;transition:all .15s}
@@ -339,17 +292,14 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 .range-summary{font-family:'JetBrains Mono';font-size:10px;color:var(--ink3);margin-top:8px}
 .prod-list{font-size:10px;color:var(--ink2);line-height:1.6}
 .prod-list .pd{white-space:nowrap;font-family:'JetBrains Mono';color:var(--ink3);font-weight:700;margin-right:4px}
+
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   body{background:#fff!important;padding:0!important}
-
-  /* Ctrl+P: imprime a pagina que esta na tela. */
   .topbar,#toast,footer,.modal-overlay{display:none!important}
   .container{display:block!important;max-width:100%!important;padding:0 7mm!important}
   .print-header{display:none!important}
   #print-db-section{display:none!important}
-
-  /* Botao Imprimir: usa a tabela especialmente montada. */
   body.custom-print .container{display:none!important}
   body.custom-print .print-header{display:block!important;padding:10px 0 8px;border-bottom:3px solid var(--navy);margin-bottom:14px}
   body.custom-print .print-header h1{font-family:'Space Grotesk';font-size:18px;font-weight:700;color:var(--navy)}
@@ -364,21 +314,15 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
   body.custom-print #print-db-section table.t tr{page-break-inside:avoid}
   @page{size:A4 portrait;margin:10mm 0 12mm 0}
 }
+
 @media(max-width:900px){.gg{grid-template-columns:1fr}.bar-label{min-width:100px;max-width:100px}}
-
-/* ═══ Scroll-fade hint for horizontally scrollable tables (mobile) ═══ */
 .cd-b.can-scroll::after{content:'';position:sticky;top:0;right:0;float:right;width:18px;height:100%;margin-left:-18px;pointer-events:none;background:linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,.9));display:block}
-
-@media(max-width:640px){
-  table.t th{top:var(--topbar-h,52px)}
-  .kr{grid-template-columns:repeat(2,1fr)}
-  .chart-wrap svg{max-height:140px}
-}
+@media(max-width:640px){table.t th{top:var(--topbar-h,52px)}.kr{grid-template-columns:repeat(2,1fr)}.chart-wrap{padding:8px 6px}.chart-wrap svg{max-height:140px;max-width:100vw}}
 
 @media(max-width:480px){
   html{scroll-padding-top:52px}
   body{overflow-x:hidden}
-  #btn-print,#btn-export{display:none}
+  #btn-print{display:none}
   .topbar-in{height:44px;flex-wrap:nowrap}
   .brand h1{font-size:12px}
   .brand small{font-size:7.5px}
@@ -409,19 +353,16 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
   .date-bar .date-nav button{flex:1;min-height:34px;font-size:15px}
   .mode-tabs{gap:3px;margin-bottom:7px}
   .mode-tab{flex:1;text-align:center;padding:6px 3px;font-size:8.5px}
-  .gg,.g2{grid-template-columns:1fr}
+  .gg{grid-template-columns:1fr}
   .bar-row{display:block;margin-bottom:7px;width:100%}
   .bar-label{display:block;font-size:9px;color:var(--ink);font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
   .bar-track{display:block;width:100%;height:11px;margin-bottom:0}
   .bar-val{display:inline-block;font-size:9px;font-weight:700;color:var(--navy);margin-top:1px}
-  .bar-pct{display:none}
   #emp-bars,#func-bars,#pav-bars,#reg-bars{padding:6px 10px!important;display:block;width:100%;box-sizing:border-box}
   .chart-wrap{padding:5px 3px;overflow:hidden}
   .chart-wrap svg{width:100%;max-width:100%;height:auto;max-height:130px;display:block}
   .em{padding:10px;font-size:10px}
   .badge{font-size:7.5px;padding:1px 4px}
-
-  /* ═══ Tabelas viram "cartões" empilhados no celular — nada de rolagem horizontal ═══ */
   .cd-b{overflow-x:hidden!important}
   .cd-b.can-scroll::after{display:none!important}
   table.t{min-width:0!important;width:100%;display:block}
@@ -446,47 +387,164 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
   .btn span.btn-label{display:none}
   .btn{padding:8px;min-width:36px;justify-content:center}
 }
+</style>
 
-/* ===== AJUSTE VISUAL FINAL: nomes legíveis nas listas expansíveis ===== */
-#emp-modal-overlay .modal-card{max-width:700px;width:min(700px,calc(100vw - 24px));max-height:86vh;border-radius:10px}
-#emp-modal-overlay .modal-h{padding:15px 18px;min-height:64px}
-#emp-modal-overlay .modal-h h4{font-size:16px;line-height:1.2}
-#emp-modal-overlay .modal-b{padding:12px 14px}
-#emp-modal-overlay .accordion-head{grid-template-columns:28px minmax(140px,1fr) 150px 52px 30px}
-#emp-modal-overlay .accordion-title{font-size:12px}
-#emp-modal-overlay .accordion-body{padding:5px 10px 7px 44px}
-#emp-modal-overlay .person-row{display:grid;grid-template-columns:8px minmax(150px,1.15fr) minmax(0,1fr) auto;align-items:center;min-height:42px;padding:8px 5px;gap:9px}
-#emp-modal-overlay .person-name{font-size:12px;font-weight:700;min-width:0;overflow:visible;text-overflow:clip;white-space:nowrap}
-#emp-modal-overlay .person-name:hover{white-space:normal;overflow-wrap:anywhere}
-#emp-modal-overlay .person-activity{display:block;min-width:0;max-width:none;font-size:10px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#emp-modal-overlay .person-row:not(.pav-person-row) .person-activity{display:none!important}
-#emp-modal-overlay .person-row .badge{white-space:nowrap;flex:none}
-#emp-modal-overlay .pav-person-row{grid-template-columns:8px minmax(155px,1.1fr) minmax(180px,1fr) auto}
-#emp-modal-overlay .pav-person-row .person-activity{font-size:10px;color:var(--ink2);line-height:1.3}
-#emp-modal-overlay .accordion-hint{font-size:8px}
-@media(max-width:560px){
-  #emp-modal-overlay .modal-card{width:calc(100vw - 16px);max-height:90vh}
-  #emp-modal-overlay .accordion-head{grid-template-columns:28px minmax(100px,1fr) 46px 28px}
-  #emp-modal-overlay .accordion-bar{display:none}
-  #emp-modal-overlay .accordion-body{padding-left:34px}
-  #emp-modal-overlay .person-row{grid-template-columns:8px minmax(115px,1fr) auto;gap:7px}
-  #emp-modal-overlay .person-row .badge-gray{display:none}
-  #emp-modal-overlay .person-name{font-size:11px}
-  #emp-modal-overlay .pav-person-row{grid-template-columns:8px minmax(105px,1fr) minmax(120px,1.1fr) auto}
-  #emp-modal-overlay .pav-person-row .person-activity{display:block!important;font-size:9px;white-space:normal;line-height:1.25;max-height:2.5em;overflow:hidden}
-  #emp-modal-overlay .pav-person-row .badge{font-size:8px;padding:4px 6px}
-  #emp-modal-overlay .accordion-count{font-size:9px}
+<style id="mobile-overlap-fix">
+/* =========================================================
+   MOBILE OVERLAP FIX — somente layout, sem alterar JS/HTML
+   ========================================================= */
+@media (max-width: 560px) {
+
+  /* Evita que o conteúdo interno force a largura da tela */
+  html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .topbar, .topbar * {
+    min-width: 0;
+  }
+
+  /* Textos longos podem quebrar em vez de invadir o elemento vizinho */
+  .brand h1,
+  .brand small,
+  .chip,
+  .date-label,
+  .date-badge,
+  .card,
+  .card *,
+  .kpi,
+  .kpi *,
+  .modal,
+  .modal *,
+  .accordion,
+  .accordion *,
+  td,
+  th {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* Mantém números/ícones pequenos sem alterar o conteúdo */
+  .chip,
+  .date-badge {
+    max-width: 100%;
+  }
+
+  /* Grades: o minmax(0,...) permite a coluna realmente encolher */
+  .kr,
+  .gg {
+    min-width: 0;
+  }
+
+  .kr > *,
+  .gg > * {
+    min-width: 0;
+  }
+
+  /* Cabeçalhos e títulos que antes eram nowrap */
+  .brand h1,
+  .brand small,
+  .card h1,
+  .card h2,
+  .card h3,
+  .modal h1,
+  .modal h2,
+  .modal h3 {
+    white-space: normal !important;
+  }
+
+  /* Modal de funcionários:
+     mantém a estrutura original, apenas permite compressão/quebra */
+  #emp-modal-overlay .accordion-head {
+    grid-template-columns: 24px minmax(0,1fr) 42px 24px 24px !important;
+    min-width: 0;
+  }
+
+  #emp-modal-overlay .accordion-head > * {
+    min-width: 0;
+  }
+
+  #emp-modal-overlay .person-row,
+  #emp-modal-overlay .pav-person-row {
+    grid-template-columns: 8px minmax(0,1fr) auto !important;
+    min-width: 0;
+  }
+
+  #emp-modal-overlay .person-row > *,
+  #emp-modal-overlay .pav-person-row > * {
+    min-width: 0;
+  }
+
+  #emp-modal-overlay .person-name,
+  #emp-modal-overlay .person-activity {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    min-width: 0;
+  }
+
+  #emp-modal-overlay .pav-person-row .person-activity {
+    grid-column: 2 / -1;
+  }
+
+  /* Botões e selects não empurram o restante da interface */
+  button,
+  select,
+  input,
+  textarea {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Tabelas/cards não criam uma segunda largura de página */
+  .table-wrap,
+  .table-container,
+  .table-responsive {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  table {
+    max-width: 100%;
+  }
+
+  /* Rótulos e valores em componentes compactos */
+  .bar-label,
+  .person-name,
+  .person-activity,
+  .activity,
+  .name,
+  .label,
+  .value {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
 }
 
-@media(max-width:640px){
-  #emp-modal-overlay{padding:8px}
-  #emp-modal-overlay .modal-card{width:calc(100vw - 16px);max-width:none!important;max-height:calc(100vh - 16px)}
-  #emp-modal-overlay .modal-h{padding:12px 14px;min-height:68px;align-items:center;gap:10px}
-  #emp-modal-overlay .modal-h > div:first-child{min-width:0;flex:1 1 auto}
-  #emp-modal-overlay .modal-h h4{font-size:15px;line-height:1.2;margin:0 0 4px}
-  #emp-modal-overlay .modal-h .mt2{font-size:8px;line-height:1.35;margin:0;white-space:normal;overflow-wrap:anywhere}
+@media (max-width: 360px) {
+  .brand h1 {
+    font-size: clamp(15px, 5vw, 20px);
+  }
+
+  .brand small {
+    font-size: 10px;
+  }
+
+  #emp-modal-overlay .accordion-head {
+    grid-template-columns: 22px minmax(0,1fr) 36px 22px 22px !important;
+    gap: 5px;
+  }
+
+  #emp-modal-overlay .person-row,
+  #emp-modal-overlay .pav-person-row {
+    grid-template-columns: 7px minmax(0,1fr) auto !important;
+    gap: 6px;
+  }
 }
 </style>
+
 </head>
 <body>
 <div class="print-header" id="print-header"></div>
@@ -508,7 +566,6 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 
 <div class="container">
   <div id="err-box"></div>
-  <div id="prod-alert"></div>
 
   <div class="sec-h">
     <div><h2><span class="tag-rdo">rdo</span>Efetivo &amp; Atividades</h2><p id="sub-date">--</p></div>
@@ -632,7 +689,6 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
       <select id="remp" onchange="renderRangeTable()"><option value="">Todas empresas</option></select>
       <select id="rfunc" onchange="renderRangeTable()"><option value="">Todas funcoes</option></select>
       <select id="rpav" onchange="renderRangeTable()"><option value="">Todos pavimentos</option></select>
-      <button class="btn btn-gr" onclick="doExportRangeCSV()" style="display:none">CSV</button>
       <span class="ct" id="range-tbl-ct"></span>
     </div>
     <div class="cd-b" id="range-tbl-box"></div>
@@ -642,12 +698,11 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
     <div class="cd-h"><h3>Historico por data</h3><span class="mt" id="hist-meta"></span></div>
     <div class="cd-b" id="hist-box"></div>
   </div>
-
-  <!-- Seção gerada dinamicamente apenas para impressão — FORA do container -->
 </div>
 <div id="print-db-section" style="display:none"></div>
 <footer style="max-width:1280px;margin:0 auto;padding:12px 14px;font-size:9px;color:var(--ink3);font-family:'JetBrains Mono';border-top:1px solid var(--line)">RDO - Painel de Mao de Obra</footer>
 <div id="toast"></div>
+
 <div id="unicos-modal-overlay" class="modal-overlay" onclick="if(event.target===this)closeUnicosModal()">
   <div class="modal-card" role="dialog" aria-modal="true">
     <div class="modal-h">
@@ -665,42 +720,18 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
       <button class="modal-close" onclick="closePrintModal()" aria-label="Fechar">&times;</button>
     </div>
     <div class="modal-b">
-
-      <div class="pm-section">
-        Empresa
-        <span class="pm-selall" onclick="pmToggleAll('pm-emps',true)">todos</span>
-        <span class="pm-selall" onclick="pmToggleAll('pm-emps',false)">nenhum</span>
-      </div>
+      <div class="pm-section">Empresa <span class="pm-selall" onclick="pmToggleAll('pm-emps',true)">todos</span> <span class="pm-selall" onclick="pmToggleAll('pm-emps',false)">nenhum</span></div>
       <div class="pm-checklist" id="pm-emps"></div>
-
-      <div class="pm-section" style="margin-top:4px">
-        Função
-        <span class="pm-selall" onclick="pmToggleAll('pm-funcs',true)">todos</span>
-        <span class="pm-selall" onclick="pmToggleAll('pm-funcs',false)">nenhum</span>
-      </div>
+      <div class="pm-section" style="margin-top:4px">Função <span class="pm-selall" onclick="pmToggleAll('pm-funcs',true)">todos</span> <span class="pm-selall" onclick="pmToggleAll('pm-funcs',false)">nenhum</span></div>
       <div class="pm-checklist" id="pm-funcs"></div>
-
-      <div class="pm-section" style="margin-top:4px">
-        Pavimento
-        <span class="pm-selall" onclick="pmToggleAll('pm-pavs',true)">todos</span>
-        <span class="pm-selall" onclick="pmToggleAll('pm-pavs',false)">nenhum</span>
-      </div>
+      <div class="pm-section" style="margin-top:4px">Pavimento <span class="pm-selall" onclick="pmToggleAll('pm-pavs',true)">todos</span> <span class="pm-selall" onclick="pmToggleAll('pm-pavs',false)">nenhum</span></div>
       <div class="pm-checklist" id="pm-pavs"></div>
-
       <div class="pm-section" style="margin-top:4px">Incluir na impressão</div>
       <div class="pm-checklist">
-        <label class="pm-chip-label on" id="pm-lbl-faltosos">
-          <input type="checkbox" id="pm-faltosos" checked onchange="this.closest('label').className='pm-chip-label'+(this.checked?' on':'');updatePrintPreview()">
-          🚫 Faltosos
-        </label>
-        <label class="pm-chip-label on" id="pm-lbl-ferias">
-          <input type="checkbox" id="pm-ferias" checked onchange="this.closest('label').className='pm-chip-label'+(this.checked?' on':'');updatePrintPreview()">
-          🌴 Férias
-        </label>
+        <label class="pm-chip-label on" id="pm-lbl-faltosos"><input type="checkbox" id="pm-faltosos" checked onchange="this.closest('label').className='pm-chip-label'+(this.checked?' on':'');updatePrintPreview()"> 🚫 Faltosos</label>
+        <label class="pm-chip-label on" id="pm-lbl-ferias"><input type="checkbox" id="pm-ferias" checked onchange="this.closest('label').className='pm-chip-label'+(this.checked?' on':'');updatePrintPreview()"> 🌴 Férias</label>
       </div>
-
       <div class="pm-preview" id="pm-preview">—</div>
-
       <div style="display:flex;gap:8px;margin-top:14px">
         <button class="btn btn-bl" style="flex:1;justify-content:center;font-size:11px" onclick="executePrint()">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
@@ -744,21 +775,23 @@ var COLORS=['#2563EB','#D97706','#0D9F4F','#7C3AED','#DC2626','#0891B2','#DB2777
 var VIEW_MODE='single';
 var RANGE_SELECTED=new Set();
 var rangeSortKey=null,rangeSortDir=1;
+var sortKey=null,sortDir=1;
 
 function norm(s){return(s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim()}
 function esc(s){return(s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function uniq(arr){return[...new Set(arr.filter(function(v){return v!==''}))].sort(function(a,b){return a.localeCompare(b,'pt-BR')})}
 function fmtNow(){return new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+function G(id){return document.getElementById(id)}
 
-var KW_VAZIO=['nao encontrado','não encontrado','n/a','na','nenhum','nenhuma','sem atividade','sem lancamento','sem lançamento','sem serviço','indefinido','—','--','-'];
+var KW_VAZIO=['nao encontrado','não encontrado','n/a','na','nenhum','nenhuma','sem atividade','sem lancamento','sem lançamento','sem serviço','sem frente de servico','sem frente de serviço','sem frente','indefinido','—','--','-'];
 function temAtividade(v){if(!v||!v.trim())return false;var n=norm(v);if(!n)return false;for(var i=0;i<KW_VAZIO.length;i++){if(n===KW_VAZIO[i]||n.indexOf(KW_VAZIO[i])===0)return false}return true}
 
 /* Efetivo real de um dia = pessoas com atividade lancada (excluindo ferias e faltosos) */
 function comAtividadeCount(day){return day.ativos.filter(function(p){return !!p.atividade}).length}
 
-function setChip(state,txt){var el=document.getElementById('chip'),dot=document.getElementById('livedot'),t=document.getElementById('chip-txt');el.className='chip chip-'+state;dot.style.display=state==='ok'?'inline-block':'none';t.textContent=txt}
+function setChip(state,txt){var el=G('chip'),dot=G('livedot'),t=G('chip-txt');el.className='chip chip-'+state;dot.style.display=state==='ok'?'inline-block':'none';t.textContent=txt}
 var _ttmr=null;
-function toast(msg,type){var el=document.getElementById('toast');el.style.display='block';el.style.background=type==='ok'?'#0D9F4F':type==='warn'?'#D97706':'#DC2626';el.textContent=msg;clearTimeout(_ttmr);_ttmr=setTimeout(function(){el.style.display='none'},3500)}
+function toast(msg,type){var el=G('toast');el.style.display='block';el.style.background=type==='ok'?'#0D9F4F':type==='warn'?'#D97706':'#DC2626';el.textContent=msg;clearTimeout(_ttmr);_ttmr=setTimeout(function(){el.style.display='none'},3500)}
 
 function findCol(hd,kws){for(var i=0;i<hd.length;i++){var n=norm(hd[i]);for(var k=0;k<kws.length;k++){if(n.indexOf(norm(kws[k]))>-1)return i}}return -1}
 
@@ -823,11 +856,9 @@ var KW_MOTIVOS=[
   {tag:'FERIAS',kws:['ferias','férias','de ferias','em ferias','feria']},
   {tag:'AFASTADO',kws:['afastado','afastada','atestado','licenca','licença','atestado medico']}
 ];
-/* CORRIGIDO: antes só olhava as colunas de status/atividade (ci.status, ci.atividade).
-   Se o motivo (ex.: "atestado medico") estivesse em qualquer outra coluna da planilha
-   (Motivo, Observacao, Situacao etc.), a pessoa nunca era marcada como ausente e sumia
-   dos filtros padrão. Agora varre a linha inteira, coluna por coluna. */
-function motivoAusencia(row,ci){
+/* Varre a linha inteira coluna por coluna — o motivo (ex.: "atestado medico")
+   pode estar em Motivo/Observacao/Situacao, não só na coluna Status. */
+function motivoAusencia(row){
   for(var fi=0;fi<row.length;fi++){
     var v=norm(row[fi]||'');
     if(!v)continue;
@@ -840,18 +871,23 @@ function motivoAusencia(row,ci){
   }
   return '';
 }
-function isFerias(row,ci){return !!motivoAusencia(row,ci)}
+
+/* Combina local + pavimento num unico rotulo, ex.: "ESTACIONAMENTO / TÉRREO" */
+function regiaoPavKey(p){
+  if(!p||!p.regiao)return '';
+  return p.pav?(p.regiao+' / '+p.pav):p.regiao;
+}
 
 /* ═══════ PARSE ═══════ */
 function parseData(raw){
   if(!raw||raw.length<2)return null;
   var hd=raw[0];
-  var ci={nome:findCol(hd,['funcionario','lider','nome']),empresa:findCol(hd,['empresa']),funcao:findCol(hd,['funcao','função']),atividade:findCol(hd,['servico','serviço','atividade']),regiao:findCol(hd,['local','regiao','região','area','área']),pav:findCol(hd,['pav']),data:findCol(hd,['data inicio','data']),status:findCol(hd,['status']),prod:findCol(hd,['prod']),id:findCol(hd,['id'])};
+  var ci={nome:findCol(hd,['funcionario','lider','nome']),empresa:findCol(hd,['empresa']),funcao:findCol(hd,['funcao','função']),atividade:findCol(hd,['servico','serviço','atividade']),regiao:findCol(hd,['local','regiao','região','area','área']),pav:findCol(hd,['pav']),data:findCol(hd,['data inicio','data']),status:findCol(hd,['status']),prod:findCol(hd,['prod'])};
   var people=[];
   for(var r=1;r<raw.length;r++){
     var row=raw[r];var nome=(ci.nome>-1?row[ci.nome]||'':'').trim();
     if(!nome||nome.length<2)continue;if(norm(nome).indexOf('total')>-1)continue;
-    var motivo=motivoAusencia(row,ci);var vac=!!motivo;
+    var motivo=motivoAusencia(row);var vac=!!motivo;
     var atividadeRaw=(ci.atividade>-1?row[ci.atividade]||'':'').trim();
     var pavRaw=(ci.pav>-1?row[ci.pav]||'':'').trim();
     var pavNorm=normalizarPavimento(pavRaw);
@@ -865,37 +901,29 @@ function parseData(raw){
     if(pa&&pb)return(pa.y*10000+pa.m*100+pa.d)-(pb.y*10000+pb.m*100+pb.d);
     return a.localeCompare(b);
   }).reverse().map(function(d){return byDate[d]});
-  return{ci:ci,hd:hd,people:people,days:days};
-}
-
-/* Combina local + pavimento num unico rotulo, ex.: "ESTACIONAMENTO / TÉRREO".
-   Usada tanto para agregar o grafico "Por local" quanto para filtrar no modal
-   que abre ao clicar numa barra, para as duas partes ficarem sempre em sincronia. */
-function regiaoPavKey(p){
-  if(!p||!p.regiao)return '';
-  return p.pav?(p.regiao+' / '+p.pav):p.regiao;
+  return{people:people,days:days};
 }
 
 /* ═══════ MODE SWITCH ═══════ */
 function setViewMode(mode){
   VIEW_MODE=mode;
-  document.getElementById('tab-single').className='mode-tab'+(mode==='single'?' on':'');
-  document.getElementById('tab-range').className='mode-tab'+(mode==='range'?' on':'');
-  document.getElementById('date-bar').style.display=mode==='single'?'flex':'none';
-  document.getElementById('range-card').style.display=mode==='range'?'block':'none';
-  document.getElementById('single-view').style.display=mode==='single'?'grid':'none';
-  document.getElementById('range-view').style.display=mode==='range'?'block':'none';
-  document.getElementById('hist-card').style.display=mode==='single'?'block':'none';
-  document.getElementById('kpis2').style.display=mode==='range'?'grid':'none';
-  document.getElementById('range-extra').style.display=mode==='range'?'grid':'none';
+  G('tab-single').className='mode-tab'+(mode==='single'?' on':'');
+  G('tab-range').className='mode-tab'+(mode==='range'?' on':'');
+  G('date-bar').style.display=mode==='single'?'flex':'none';
+  G('range-card').style.display=mode==='range'?'block':'none';
+  G('single-view').style.display=mode==='single'?'grid':'none';
+  G('range-view').style.display=mode==='range'?'block':'none';
+  G('hist-card').style.display=mode==='single'?'block':'none';
+  G('kpis2').style.display=mode==='range'?'grid':'none';
+  G('range-extra').style.display=mode==='range'?'grid':'none';
   if(mode==='range'){initRangeChips();renderRangeAll()}
   else{renderAllForDate()}
 }
 
 /* ═══════ DATE FILTER (single) ═══════ */
 function populateDateFilter(){
-  var badge=document.getElementById('date-count-badge'),btnPrev=document.getElementById('btn-prev'),btnNext=document.getElementById('btn-next');
-  if(!PARSED||!PARSED.days.length){document.getElementById('fdate-btn').textContent='Sem datas';document.getElementById('fdate-panel').innerHTML='';badge.textContent='';btnPrev.disabled=true;btnNext.disabled=true;return}
+  var badge=G('date-count-badge'),btnPrev=G('btn-prev'),btnNext=G('btn-next');
+  if(!PARSED||!PARSED.days.length){G('fdate-btn').textContent='Sem datas';G('fdate-panel').innerHTML='';badge.textContent='';btnPrev.disabled=true;btnNext.disabled=true;return}
   var days=PARSED.days;
   if(isNaN(SELECTED_DATE_IDX)||SELECTED_DATE_IDX<0||SELECTED_DATE_IDX>=days.length)SELECTED_DATE_IDX=0;
   renderDatePanel();updateDateBtnText();
@@ -903,36 +931,35 @@ function populateDateFilter(){
   btnPrev.disabled=SELECTED_DATE_IDX>=days.length-1;btnNext.disabled=SELECTED_DATE_IDX<=0;
 }
 
-/* botao + painel com scroll (max-height via CSS) no lugar do <select> nativo, que nao aceita limitar altura */
 function renderDatePanel(){
-  var panel=document.getElementById('fdate-panel');
+  var panel=G('fdate-panel');
   if(!PARSED||!PARSED.days.length){panel.innerHTML='';return}
   panel.innerHTML=PARSED.days.map(function(d,i){return '<div class="date-dd-item'+(i===SELECTED_DATE_IDX?' sel':'')+'" onclick="selectDateFromPanel('+i+')">'+esc(d.date)+'  ('+comAtividadeCount(d)+' com atividade, '+d.ferias.length+' ferias)</div>'}).join('');
 }
 function updateDateBtnText(){
   var day=getSelectedDay();
-  document.getElementById('fdate-btn').textContent=day?(day.date+'  ('+comAtividadeCount(day)+' com atividade, '+day.ferias.length+' ferias)'):'Sem datas';
+  G('fdate-btn').textContent=day?(day.date+'  ('+comAtividadeCount(day)+' com atividade, '+day.ferias.length+' ferias)'):'Sem datas';
 }
 function toggleDateDropdown(e){
   if(e)e.stopPropagation();
-  var panel=document.getElementById('fdate-panel');
+  var panel=G('fdate-panel');
   var opening=panel.style.display==='none'||!panel.style.display;
   if(opening){renderDatePanel();panel.style.display='block';var selEl=panel.querySelector('.date-dd-item.sel');if(selEl)selEl.scrollIntoView({block:'nearest'})}
   else panel.style.display='none';
 }
 document.addEventListener('click',function(e){
-  var wrap=document.getElementById('fdate-wrap');
-  if(wrap&&!wrap.contains(e.target))document.getElementById('fdate-panel').style.display='none';
+  var wrap=G('fdate-wrap');
+  if(wrap&&!wrap.contains(e.target))G('fdate-panel').style.display='none';
 });
-function selectDateFromPanel(idx){SELECTED_DATE_IDX=idx;document.getElementById('fdate-panel').style.display='none';onDateChange()}
+function selectDateFromPanel(idx){SELECTED_DATE_IDX=idx;G('fdate-panel').style.display='none';onDateChange()}
 
 function navDate(dir){if(!PARSED||!PARSED.days.length)return;var newIdx=SELECTED_DATE_IDX+dir;if(newIdx<0||newIdx>=PARSED.days.length)return;SELECTED_DATE_IDX=newIdx;onDateChange()}
 
 function onDateChange(){
-  document.getElementById('btn-prev').disabled=SELECTED_DATE_IDX>=PARSED.days.length-1;
-  document.getElementById('btn-next').disabled=SELECTED_DATE_IDX<=0;
-  ['fq','femp','ffunc','fpav','fprod','faz'].forEach(function(id){document.getElementById(id).value=''});
-  document.getElementById('fstatus').value='ativo';
+  G('btn-prev').disabled=SELECTED_DATE_IDX>=PARSED.days.length-1;
+  G('btn-next').disabled=SELECTED_DATE_IDX<=0;
+  ['fq','femp','ffunc','fpav','fprod','faz'].forEach(function(id){G(id).value=''});
+  G('fstatus').value='ativo';
   updateDateBtnText();renderDatePanel();
   renderAllForDate();
 }
@@ -950,7 +977,7 @@ function parseDateBR(s){
 }
 
 function initRangeChips(){
-  var box=document.getElementById('range-chips');
+  var box=G('range-chips');
   if(!PARSED||!PARSED.days.length){box.innerHTML='<div class="em">Sem datas</div>';return}
   var ascDays=PARSED.days.slice().reverse();
   var html='',curKey=null;
@@ -966,7 +993,7 @@ function initRangeChips(){
     html+='<span class="date-chip'+(sel?' sel':'')+'" data-date="'+esc(d.date)+'" onclick="toggleRangeDate(\''+esc(d.date).replace(/'/g,"\\'")+'\')">'+esc(d.date)+' <span style="opacity:.7">('+d.ativos.length+')</span></span>';
   });
   box.innerHTML=html;
-  document.getElementById('range-meta').textContent=PARSED.days.length+' data(s) disponiveis';
+  G('range-meta').textContent=PARSED.days.length+' data(s) disponiveis';
 }
 
 function toggleRangeDate(date){
@@ -1008,17 +1035,17 @@ function computeRangeAgg(days){
 }
 
 function populateRangeFilters(agg){
-  function fill(id,vals,def){var sel=document.getElementById(id),cur=sel.value;sel.innerHTML='<option value="">'+def+'</option>'+vals.map(function(v){return '<option value="'+esc(v)+'">'+esc(v)+'</option>'}).join('');if(vals.indexOf(cur)>-1)sel.value=cur}
+  function fill(id,vals,def){var sel=G(id),cur=sel.value;sel.innerHTML='<option value="">'+def+'</option>'+vals.map(function(v){return '<option value="'+esc(v)+'">'+esc(v)+'</option>'}).join('');if(vals.indexOf(cur)>-1)sel.value=cur}
   fill('remp',uniq(agg.map(function(p){return p.empresa})),'Todas empresas');
   fill('rfunc',uniq(agg.map(function(p){return p.funcao})),'Todas funcoes');
-  var pavSel=document.getElementById('rpav'),curPav=pavSel.value;
+  var pavSel=G('rpav'),curPav=pavSel.value;
   pavSel.innerHTML='<option value="">Todos pavimentos</option>'+PAVIMENTOS.map(function(v){return '<option value="'+esc(v)+'">'+esc(v)+'</option>'}).join('');
   if(PAVIMENTOS.indexOf(curPav)>-1)pavSel.value=curPav;
 }
 
 function renderRangeKPIs(days,agg){
-  var el=document.getElementById('kpis');
-  if(!days.length){el.innerHTML='<div class="kp"><div class="kl">Nenhuma data selecionada</div><div class="kv">—</div></div>';document.getElementById('kpis2').innerHTML='';return}
+  var el=G('kpis');
+  if(!days.length){el.innerHTML='<div class="kp"><div class="kl">Nenhuma data selecionada</div><div class="kv">—</div></div>';G('kpis2').innerHTML='';return}
   var totalPessoaDias=agg.reduce(function(s,p){return s+p.diasPresente},0);
   var pessoasDistintas=agg.length;
   var mediaDias=pessoasDistintas>0?(totalPessoaDias/pessoasDistintas).toFixed(1):'0';
@@ -1037,7 +1064,7 @@ function renderRangeKPIs(days,agg){
 }
 
 function renderRangeKPIs2(days,agg){
-  var el=document.getElementById('kpis2');
+  var el=G('kpis2');
   if(!days.length){el.innerHTML='';return}
   var headcounts=days.map(function(d){return comAtividadeCount(d)});
   var efetivoMedio=(headcounts.reduce(function(s,v){return s+v},0)/days.length).toFixed(1);
@@ -1065,45 +1092,27 @@ function renderRangeKPIs2(days,agg){
 function openUnicosModal(){
   var days=getRangeDays();
   if(!days.length){toast('Selecione um ou mais dias no periodo','warn');return}
-
-  /* IMPORTANTE: a lista da tela deve usar EXATAMENTE a mesma regra do KPI.
-     Presença única = pessoa com diasPresente === 1 no período selecionado.
-     Antes o modal fazia apenas distinct(nome+empresa), por isso mostrava 120
-     pessoas mesmo quando o KPI informava 17. */
+  /* Presença única = pessoa com diasPresente === 1 no período selecionado */
   var agg=computeRangeAgg(days);
   var unicosAgg=agg.filter(function(p){return p.diasPresente===1});
-
-  /* Recupera os dados do único dia em que cada pessoa apareceu. */
   var mapaDados={};
   days.forEach(function(day){
     day.all.forEach(function(p){
       var key=norm(p.nome)+'|'+norm(p.empresa);
       if(!mapaDados[key])mapaDados[key]=[];
-      mapaDados[key].push({
-        nome:p.nome,empresa:p.empresa,funcao:p.funcao,data:day.date,
-        pav:p.pav,atividade:p.atividade||p.atividadeRaw||''
-      });
+      mapaDados[key].push({nome:p.nome,empresa:p.empresa,funcao:p.funcao,data:day.date,pav:p.pav,atividade:p.atividade||p.atividadeRaw||''});
     });
   });
-
   var lista=unicosAgg.map(function(p){
     var key=norm(p.nome)+'|'+norm(p.empresa);
     var registro=(mapaDados[key]&&mapaDados[key][0])?mapaDados[key][0]:{};
-    return {
-      nome:p.nome,
-      empresa:p.empresa,
-      funcao:p.funcao,
-      data:registro.data||'—',
-      pav:registro.pav||'',
-      atividade:registro.atividade||''
-    };
+    return{nome:p.nome,empresa:p.empresa,funcao:p.funcao,data:registro.data||'—',pav:registro.pav||'',atividade:registro.atividade||''};
   });
-
   lista.sort(function(a,b){return(a.nome||'').localeCompare(b.nome||'','pt-BR')});
 
-  var body=document.getElementById('unicos-modal-body');
-  document.getElementById('unicos-modal-title').textContent='🔄 Presença Única';
-  document.getElementById('unicos-modal-sub').textContent=days.length+' dia(s) selecionados · '+lista.length+' pessoa(s) presente(s) em apenas 1 dia';
+  var body=G('unicos-modal-body');
+  G('unicos-modal-title').textContent='🔄 Presença Única';
+  G('unicos-modal-sub').textContent=days.length+' dia(s) selecionados · '+lista.length+' pessoa(s) presente(s) em apenas 1 dia';
 
   if(!lista.length){
     body.innerHTML='<div class="modal-empty">Nenhuma pessoa com presença única no período selecionado.</div>';
@@ -1126,12 +1135,10 @@ function openUnicosModal(){
     '</tr>'}).join('')+
     '</tbody></table></div>';
   }
-  document.getElementById('unicos-modal-overlay').classList.add('on');
+  G('unicos-modal-overlay').classList.add('on');
 }
 
-function closeUnicosModal(){
-  document.getElementById('unicos-modal-overlay').classList.remove('on');
-}
+function closeUnicosModal(){G('unicos-modal-overlay').classList.remove('on')}
 
 function aggregateAcrossDays(days,field){
   var out={};
@@ -1140,7 +1147,7 @@ function aggregateAcrossDays(days,field){
 }
 
 function getFilteredRangeAgg(){
-  var q=norm(document.getElementById('rq').value),emp=document.getElementById('remp').value,func=document.getElementById('rfunc').value,pav=document.getElementById('rpav').value;
+  var q=norm(G('rq').value),emp=G('remp').value,func=G('rfunc').value,pav=G('rpav').value;
   var days=getRangeDays();var agg=computeRangeAgg(days);
   return agg.filter(function(p){
     if(emp&&p.empresa!==emp)return false;
@@ -1154,7 +1161,7 @@ function getFilteredRangeAgg(){
 function setRangeSort(k){if(rangeSortKey===k)rangeSortDir*=-1;else{rangeSortKey=k;rangeSortDir=1}renderRangeTable()}
 
 function renderRangeTable(){
-  var el=document.getElementById('range-tbl-box'),meta=document.getElementById('range-tbl-meta'),ct=document.getElementById('range-tbl-ct');
+  var el=G('range-tbl-box'),meta=G('range-tbl-meta'),ct=G('range-tbl-ct');
   var days=getRangeDays();
   if(!days.length){el.innerHTML='<div class="em">Selecione um ou mais dias acima para ver a producao por pessoa.</div>';meta.textContent='';ct.textContent='';return}
   var agg=getFilteredRangeAgg();
@@ -1187,10 +1194,9 @@ function renderRangeTable(){
 }
 
 function renderRangeAll(){
-  document.getElementById('prod-alert').innerHTML='';
   var days=getRangeDays(),agg=computeRangeAgg(days);
-  document.getElementById('sub-date').textContent=days.length?('Periodo: '+days.length+' dia(s) selecionados'):'Nenhum dia selecionado no periodo';
-  document.getElementById('range-summary').textContent=days.length?(days.length+' dia(s) selecionados de '+(PARSED?PARSED.days.length:0)):'Nenhum dia selecionado';
+  G('sub-date').textContent=days.length?('Periodo: '+days.length+' dia(s) selecionados'):'Nenhum dia selecionado no periodo';
+  G('range-summary').textContent=days.length?(days.length+' dia(s) selecionados de '+(PARSED?PARSED.days.length:0)):'Nenhum dia selecionado';
   renderRangeKPIs(days,agg);
   renderRangeKPIs2(days,agg);
   if(days.length){
@@ -1198,56 +1204,56 @@ function renderRangeAll(){
     renderBars('rtop-emp-bars','rtop-emp-meta',aggregateAcrossDays(days,'byEmp'),COLORS,null,'range');
     renderBars('rtop-func-bars','rtop-func-meta',aggregateAcrossDays(days,'byFunc'),COLORS);
   }else{
-    document.getElementById('rchart-box').innerHTML='<div class="em">Selecione um ou mais dias acima</div>';
-    document.getElementById('rchart-meta').textContent='';
-    ['rtop-emp-bars','rtop-func-bars'].forEach(function(id){document.getElementById(id).innerHTML=''});
-    ['rtop-emp-meta','rtop-func-meta'].forEach(function(id){document.getElementById(id).textContent=''});
+    G('rchart-box').innerHTML='<div class="em">Selecione um ou mais dias acima</div>';
+    G('rchart-meta').textContent='';
+    ['rtop-emp-bars','rtop-func-bars'].forEach(function(id){G(id).innerHTML=''});
+    ['rtop-emp-meta','rtop-func-meta'].forEach(function(id){G(id).textContent=''});
   }
   populateRangeFilters(agg);
   renderRangeTable();
-  document.getElementById('upd-ts').textContent='atualizado '+fmtNow();
+  G('upd-ts').textContent='atualizado '+fmtNow();
 }
 
-/* abre modal de configuracao de impressao */
+/* ═══════ IMPRESSÃO ═══════ */
 function doPrint(){
   var day=getSelectedDay();
   if(!day){toast('Selecione um dia primeiro','warn');return}
-  document.getElementById('pm-sub').textContent='Dia '+day.date+' \u00b7 '+day.all.length+' pessoas no total';
+  G('pm-sub').textContent='Dia '+day.date+' \u00b7 '+day.all.length+' pessoas no total';
   pmBuildChips('pm-emps',uniq(day.all.map(function(p){return p.empresa})));
   pmBuildChips('pm-funcs',uniq(day.all.map(function(p){return p.funcao})));
   pmBuildChips('pm-pavs',PAVIMENTOS.filter(function(v){return day.byPav[v]>0}));
-  document.getElementById('pm-faltosos').checked=true;
-  document.getElementById('pm-lbl-faltosos').className='pm-chip-label on';
-  document.getElementById('pm-ferias').checked=true;
-  document.getElementById('pm-lbl-ferias').className='pm-chip-label on';
-  document.getElementById('print-modal-overlay').classList.add('on');
+  G('pm-faltosos').checked=true;
+  G('pm-lbl-faltosos').className='pm-chip-label on';
+  G('pm-ferias').checked=true;
+  G('pm-lbl-ferias').className='pm-chip-label on';
+  G('print-modal-overlay').classList.add('on');
   updatePrintPreview();
 }
 
 function pmBuildChips(id,vals){
-  var b=document.getElementById(id);if(!b)return;
+  var b=G(id);if(!b)return;
   b.innerHTML=vals.map(function(v){
     return '<label class="pm-chip-label on" title="'+esc(v)+'"><input type="checkbox" value="'+esc(v)+'" checked onchange="this.closest(\'label\').className=\'pm-chip-label\'+(this.checked?\' on\':\'\');updatePrintPreview()">'+esc(v)+'</label>';
   }).join('');
 }
 
 function pmToggleAll(id,state){
-  var b=document.getElementById(id);if(!b)return;
+  var b=G(id);if(!b)return;
   b.querySelectorAll('input').forEach(function(cb){cb.checked=state;cb.closest('label').className='pm-chip-label'+(state?' on':'');});
   updatePrintPreview();
 }
 
 function pmGetSelected(id){
-  var b=document.getElementById(id);if(!b)return[];
+  var b=G(id);if(!b)return[];
   var v=[];b.querySelectorAll('input:checked').forEach(function(c){v.push(c.value)});return v;
 }
 
-function closePrintModal(){document.getElementById('print-modal-overlay').classList.remove('on');}
+function closePrintModal(){G('print-modal-overlay').classList.remove('on')}
 
 function updatePrintPreview(){
   var day=getSelectedDay();if(!day)return;
   var emps=pmGetSelected('pm-emps'),funcs=pmGetSelected('pm-funcs'),pavs=pmGetSelected('pm-pavs');
-  var iF=document.getElementById('pm-faltosos').checked,iV=document.getElementById('pm-ferias').checked;
+  var iF=G('pm-faltosos').checked,iV=G('pm-ferias').checked;
   function match(p){
     if(emps.length&&emps.indexOf(p.empresa)===-1)return false;
     if(funcs.length&&funcs.indexOf(p.funcao)===-1)return false;
@@ -1257,14 +1263,14 @@ function updatePrintPreview(){
   var a=day.ativos.filter(function(p){return !!p.atividade&&match(p)});
   var f=iF?day.ativos.filter(function(p){return !p.atividade&&match(p)}):[];
   var v=iV?day.ferias.filter(function(p){return match(p)}):[];
-  document.getElementById('pm-preview').textContent=
+  G('pm-preview').textContent=
     (a.length+f.length+v.length)+' pessoa(s) — '+a.length+' ativo(s)'+(iF?' \u00b7 '+f.length+' faltoso(s)':'')+(iV?' \u00b7 '+v.length+' f\u00e9rias':'');
 }
 
 function executePrint(){
   var day=getSelectedDay();if(!day)return;
   var emps=pmGetSelected('pm-emps'),funcs=pmGetSelected('pm-funcs'),pavs=pmGetSelected('pm-pavs');
-  var iF=document.getElementById('pm-faltosos').checked,iV=document.getElementById('pm-ferias').checked;
+  var iF=G('pm-faltosos').checked,iV=G('pm-ferias').checked;
   function match(p){
     if(emps.length&&emps.indexOf(p.empresa)===-1)return false;
     if(funcs.length&&funcs.indexOf(p.funcao)===-1)return false;
@@ -1275,15 +1281,15 @@ function executePrint(){
   var ativos=day.ativos.filter(function(p){return !!p.atividade&&match(p)}).sort(srt);
   var semAtiv=iF?day.ativos.filter(function(p){return !p.atividade&&match(p)}).sort(srt):[];
   var ferias=iV?day.ferias.filter(function(p){return match(p)}).sort(srt):[];
-  var tE=document.getElementById('pm-emps').querySelectorAll('input').length;
-  var tF=document.getElementById('pm-funcs').querySelectorAll('input').length;
-  var tP=document.getElementById('pm-pavs').querySelectorAll('input').length;
+  var tE=G('pm-emps').querySelectorAll('input').length;
+  var tF=G('pm-funcs').querySelectorAll('input').length;
+  var tP=G('pm-pavs').querySelectorAll('input').length;
   var fl=[];
   if(emps.length&&emps.length<tE)fl.push('Empresa: '+emps.join(', '));
   if(funcs.length&&funcs.length<tF)fl.push('Fun\u00e7\u00e3o: '+funcs.join(', '));
   if(pavs.length&&pavs.length<tP)fl.push('Pav.: '+pavs.join(', '));
   var sf=fl.length?' \u00b7 '+fl.join(' / '):'';
-  document.getElementById('print-header').innerHTML=
+  G('print-header').innerHTML=
     '<h1>RDO \u2014 Relatorio Diario de Obra</h1>'+
     '<p>Data: '+esc(day.date)+' \u00b7 Efetivo: '+ativos.length+' \u00b7 Faltosos: '+semAtiv.length+' \u00b7 F\u00e9rias: '+ferias.length+sf+' \u00b7 Impresso em '+fmtNow()+'</p>';
   var h='<div class="cd"><div class="cd-h"><h3>Equipe do dia \u2014 '+esc(day.date)+'</h3>'+
@@ -1302,7 +1308,7 @@ function executePrint(){
     ferias.forEach(function(p){h+='<tr style="background:#FFFBEB"><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;color:#92400E">'+esc(p.nome)+'</td><td style="color:#B45309">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td colspan="3"><span style="font-family:JetBrains Mono;font-size:9px;font-weight:700;background:#FEF3C7;padding:2px 6px;border-radius:10px;color:#92400E">'+esc(p.motivo||'F\u00c9RIAS')+'</span></td></tr>';});
   }
   h+='</tbody></table></div>';
-  var sec=document.getElementById('print-db-section');
+  var sec=G('print-db-section');
   sec.innerHTML=h;
   sec.style.display='block';
   document.body.classList.add('custom-print');
@@ -1318,23 +1324,23 @@ function executePrint(){
 
 /* ═══════ RENDERING (single day) ═══════ */
 function populateFilters(day){
-  function fill(id,vals,def){var sel=document.getElementById(id),cur=sel.value;sel.innerHTML='<option value="">'+def+'</option>'+vals.map(function(v){return '<option value="'+esc(v)+'">'+esc(v)+'</option>'}).join('');sel.value=(vals.indexOf(cur)>-1)?cur:''}
+  function fill(id,vals,def){var sel=G(id),cur=sel.value;sel.innerHTML='<option value="">'+def+'</option>'+vals.map(function(v){return '<option value="'+esc(v)+'">'+esc(v)+'</option>'}).join('');sel.value=(vals.indexOf(cur)>-1)?cur:''}
   if(!day)return;
   fill('femp',uniq(day.ativos.map(function(p){return p.empresa})),'Todas empresas');
   fill('ffunc',uniq(day.ativos.map(function(p){return p.funcao})),'Todas funcoes');
-  var pavSel=document.getElementById('fpav');var curPav=pavSel.value;
+  var pavSel=G('fpav');var curPav=pavSel.value;
   pavSel.innerHTML='<option value="">Todos pavimentos</option>'+PAVIMENTOS.map(function(v){var cnt=day.byPav[v]||0;return cnt>0?'<option value="'+esc(v)+'">'+esc(v)+'</option>':''}).join('');
   pavSel.value=(PAVIMENTOS.indexOf(curPav)>-1)?curPav:'';
 }
 
 function renderKPIs(day){
-  if(!day){document.getElementById('kpis').innerHTML='<div class="kp"><div class="kl">Sem dados</div><div class="kv">—</div></div>';return}
+  if(!day){G('kpis').innerHTML='<div class="kp"><div class="kl">Sem dados</div><div class="kv">—</div></div>';return}
   var empCnt=Object.keys(day.byEmp).length,funcCnt=Object.keys(day.byFunc).length;
   var comAtiv=day.ativos.filter(function(p){return !!p.atividade}).length;
   var faltosos=day.ativos.length-comAtiv;
   var previsto=day.ativos.length;
   var pctPrevisto=previsto>0?(comAtiv/previsto*100).toFixed(0):'0';
-  document.getElementById('kpis').innerHTML=[
+  G('kpis').innerHTML=[
     {i:'👷',l:'Pessoas trabalhando no dia',   v:comAtiv,           f:'de '+previsto+' previstos ('+pctPrevisto+'%)', c:'#059669', click:''},
     {i:'🌴',l:'De Ferias',      v:day.ferias.length, f:'excluidos do efetivo',              c:'var(--amber)', click:'openPeopleModal(\'ferias\')'},
     {i:'🚫',l:'Faltosos',       v:faltosos,          f:'sem atividade — excluidos',         c:'var(--red)',   click:'openPeopleModal(\'faltosos\')'},
@@ -1348,11 +1354,11 @@ function renderKPIs(day){
 }
 
 function renderBars(elId,metaId,counts,colorMap,ativCounts,clickMode){
-  var el=document.getElementById(elId);
+  var el=G(elId);
   var keys=Object.keys(counts).sort(function(a,b){return counts[b]-counts[a]});
-  if(!keys.length){el.innerHTML='<div class="em">Sem dados</div>';document.getElementById(metaId).textContent='';return}
+  if(!keys.length){el.innerHTML='<div class="em">Sem dados</div>';G(metaId).textContent='';return}
   var max=counts[keys[0]];
-  document.getElementById(metaId).textContent=keys.length+' categorias';
+  G(metaId).textContent=keys.length+' categorias';
   el.innerHTML=keys.map(function(k,i){
     var total=counts[k];
     var atv=ativCounts?(ativCounts[k]||0):null;
@@ -1375,35 +1381,127 @@ function renderBars(elId,metaId,counts,colorMap,ativCounts,clickMode){
   }
 }
 
-/* ═══════ MODAL POR FUNÇÃO → lista de pessoas ═══════ */
+/* ═══════════════════════════════════════════════════════════════════════
+   MODAIS DE DRILL-DOWN (Empresa / Pavimento / Local / Função)
+   As três variantes (emp/pav/local) agrupam por função e usam o mesmo HTML,
+   então compartilham _abrirModalAgrupado(). Função é um caso à parte: mostra
+   uma tabela achatada em vez de accordions.
+   ═══════════════════════════════════════════════════════════════════════ */
+function _abrirModalAgrupado(pessoas,opts){
+  var grupos={};
+  pessoas.forEach(function(p){var f=p.funcao||'(sem função)';if(!grupos[f])grupos[f]=[];grupos[f].push(p);});
+  var funcs=Object.keys(grupos).sort(function(a,b){return grupos[b].length-grupos[a].length});
+  var total=pessoas.length,comAtiv=pessoas.filter(function(p){return !!p.atividade}).length;
+
+  var hdr=G('emp-modal-overlay').querySelector('.modal-h');
+  hdr.style.background=opts.cor;
+  G('emp-modal-title').textContent=opts.titulo;
+  G('emp-modal-sub').textContent=opts.subtitulo;
+
+  var body=G('emp-modal-body');
+  if(!funcs.length){body.innerHTML='<div class="modal-empty">Nenhuma pessoa encontrada.</div>';G('emp-modal-overlay').classList.add('on');return}
+
+  var max=grupos[funcs[0]].length;
+  var rowCls=opts.pavRow?'person-row pav-person-row':'person-row';
+  var html='<div class="local-summary">'+
+    '<div class="local-stat"><b>'+total+'</b><span>Pessoas</span></div>'+
+    '<div class="local-stat"><b>'+comAtiv+'</b><span>Com atividade</span></div>'+
+    '<div class="local-stat"><b>'+funcs.length+'</b><span>Funções</span></div></div>';
+
+  html+=funcs.map(function(f,i){
+    var lista=grupos[f].slice().sort(function(a,b){return(a.nome||'').localeCompare(b.nome||'','pt-BR')});
+    var cnt=lista.length,atv=lista.filter(function(p){return !!p.atividade}).length;
+    var w=max?(cnt/max*100).toFixed(1):0;
+    var corBar=opts.corBar==='cycle'?COLORS[i%COLORS.length]:opts.corBar;
+    var people=lista.map(function(p){
+      /* Empresa: mostra badge do pavimento; Pav/Local: mostra o texto da atividade */
+      var meio=opts.pavRow
+        ? '<span class="person-activity" title="'+esc(p.atividade||'Sem atividade')+'">'+esc(p.atividade||'Sem atividade')+'</span>'
+        : '<span class="badge badge-gray">'+esc(p.pav||'')+'</span>';
+      return '<div class="'+rowCls+'">'+
+        '<i class="person-dot" style="background:'+(p.atividade?'#10B981':'#EF4444')+'"></i>'+
+        '<span class="person-name" title="'+esc(p.nome)+'">'+esc(p.nome)+'</span>'+
+        meio+
+        '<span class="badge '+(p.atividade?'badge-green':'badge-red')+'">'+(p.atividade?'ATIVO':'SEM ATIVIDADE')+'</span>'+
+        '</div>';
+    }).join('');
+    return '<div class="accordion-group">'+
+      '<div class="accordion-head">'+
+        '<span class="accordion-arrow">▶</span><span class="accordion-title">'+esc(f)+'</span>'+
+        '<div class="accordion-bar"><i style="width:'+w+'%;background:'+corBar+'"></i></div>'+
+        '<span class="accordion-count">'+atv+'/'+cnt+'</span><span class="accordion-hint">ver</span>'+
+      '</div><div class="accordion-body">'+people+'</div></div>';
+  }).join('');
+
+  body.innerHTML=html;
+  body.querySelectorAll('.accordion-head').forEach(function(head){head.addEventListener('click',function(){
+    var b=head.nextElementSibling,open=b.classList.toggle('open');head.classList.toggle('open',open);
+  });});
+  G('emp-modal-overlay').classList.add('on');
+}
+
+function openEmpModal(empKey,mode){
+  if(!empKey)return;
+  var peopleList=[],contextLabel='';
+  if(mode==='range'){
+    var days=getRangeDays(); if(!days.length)return;
+    days.forEach(function(d){peopleList=peopleList.concat(d.ativos)});
+    contextLabel=days.length+' dia(s) selecionados no periodo';
+  }else{
+    var day=getSelectedDay(); if(!day)return;
+    peopleList=day.ativos; contextLabel='Dia '+(day.date||'—');
+  }
+  var pessoas=peopleList.filter(function(p){return p.empresa===empKey});
+  _abrirModalAgrupado(pessoas,{
+    titulo:'🏢 '+empKey,
+    cor:'var(--navy)',
+    subtitulo:contextLabel+' · '+pessoas.length+' pessoa(s)',
+    pavRow:false,
+    corBar:'cycle'
+  });
+}
+
+function openPavModal(pavKey){
+  if(!pavKey)return;
+  var day=getSelectedDay(); if(!day)return;
+  var pessoas=day.ativos.filter(function(p){return p.pav===pavKey});
+  _abrirModalAgrupado(pessoas,{
+    titulo:'📍 '+pavKey,
+    cor:PAV_CORES[pavKey]||'var(--navy)',
+    subtitulo:day.date+' · '+pessoas.length+' pessoa(s)',
+    pavRow:true,
+    corBar:PAV_CORES[pavKey]||'#64748B'
+  });
+}
+
+function openLocalModal(localKey){
+  if(!localKey)return;
+  var day=getSelectedDay(); if(!day)return;
+  var pessoas=day.ativos.filter(function(p){return regiaoPavKey(p)===localKey});
+  _abrirModalAgrupado(pessoas,{
+    titulo:'📍 '+localKey,
+    cor:'var(--navy)',
+    subtitulo:day.date+' · '+pessoas.length+' pessoa(s)',
+    pavRow:true,
+    corBar:'#64748B'
+  });
+}
+
+/* Função: mostra uma tabela achatada (não agrupa por nada) */
 function openFuncModal(funcKey){
   if(!funcKey)return;
-  var day=getSelectedDay();
-  if(!day)return;
-
-  /* Pessoas ativas da função selecionada no dia */
-  var pessoas=day.ativos.filter(function(p){
-    return (p.funcao||'(sem funcao)')===funcKey;
-  });
-
+  var day=getSelectedDay(); if(!day)return;
+  var pessoas=day.ativos.filter(function(p){return (p.funcao||'(sem funcao)')===funcKey});
   var comAtiv=pessoas.filter(function(p){return !!p.atividade}).length;
-
-  var hdr=document.getElementById('emp-modal-overlay').querySelector('.modal-h');
+  var hdr=G('emp-modal-overlay').querySelector('.modal-h');
   hdr.style.background='#0891B2';
-
-  document.getElementById('emp-modal-title').textContent=funcKey;
-  document.getElementById('emp-modal-sub').textContent=
-    'Dia '+(day.date||'—')+' · '+pessoas.length+' pessoa(s) · '+comAtiv+' c/ atividade';
-
-  var body=document.getElementById('emp-modal-body');
-
+  G('emp-modal-title').textContent=funcKey;
+  G('emp-modal-sub').textContent='Dia '+(day.date||'—')+' · '+pessoas.length+' pessoa(s) · '+comAtiv+' c/ atividade';
+  var body=G('emp-modal-body');
   if(!pessoas.length){
     body.innerHTML='<div class="modal-empty">Nenhuma pessoa encontrada nesta função.</div>';
   }else{
-    pessoas.sort(function(a,b){
-      return (a.nome||'').localeCompare(b.nome||'','pt-BR');
-    });
-
+    pessoas.sort(function(a,b){return (a.nome||'').localeCompare(b.nome||'','pt-BR')});
     body.innerHTML='<table class="people-modal-table" style="width:100%;border-collapse:collapse;font-size:12px">'+
       '<thead><tr>'+
       '<th style="text-align:left;padding:8px 10px;background:#E0F2FE;color:#075985;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Nome</th>'+
@@ -1427,179 +1525,28 @@ function openFuncModal(funcKey){
       }).join('')+
       '</tbody></table>';
   }
-
-  document.getElementById('emp-modal-overlay').classList.add('on');
-}
-
-function openEmpModal(empKey,mode){
-  if(!empKey)return;
-  var peopleList=[],contextLabel='';
-  if(mode==='range'){
-    var days=getRangeDays(); if(!days.length)return;
-    days.forEach(function(d){peopleList=peopleList.concat(d.ativos)});
-    contextLabel=days.length+' dia(s) selecionados no periodo';
-  }else{
-    var day=getSelectedDay(); if(!day)return;
-    peopleList=day.ativos; contextLabel='Dia '+(day.date||'—');
-  }
-  var grupos={};
-  peopleList.forEach(function(p){
-    if(p.empresa!==empKey)return;
-    var f=p.funcao||'(sem funcao)';
-    if(!grupos[f])grupos[f]=[]; grupos[f].push(p);
-  });
-  var keys=Object.keys(grupos).sort(function(a,b){return grupos[b].length-grupos[a].length});
-  var totalPeople=keys.reduce(function(n,k){return n+grupos[k].length},0);
-  var ativos=peopleList.filter(function(p){return p.empresa===empKey&&p.atividade}).length;
-  var header=document.getElementById('emp-modal-overlay').querySelector('.modal-h');
-  header.style.background='var(--navy)';
-  document.getElementById('emp-modal-title').textContent='🏢 '+empKey;
-  document.getElementById('emp-modal-sub').textContent=contextLabel+' · '+totalPeople+' pessoa(s) · '+keys.length+' cargo(s)';
-  var body=document.getElementById('emp-modal-body');
-  if(!keys.length){body.innerHTML='<div class="modal-empty">Sem pessoas ativas desta empresa neste periodo.</div>';}else{
-    var max=grupos[keys[0]].length;
-    var html='<div class="local-summary">'+
-      '<div class="local-stat"><b>'+totalPeople+'</b><span>Pessoas</span></div>'+
-      '<div class="local-stat"><b>'+ativos+'</b><span>Com atividade</span></div>'+
-      '<div class="local-stat"><b>'+keys.length+'</b><span>Cargos</span></div></div>';
-    html+=keys.map(function(k,i){
-      var lista=grupos[k].slice().sort(function(a,b){return(a.nome||'').localeCompare(b.nome||'','pt-BR')});
-      var total=lista.length,atv=lista.filter(function(p){return !!p.atividade}).length;
-      var w=max?(total/max*100).toFixed(1):0,c=COLORS[i%COLORS.length];
-      var people=lista.map(function(p){
-        return '<div class="person-row">'+
-          '<i class="person-dot" style="background:'+(p.atividade?'#10B981':'#EF4444')+'"></i>'+
-          '<span class="person-name">'+esc(p.nome)+'</span>'+
-          (p.pav?'<span class="badge badge-gray">'+esc(p.pav)+'</span>':'')+
-          '<span class="person-activity" title="'+esc(p.atividade||'Sem atividade')+'">'+esc(p.atividade||'Sem atividade')+'</span>'+ 
-          '<span class="badge '+(p.atividade?'badge-green':'badge-red')+'">'+(p.atividade?'ATIVO':'SEM ATIVIDADE')+'</span>'+
-          '</div>';}).join('');
-      return '<div class="accordion-group">'+
-        '<div class="accordion-head" data-acc="emp-'+i+'">'+
-          '<span class="accordion-arrow">▶</span><span class="accordion-title">'+esc(k)+'</span>'+ 
-          '<div class="accordion-bar"><i style="width:'+w+'%;background:'+c+'"></i></div>'+ 
-          '<span class="accordion-count">'+atv+'/'+total+'</span><span class="accordion-hint">ver</span>'+ 
-        '</div><div class="accordion-body">'+people+'</div></div>';
-    }).join('');
-    body.innerHTML=html;
-    body.querySelectorAll('.accordion-head').forEach(function(head){head.addEventListener('click',function(){
-      var b=head.nextElementSibling,open=b.classList.toggle('open');head.classList.toggle('open',open);
-    });});
-  }
-  document.getElementById('emp-modal-overlay').classList.add('on');
+  G('emp-modal-overlay').classList.add('on');
 }
 
 function closeEmpModal(){
-  document.getElementById('emp-modal-overlay').classList.remove('on');
-  document.getElementById('emp-modal-overlay').querySelector('.modal-h').style.background='';
+  G('emp-modal-overlay').classList.remove('on');
+  G('emp-modal-overlay').querySelector('.modal-h').style.background='';
 }
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeEmpModal();closePeopleModal();closePavModal();closeUnicosModal();closePrintModal()}});
+/* closePavModal era um alias — mantido só por compatibilidade com chamadas antigas */
+function closePavModal(){closeEmpModal()}
 
-/* ═══════ MODAL POR PAVIMENTO → funções ═══════ */
-function openPavModal(pavKey){
-  if(!pavKey)return;
-  var day=getSelectedDay(); if(!day)return;
-  var pessoas=day.ativos.filter(function(p){return p.pav===pavKey});
-  var grupos={};
-  pessoas.forEach(function(p){var f=p.funcao||'(sem função)';if(!grupos[f])grupos[f]=[];grupos[f].push(p);});
-  var funcs=Object.keys(grupos).sort(function(a,b){return grupos[b].length-grupos[a].length});
-  var total=pessoas.length,comAtiv=pessoas.filter(function(p){return !!p.atividade}).length;
-  var corPav=PAV_CORES[pavKey]||'var(--navy)';
-  var hdr=document.getElementById('emp-modal-overlay').querySelector('.modal-h');hdr.style.background=corPav;
-  document.getElementById('emp-modal-title').textContent='📍 '+pavKey;
-  document.getElementById('emp-modal-sub').textContent=day.date+' · '+total+' pessoa(s) · '+comAtiv+' c/ atividade · '+funcs.length+' função(ões)';
-  var body=document.getElementById('emp-modal-body');
-  if(!funcs.length){body.innerHTML='<div class="modal-empty">Nenhuma pessoa neste local.</div>';}else{
-    var max=grupos[funcs[0]].length;
-    var html='<div class="local-summary">'+
-      '<div class="local-stat"><b>'+total+'</b><span>Pessoas</span></div>'+
-      '<div class="local-stat"><b>'+comAtiv+'</b><span>Com atividade</span></div>'+ 
-      '<div class="local-stat"><b>'+funcs.length+'</b><span>Funções</span></div></div>';
-    html+=funcs.map(function(f,i){
-      var lista=grupos[f].slice().sort(function(a,b){return(a.nome||'').localeCompare(b.nome||'','pt-BR')});
-      var cnt=lista.length,atv=lista.filter(function(p){return !!p.atividade}).length,w=max?(cnt/max*100).toFixed(1):0;
-      var people=lista.map(function(p){return '<div class="person-row pav-person-row">'+
-        '<i class="person-dot" style="background:'+(p.atividade?'#10B981':'#EF4444')+'"></i>'+ 
-        '<span class="person-name" title="'+esc(p.nome)+'">'+esc(p.nome)+'</span>'+ 
-        '<span class="person-activity" title="'+esc(p.atividade||'Sem atividade')+'">'+esc(p.atividade||'Sem atividade')+'</span>'+ 
-        '<span class="badge '+(p.atividade?'badge-green':'badge-red')+'">'+(p.atividade?'ATIVO':'SEM ATIVIDADE')+'</span>'+ 
-        '</div>';}).join('');
-      return '<div class="accordion-group">'+
-        '<div class="accordion-head" data-acc="pav-'+i+'">'+
-          '<span class="accordion-arrow">▶</span><span class="accordion-title">'+esc(f)+'</span>'+ 
-          '<div class="accordion-bar"><i style="width:'+w+'%;background:'+corPav+'"></i></div>'+ 
-          '<span class="accordion-count">'+atv+'/'+cnt+'</span><span class="accordion-hint">ver</span>'+ 
-        '</div><div class="accordion-body">'+people+'</div></div>';
-    }).join('');
-    body.innerHTML=html;
-    body.querySelectorAll('.accordion-head').forEach(function(head){head.addEventListener('click',function(){
-      var b=head.nextElementSibling,open=b.classList.toggle('open');head.classList.toggle('open',open);
-    });});
-  }
-  document.getElementById('emp-modal-overlay').classList.add('on');
-}
-
-
-/* ═══════ MODAL POR LOCAL → funções → pessoas + atividade ═══════ */
-function openLocalModal(localKey){
-  if(!localKey)return;
-  var day=getSelectedDay(); if(!day)return;
-  var pessoas=day.ativos.filter(function(p){return regiaoPavKey(p)===localKey});
-  var grupos={};
-  pessoas.forEach(function(p){var f=p.funcao||'(sem função)';if(!grupos[f])grupos[f]=[];grupos[f].push(p);});
-  var funcs=Object.keys(grupos).sort(function(a,b){return grupos[b].length-grupos[a].length});
-  var total=pessoas.length,comAtiv=pessoas.filter(function(p){return !!p.atividade}).length;
-  var hdr=document.getElementById('emp-modal-overlay').querySelector('.modal-h');hdr.style.background='var(--navy)';
-  document.getElementById('emp-modal-title').textContent='📍 '+localKey;
-  document.getElementById('emp-modal-sub').textContent=day.date+' · '+total+' pessoa(s) · '+comAtiv+' c/ atividade · '+funcs.length+' função(ões)';
-  var body=document.getElementById('emp-modal-body');
-  if(!funcs.length){body.innerHTML='<div class="modal-empty">Nenhuma pessoa neste local.</div>';}
-  else{
-    var max=grupos[funcs[0]].length;
-    var html='<div class="local-summary">'+
-      '<div class="local-stat"><b>'+total+'</b><span>Pessoas</span></div>'+
-      '<div class="local-stat"><b>'+comAtiv+'</b><span>Com atividade</span></div>'+
-      '<div class="local-stat"><b>'+funcs.length+'</b><span>Funções</span></div></div>';
-    html+=funcs.map(function(f,i){
-      var lista=grupos[f].slice().sort(function(a,b){return(a.nome||'').localeCompare(b.nome||'','pt-BR')});
-      var cnt=lista.length,atv=lista.filter(function(p){return !!p.atividade}).length,w=max?(cnt/max*100).toFixed(1):0;
-      var people=lista.map(function(p){return '<div class="person-row pav-person-row">'+
-        '<i class="person-dot" style="background:'+(p.atividade?'#10B981':'#EF4444')+'"></i>'+ 
-        '<span class="person-name" title="'+esc(p.nome)+'">'+esc(p.nome)+'</span>'+ 
-        '<span class="person-activity" title="'+esc(p.atividade||'Sem atividade')+'">'+esc(p.atividade||'Sem atividade')+'</span>'+ 
-        '<span class="badge '+(p.atividade?'badge-green':'badge-red')+'">'+(p.atividade?'ATIVO':'SEM ATIVIDADE')+'</span>'+ 
-        '</div>';}).join('');
-      return '<div class="accordion-group">'+
-        '<div class="accordion-head" data-acc="local-'+i+'">'+
-          '<span class="accordion-arrow">▶</span><span class="accordion-title">'+esc(f)+'</span>'+ 
-          '<div class="accordion-bar"><i style="width:'+w+'%;background:#64748B"></i></div>'+ 
-          '<span class="accordion-count">'+atv+'/'+cnt+'</span><span class="accordion-hint">ver</span>'+ 
-        '</div><div class="accordion-body">'+people+'</div></div>';
-    }).join('');
-    body.innerHTML=html;
-    body.querySelectorAll('.accordion-head').forEach(function(head){head.addEventListener('click',function(){
-      var b=head.nextElementSibling,open=b.classList.toggle('open');head.classList.toggle('open',open);
-    });});
-  }
-  document.getElementById('emp-modal-overlay').classList.add('on');
-}
-
-function closePavModal(){
-  /* reutiliza o mesmo overlay do modal de empresa */
-  document.getElementById('emp-modal-overlay').classList.remove('on');
-  /* restaura cor padrão do header */
-  document.getElementById('emp-modal-overlay').querySelector('.modal-h').style.background='';
-}
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){closeEmpModal();closePeopleModal();closeUnicosModal();closePrintModal()}
+});
 
 /* ═══════ MODAL FALTOSOS / FÉRIAS ═══════ */
 function openPeopleModal(tipo){
   var day=getSelectedDay();
   if(!day)return;
-
-  var hdr=document.getElementById('people-modal-hdr');
-  var title=document.getElementById('people-modal-title');
-  var sub=document.getElementById('people-modal-sub');
-  var body=document.getElementById('people-modal-body');
+  var hdr=G('people-modal-hdr');
+  var title=G('people-modal-title');
+  var sub=G('people-modal-sub');
+  var body=G('people-modal-body');
 
   if(tipo==='ferias'){
     var lista=day.ferias;
@@ -1627,7 +1574,6 @@ function openPeopleModal(tipo){
         }).join('')+
         '</tbody></table>';
     }
-
   }else{ /* faltosos */
     var faltososList=day.ativos.filter(function(p){return !p.atividade});
     hdr.style.background='#991B1B';
@@ -1655,24 +1601,18 @@ function openPeopleModal(tipo){
         '</tbody></table>';
     }
   }
-
-  document.getElementById('people-modal-overlay').classList.add('on');
+  G('people-modal-overlay').classList.add('on');
 }
-
-function closePeopleModal(){
-  document.getElementById('people-modal-overlay').classList.remove('on');
-}
+function closePeopleModal(){G('people-modal-overlay').classList.remove('on')}
 
 function renderChart(days,selectedDay,boxId,metaId){
   boxId=boxId||'chart-box';metaId=metaId||'chart-meta';
-  var el=document.getElementById(boxId),meta=document.getElementById(metaId);
+  var el=G(boxId),meta=G(metaId);
   if(!days||!days.length){el.innerHTML='<div class="em">Sem dados</div>';return}
   meta.textContent=days.length+' dia(s)';
 
   var isMobile=window.innerWidth<=640;
   var n=days.length;
-
-  /* Dimensões fixas — simples e previsíveis */
   var W=isMobile?(window.innerWidth-28):600;
   var H=isMobile?130:220;
   var pL=isMobile?28:36, pR=isMobile?6:10, pT=isMobile?20:28, pB=isMobile?26:38;
@@ -1688,7 +1628,6 @@ function renderChart(days,selectedDay,boxId,metaId){
 
   var svg='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;display:block">';
 
-  /* ── grade Y (4 linhas fixas) ── */
   var fntY=isMobile?8:9;
   for(var g=0;g<=4;g++){
     var gy=yS(maxV*g/4);
@@ -1696,20 +1635,11 @@ function renderChart(days,selectedDay,boxId,metaId){
     svg+='<text x="'+(pL-4)+'" y="'+(gy+3)+'" text-anchor="end" fill="#94A3B8" font-family="JetBrains Mono" font-size="'+fntY+'">'+Math.round(maxV*g/4)+'</text>';
   }
 
-  /* ── rótulos eixo X ──────────────────────────────────────────────────────
-     Estratégia: cada rótulo "DD/MM" tem ~34px de largura (desktop) / 28px (mobile).
-     Calculamos quantos cabem na área útil e selecionamos índices uniformemente
-     distribuídos. Sempre incluímos o ÚLTIMO (mais recente). Nunca tentamos
-     mostrar mais do que cabe. Sem algoritmo de colisão — simplesmente não
-     geramos candidatos que colidiriam.                                        */
-  var lblSlot=isMobile?30:36;  /* largura reservada por rótulo em px */
+  var lblSlot=isMobile?30:36;
   var maxXLbls=Math.max(2, Math.floor((W-pL-pR)/lblSlot));
-  /* step = quantos pontos pular entre cada rótulo */
   var xStep=Math.max(1, Math.ceil((n-1)/(maxXLbls-1)));
-  /* gera os índices que vão receber rótulo */
   var xLblIdx=[];
   for(var xi=0;xi<n;xi+=xStep) xLblIdx.push(xi);
-  /* garante o último ponto */
   if(xLblIdx[xLblIdx.length-1]!==n-1) xLblIdx[xLblIdx.length-1]=n-1;
 
   var fntX=isMobile?7:8;
@@ -1719,13 +1649,9 @@ function renderChart(days,selectedDay,boxId,metaId){
     var isFirst=(idx===0),isLast=(idx===n-1),isSel=(idx===selIdx);
     var anchor=isLast?'end':(isFirst?'start':'middle');
     svg+='<line x1="'+lx+'" y1="'+pT+'" x2="'+lx+'" y2="'+(H-pB)+'" stroke="#F1F5F9"/>';
-    svg+='<text x="'+lx+'" y="'+(H-pB+fntX+4)+'" text-anchor="'+anchor+'"'+
-         ' fill="'+(isSel?'#059669':'#94A3B8')+'"'+
-         ' font-family="JetBrains Mono" font-size="'+fntX+'"'+
-         ' font-weight="'+(isSel?'700':'400')+'">'+esc(labels[idx].slice(0,5))+'</text>';
+    svg+='<text x="'+lx+'" y="'+(H-pB+fntX+4)+'" text-anchor="'+anchor+'" fill="'+(isSel?'#059669':'#94A3B8')+'" font-family="JetBrains Mono" font-size="'+fntX+'" font-weight="'+(isSel?'700':'400')+'">'+esc(labels[idx].slice(0,5))+'</text>';
   }
 
-  /* ── área e linha ── */
   var areaPath='M '+xS(0)+' '+(H-pB)+' L '+xS(0)+' '+yS(vals[0]);
   for(var pi=1;pi<n;pi++) areaPath+=' L '+xS(pi)+' '+yS(vals[pi]);
   areaPath+=' L '+xS(n-1)+' '+(H-pB)+' Z';
@@ -1734,10 +1660,6 @@ function renderChart(days,selectedDay,boxId,metaId){
   for(var li=1;li<n;li++) linePath+=' L '+xS(li)+' '+yS(vals[li]);
   svg+='<path d="'+linePath+'" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
 
-  /* ── rótulos numéricos acima dos pontos ─────────────────────────────────
-     Mesma lógica: calcular quantos cabem pelo espaço X disponível, distribuir
-     uniformemente + sempre incluir ponto selecionado + primeiro + último.
-     Com poucos pontos (≤12) mostra todos; acima disso usa o mesmo step de X. */
   var valStep=n<=12?1:xStep;
   var valSet={};
   for(var vi=0;vi<n;vi+=valStep) valSet[vi]=true;
@@ -1746,7 +1668,6 @@ function renderChart(days,selectedDay,boxId,metaId){
   if(selIdx>=0) valSet[selIdx]=true;
   var fntV=isMobile?8:9, fntVSel=isMobile?10:11;
 
-  /* ── pontos e números ── */
   for(var ci=0;ci<n;ci++){
     var cx=xS(ci),cy=yS(vals[ci]),isSel=(ci===selIdx);
     var r=isSel?5:3;
@@ -1756,13 +1677,10 @@ function renderChart(days,selectedDay,boxId,metaId){
       var vAnchor=isL?'end':(isF?'start':'middle');
       var vx=isF?cx+2:(isL?cx-2:cx);
       var vy=Math.max(pT+(isSel?fntVSel:fntV), cy-r-4);
-      svg+='<text x="'+vx+'" y="'+vy+'" text-anchor="'+vAnchor+'"'+
-           ' fill="'+(isSel?'#D97706':'#059669')+'"'+
-           ' font-family="JetBrains Mono" font-size="'+(isSel?fntVSel:fntV)+'" font-weight="700">'+vals[ci]+'</text>';
+      svg+='<text x="'+vx+'" y="'+vy+'" text-anchor="'+vAnchor+'" fill="'+(isSel?'#D97706':'#059669')+'" font-family="JetBrains Mono" font-size="'+(isSel?fntVSel:fntV)+'" font-weight="700">'+vals[ci]+'</text>';
     }
   }
 
-  /* ── anel animado no ponto selecionado ── */
   if(selIdx>=0){
     var sx=xS(selIdx),sy=yS(vals[selIdx]);
     svg+='<circle cx="'+sx+'" cy="'+sy+'" r="5" fill="none" stroke="#D97706" stroke-width="1.5" opacity="0.5">'+
@@ -1776,25 +1694,21 @@ function renderChart(days,selectedDay,boxId,metaId){
 
 function getFilteredPeople(day){
   if(!day)return{active:[],ferias:[]};
-  var q=norm(document.getElementById('fq').value),emp=document.getElementById('femp').value,func=document.getElementById('ffunc').value,pav=document.getElementById('fpav').value,st=document.getElementById('fstatus').value||'ativo',prodF=document.getElementById('fprod').value;
+  var q=norm(G('fq').value),emp=G('femp').value,func=G('ffunc').value,pav=G('fpav').value,st=G('fstatus').value||'ativo',prodF=G('fprod').value;
   var active=[],ferias=[];
   day.all.forEach(function(p){
-    /* filtros de empresa/funcao/pavimento/busca valem para todo mundo, inclusive ferias */
     if(emp&&p.empresa!==emp)return;
     if(func&&p.funcao!==func)return;
     if(pav&&p.pav!==pav)return;
     if(q){var full=norm(p.nome+' '+p.empresa+' '+p.funcao+' '+p.atividade+' '+p.regiao);if(full.indexOf(q)===-1)return}
 
     if(p.ferias){
-      /* pessoas de ferias so aparecem quando o filtro "De ferias" ou "Mostrar tudo" esta ativo */
       if(st==='ferias'||st==='todos')ferias.push(p);
       return;
     }
-
-    /* padrao ("ativo"): so quem tem atividade lancada — faltosos ficam escondidos ate filtrar */
     if(st==='ativo'&&!p.atividade)return;
     if(st==='sem'&&p.atividade)return;
-    if(st==='ferias')return; /* filtrando so ferias: ninguem que nao esta de ferias aparece */
+    if(st==='ferias')return;
     if(prodF==='com'&&!temAtividade(p.prod))return;
     if(prodF==='sem'&&temAtividade(p.prod))return;
     active.push(p);
@@ -1807,48 +1721,35 @@ function pavBadge(pav){
   return '<span class="badge '+(PAV_BADGE[pav]||'badge-blue')+'">'+esc(pav)+'</span>';
 }
 
-function prodBadge(prod){
-  if(temAtividade(prod)){var t=prod.length>20?prod.slice(0,20)+'…':prod;return '<span class="badge badge-green" title="'+esc(prod)+'">'+esc(t)+'</span>'}
-  return '<span class="badge badge-red" style="animation:pulse 1.4s ease infinite" title="Producao nao preenchida">⚠ SEM PRODUCAO</span>';
-}
-
-function renderProdAlert(day){
-  document.getElementById('prod-alert').innerHTML='';
-}
-
-/* ═══ Marca .cd-b como scrollavel quando a tabela e mais larga que o container (mostra sombra de dica) ═══ */
 function markScrollable(container){
   requestAnimationFrame(function(){
-    if(window.innerWidth<=480)return; /* no mobile a tabela vira cartao empilhado — nunca precisa de scroll */
+    if(window.innerWidth<=480)return;
     var tbl=container.querySelector('table.t');
     if(tbl&&tbl.scrollWidth>container.clientWidth+2)container.classList.add('can-scroll');
     else container.classList.remove('can-scroll');
   });
 }
 
-var sortKey=null,sortDir=1;
 function setSort(k){if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=1}renderTable()}
 
 function renderTable(){
-  var day=getSelectedDay(),el=document.getElementById('tbl-box'),meta=document.getElementById('tbl-meta'),ct=document.getElementById('tbl-ct');
+  var day=getSelectedDay(),el=G('tbl-box'),meta=G('tbl-meta'),ct=G('tbl-ct');
   if(!day){el.innerHTML='<div class="em">Sem dados</div>';return}
   var r=getFilteredPeople(day),ferias=r.ferias;
-  var az=document.getElementById('faz').value;
+  var az=G('faz').value;
 
-  /* Separar ativos reais dos faltosos (sem atividade) */
   var ativos=r.active.filter(function(p){return !!p.atividade});
   var faltosos=r.active.filter(function(p){return !p.atividade});
 
-  /* Ordenação */
   function sortPpl(arr){
     if(sortKey) return arr.slice().sort(function(a,b){return(a[sortKey]||'').localeCompare(b[sortKey]||'','pt-BR',{numeric:true})*sortDir});
     if(az==='az') return arr.slice().sort(function(a,b){return(a.nome||'').localeCompare(b.nome||'','pt-BR')});
     if(az==='za') return arr.slice().sort(function(a,b){return(b.nome||'').localeCompare(a.nome||'','pt-BR')});
     return arr;
   }
-  ativos  = sortPpl(ativos);
-  faltosos= sortPpl(faltosos);
-  ferias  = sortPpl(ferias);
+  ativos=sortPpl(ativos);
+  faltosos=sortPpl(faltosos);
+  ferias=sortPpl(ferias);
 
   meta.textContent=ativos.length+' ativos'+(faltosos.length?' · '+faltosos.length+' faltosos':'')+(ferias.length?' · '+ferias.length+' ferias':'');
   ct.textContent=(ativos.length+faltosos.length+ferias.length)+' registro(s)';
@@ -1863,7 +1764,6 @@ function renderTable(){
     '<th onclick="setSort(\'regiao\')" class="'+(sk==='regiao'?sd>0?'asc':'desc':'')+'">Local</th>'+
     '</tr></thead><tbody>';
 
-  /* Ativos com atividade */
   ativos.forEach(function(p){
     h+='<tr>'+
       '<td data-label="Nome" style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td>'+
@@ -1875,10 +1775,8 @@ function renderTable(){
     '</tr>';
   });
 
-  /* Faltosos */
   if(faltosos.length){
-    h+='<tr style="background:#FEE2E2"><td colspan="6" style="padding:8px 12px;font-family:\'JetBrains Mono\';font-size:10px;color:#B91C1C;font-weight:700;letter-spacing:.04em;text-transform:uppercase">'+
-      '🚫 '+faltosos.length+' FALTOSO(S) — sem atividade (excluidos do efetivo real)</td></tr>';
+    h+='<tr style="background:#FEE2E2"><td colspan="6" style="padding:8px 12px;font-family:\'JetBrains Mono\';font-size:10px;color:#B91C1C;font-weight:700;letter-spacing:.04em;text-transform:uppercase">🚫 '+faltosos.length+' FALTOSO(S) — sem atividade (excluidos do efetivo real)</td></tr>';
     faltosos.forEach(function(p){
       h+='<tr style="background:#FFF5F5">'+
         '<td data-label="Nome" style="font-weight:600;white-space:nowrap;color:#B91C1C">'+esc(p.nome)+'</td>'+
@@ -1891,7 +1789,6 @@ function renderTable(){
     });
   }
 
-  /* Ferias / ausencias */
   if(ferias.length){
     h+='<tr class="ferias-header"><td colspan="6">★ '+ferias.length+' PESSOA(S) AUSENTE(S) (ferias/afastado — excluidas do efetivo)</td></tr>';
     ferias.forEach(function(p){
@@ -1911,7 +1808,7 @@ function renderTable(){
 }
 
 function renderHist(days){
-  var el=document.getElementById('hist-box'),meta=document.getElementById('hist-meta');
+  var el=G('hist-box'),meta=G('hist-meta');
   if(!days||!days.length){el.innerHTML='<div class="em">Sem dados</div>';return}
   meta.textContent=days.length+' dia(s)';
   var selDay=getSelectedDay(),selDate=selDay?selDay.date:'';
@@ -1934,94 +1831,40 @@ function renderHist(days){
 
 function selectDateByValue(idx){
   SELECTED_DATE_IDX=idx;
-  document.getElementById('btn-prev').disabled=SELECTED_DATE_IDX>=PARSED.days.length-1;
-  document.getElementById('btn-next').disabled=SELECTED_DATE_IDX<=0;
-  ['fq','femp','ffunc','fpav','fprod','faz'].forEach(function(id){document.getElementById(id).value=''});
-  document.getElementById('fstatus').value='ativo';
+  G('btn-prev').disabled=SELECTED_DATE_IDX>=PARSED.days.length-1;
+  G('btn-next').disabled=SELECTED_DATE_IDX<=0;
+  ['fq','femp','ffunc','fpav','fprod','faz'].forEach(function(id){G(id).value=''});
+  G('fstatus').value='ativo';
   updateDateBtnText();renderDatePanel();
-  renderAllForDate();document.getElementById('kpis').scrollIntoView({behavior:'smooth',block:'start'});
+  renderAllForDate();G('kpis').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function renderAllForDate(){
   var day=getSelectedDay();
-  document.getElementById('sub-date').textContent=day?('Dados de '+day.date):'Sem dados';
+  G('sub-date').textContent=day?('Dados de '+day.date):'Sem dados';
   renderKPIs(day);
   if(day){populateFilters(day);renderBars('emp-bars','emp-meta',day.byEmp,COLORS,day.byEmpAtiv,'day');renderBars('func-bars','func-meta',day.byFunc,COLORS,day.byFuncAtiv,'func');renderBars('pav-bars','pav-meta',day.byPav,PAV_CORES,null,'pav');renderBars('reg-bars','reg-meta',day.byRegiao,COLORS,null,'reg')}
-  else{['emp-bars','func-bars','pav-bars','reg-bars'].forEach(function(id){document.getElementById(id).innerHTML=''});['emp-meta','func-meta','pav-meta','reg-meta'].forEach(function(id){document.getElementById(id).textContent=''})}
-  renderChart(PARSED.days,day);renderTable();renderHist(PARSED.days);renderProdAlert(day);
-  document.getElementById('upd-ts').textContent='atualizado '+fmtNow();
+  else{['emp-bars','func-bars','pav-bars','reg-bars'].forEach(function(id){G(id).innerHTML=''});['emp-meta','func-meta','pav-meta','reg-meta'].forEach(function(id){G(id).textContent=''})}
+  renderChart(PARSED.days,day);renderTable();renderHist(PARSED.days);
+  G('upd-ts').textContent='atualizado '+fmtNow();
 }
 
 function renderAll(){
-  if(!PARSED){document.getElementById('kpis').innerHTML='<div class="kp"><div class="kl">Sem dados</div><div class="kv">—</div></div>';return}
+  if(!PARSED){G('kpis').innerHTML='<div class="kp"><div class="kl">Sem dados</div><div class="kv">—</div></div>';return}
   populateDateFilter();
-  document.getElementById('sub-info').textContent='Fonte: Google Sheets · '+PARSED.people.length+' registros';
+  G('sub-info').textContent='Fonte: Google Sheets · '+PARSED.people.length+' registros';
   initRangeChips();
   if(VIEW_MODE==='range')renderRangeAll();else renderAllForDate();
 }
 
-var APPS_URL='https://script.google.com/macros/s/AKfycbwFLxduVg7tpCeBlfYThOrigDhMn8ju9_w888TfWEblxesUJeFfvXhR03nr4zDpREY6/exec';
-
-function processRdoData(data){
-  if(!data||data.status!=='ok')throw new Error('Status: '+(data?data.status:'null'));
-  if(!data.rows||!data.headers)throw new Error('Sem dados na resposta');
-
-  var hd=data.headers.map(function(h){return String(h||'')});
-  var raw=[hd];
-  var MONTHS={'Jan':'01','Feb':'02','Mar':'03','Apr':'04','May':'05','Jun':'06','Jul':'07','Aug':'08','Sep':'09','Oct':'10','Nov':'11','Dec':'12'};
-  data.rows.forEach(function(obj){
-    var row=hd.map(function(h){
-      var v=obj[h];
-      if(v===null||v===undefined)return '';
-      var s=String(v);
-      // ISO: 2026-08-13T03:00:00.000Z ou 2026-08-13
-      var mISO=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
-      if(mISO)return mISO[3]+'/'+mISO[2]+'/'+mISO[1];
-      // String longa JS: "Wed Aug 12 2026 00:00:00 GMT-0300..."
-      var mLong=s.match(/\w+\s+(\w{3})\s+(\d{1,2})\s+(\d{4})/);
-      if(mLong&&MONTHS[mLong[1]]){
-        return String(mLong[2]).padStart(2,'0')+'/'+MONTHS[mLong[1]]+'/'+mLong[3];
-      }
-      return s;
-    });
-    raw.push(row);
-  });
-  raw=raw.filter(function(r){return r.some(function(c){return(c||'').trim()!==''})});
-  if(raw.length<2)throw new Error('Planilha vazia');
-  return{raw:raw,total:data.total};
-}
-
-function onLoadSuccess(data,btn){
-  btn.classList.remove('spin');
-  try{
-    var res=processRdoData(data);
-    PARSED=parseData(res.raw);
-    setChip('ok','online');
-    toast('Carregado — '+res.total+' linhas (inclusive ocultas)','ok');
-    document.getElementById('sub-info').textContent='Apps Script · '+res.total+' linhas (inclusive ocultas)';
-    renderAll();
-  }catch(e){
-    setChip('err','erro');
-    document.getElementById('err-box').innerHTML='<div class="err-box"><b>Erro: '+esc(e.message)+'</b><br>Verifique se o Apps Script foi reimplantado com a nova versao.</div>';
-    toast('Erro ao carregar','err');
-  }
-}
-
-function onLoadFail(btn,msg){
-  btn.classList.remove('spin');
-  setChip('err','erro');
-  document.getElementById('err-box').innerHTML='<div class="err-box"><b>Erro de rede ao acessar Apps Script.</b><br>'+esc(msg||'Verifique se o Web App esta publicado como "Qualquer pessoa".')+'<br><a href="'+APPS_URL+'" target="_blank">Testar URL</a></div>';
-  toast('Erro de rede','err');
-}
-
-/* Fallback JSONP: usado quando fetch() falha (ex.: bloqueio de CORS em alguns navegadores antigos) */
+/* ═══════ DATA LOADING ═══════ */
 function doLoad(){
-  /* Reinicia o timer do auto-refresh sempre que houver carga manual */
-  if(typeof _scheduleNext==='function') _scheduleNext();
-  var btn=document.getElementById('btn-reload');
+  /* Reinicia o timer do auto-refresh sempre que houver carga (manual ou silenciosa) */
+  _scheduleNext();
+  var btn=G('btn-reload');
   btn.classList.add('spin');
   setChip('warn','carregando');
-  document.getElementById('err-box').innerHTML='';
+  G('err-box').innerHTML='';
   var API_KEY='AIzaSyBcTj7dlJDeCjnNjy5ZHVgJ1_NeQNEhw7M';
   var attempt=0;
   function tryLoad(){
@@ -2042,21 +1885,21 @@ function doLoad(){
       PARSED=parseData(data.values);
       setChip('ok','online');
       toast('Carregado \u2014 '+(data.values.length-1)+' linhas','ok');
-      document.getElementById('sub-info').textContent='Sheets API \u00b7 '+(data.values.length-1)+' linhas';
+      G('sub-info').textContent='Sheets API \u00b7 '+(data.values.length-1)+' linhas';
       renderAll();
     })
     .catch(function(err){
       if(attempt<2){setTimeout(tryLoad,2000);return;}
       btn.classList.remove('spin');
       setChip('err','erro');
-      document.getElementById('err-box').innerHTML='<div class="err-box"><b>Erro: '+esc(err.message)+'</b><br>Clique em Atualizar para tentar novamente.</div>';
+      G('err-box').innerHTML='<div class="err-box"><b>Erro: '+esc(err.message)+'</b><br>Clique em Atualizar para tentar novamente.</div>';
       toast('Erro ao carregar','err');
     });
   }
   tryLoad();
 }
 
-setInterval(function(){document.getElementById('clk').textContent=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})},1000);
+setInterval(function(){G('clk').textContent=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})},1000);
 
 /* ═══════════════════════════════════════════════════════════════════
    AUTO-REFRESH SILENCIOSO
@@ -2070,12 +1913,6 @@ var _autoTimer   = null;
 var _nextReload  = 0;
 var _countTick   = null;
 
-function _doSilentLoad(){
-  /* Reusa doLoad() mas sem mover o foco ou resetar filtros ativos */
-  doLoad();
-  _scheduleNext();
-}
-
 function _scheduleNext(){
   clearTimeout(_autoTimer);
   clearInterval(_countTick);
@@ -2083,18 +1920,17 @@ function _scheduleNext(){
 
   _autoTimer = setTimeout(function(){
     if(document.hidden){ /* aba em segundo plano — adia 30 s e tenta de novo */
-      _autoTimer = setTimeout(_doSilentLoad, 30000);
+      _autoTimer = setTimeout(function(){doLoad()}, 30000);
     } else {
-      _doSilentLoad();
+      doLoad();
     }
   }, AUTO_INTERVAL_MS);
 
-  /* countdown no relógio: "05:00 → prox." */
   _countTick = setInterval(function(){
     var rem = Math.max(0, Math.round((_nextReload - Date.now()) / 1000));
     var mm  = String(Math.floor(rem / 60)).padStart(2,'0');
     var ss  = String(rem % 60).padStart(2,'0');
-    var clkEl = document.getElementById('auto-countdown');
+    var clkEl = G('auto-countdown');
     if(clkEl) clkEl.textContent = mm+':'+ss;
   }, 1000);
 }
@@ -2102,16 +1938,13 @@ function _scheduleNext(){
 /* retoma ao voltar para a aba */
 document.addEventListener('visibilitychange', function(){
   if(!document.hidden && _nextReload && Date.now() >= _nextReload){
-    _doSilentLoad();
+    doLoad();
   }
 });
 
-/* inicia o ciclo após o primeiro carregamento */
 window.addEventListener('load', function(){
   doLoad();
-  _scheduleNext();
 });
-
 </script>
 </body>
 </html>
