@@ -238,6 +238,53 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
   #people-modal-overlay .people-modal-table .badge{max-width:calc(100% - 84px)}
 }
 
+/* ── Modal Chegaram Hoje ── */
+#hoje-modal-overlay .modal-card{max-width:780px;width:min(780px,calc(100vw - 24px));max-height:88vh;border-radius:10px}
+#hoje-modal-overlay .modal-h{background:var(--navy);padding:16px 20px;min-height:68px}
+#hoje-modal-overlay .modal-h h4{font-size:17px;font-weight:700}
+#hoje-modal-overlay .modal-b{padding:14px 16px}
+#hoje-modal-overlay .hj-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+#hoje-modal-overlay .hj-stat{background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:10px;text-align:center}
+#hoje-modal-overlay .hj-stat b{display:block;font-family:'Space Grotesk';font-size:22px;font-weight:700;color:var(--navy)}
+#hoje-modal-overlay .hj-stat span{font-size:9px;font-family:'JetBrains Mono';text-transform:uppercase;letter-spacing:.04em;color:var(--ink3)}
+#hoje-modal-overlay .hj-filter{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+#hoje-modal-overlay .hj-filter input,#hoje-modal-overlay .hj-filter select{font-family:'Inter';font-size:12px;padding:6px 10px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:4px;min-height:34px;flex:1;min-width:120px}
+#hoje-modal-overlay .hj-filter input:focus,#hoje-modal-overlay .hj-filter select:focus{outline:2px solid var(--amber);outline-offset:-1px}
+#hoje-modal-overlay .hj-table-wrap{overflow:auto;max-height:52vh;-webkit-overflow-scrolling:touch}
+#hoje-modal-overlay table{width:100%;border-collapse:collapse;font-size:11px}
+#hoje-modal-overlay thead th{position:sticky;top:0;background:var(--navy);color:#fff;font-family:'JetBrains Mono';font-size:8px;text-transform:uppercase;letter-spacing:.04em;text-align:left;padding:9px 10px;z-index:2}
+#hoje-modal-overlay tbody td{padding:8px 10px;border-bottom:1px solid #EEF2F6;vertical-align:middle}
+#hoje-modal-overlay tbody tr:hover td{background:#F8FAFC}
+#hoje-modal-overlay .hj-func-header{background:var(--paper)!important;font-family:'JetBrains Mono';font-size:9px;font-weight:700;color:var(--ink2);letter-spacing:.06em;text-transform:uppercase}
+#hoje-modal-overlay .hj-func-header td{border-top:2px solid var(--line)!important;padding:7px 10px!important}
+@media(max-width:640px){
+  #hoje-modal-overlay{padding:8px}
+  #hoje-modal-overlay .modal-card{width:100%;max-width:none!important;max-height:calc(100vh - 16px);border-radius:8px;display:flex;flex-direction:column}
+  #hoje-modal-overlay .modal-h{padding:12px 14px;flex-shrink:0}
+  #hoje-modal-overlay .modal-h h4{font-size:14px}
+  #hoje-modal-overlay .modal-b{padding:10px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+  #hoje-modal-overlay .hj-summary{grid-template-columns:repeat(3,1fr);gap:6px;flex-shrink:0}
+  #hoje-modal-overlay .hj-stat b{font-size:18px}
+  #hoje-modal-overlay .hj-filter{flex-direction:column;flex-shrink:0}
+  #hoje-modal-overlay .hj-filter input,#hoje-modal-overlay .hj-filter select{min-width:0;width:100%}
+  #hoje-modal-overlay .hj-table-wrap{max-height:none;flex:1;min-height:0}
+  #hoje-modal-overlay table{border-collapse:separate;border-spacing:0 6px}
+  #hoje-modal-overlay thead{display:none}
+  #hoje-modal-overlay tbody{display:block;width:100%}
+  #hoje-modal-overlay tbody tr{display:block;width:100%;border:1px solid var(--line);border-radius:7px;background:#fff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  #hoje-modal-overlay .hj-func-header{display:none}
+  #hoje-modal-overlay tbody td{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;width:100%;padding:7px 9px!important;border-bottom:1px solid #EEF2F6!important;line-height:1.35;overflow-wrap:anywhere}
+  #hoje-modal-overlay tbody td:last-child{border-bottom:none!important}
+  #hoje-modal-overlay tbody td::before{content:attr(data-label);flex:0 0 76px;text-align:left;font-family:'JetBrains Mono';font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#94A3B8;padding-top:1px}
+  #hoje-modal-overlay tbody td > *{max-width:calc(100% - 86px);overflow-wrap:anywhere}
+  #hoje-modal-overlay .badge{white-space:normal;text-align:right}
+}
+@media(max-width:360px){
+  #hoje-modal-overlay{padding:5px}
+  #hoje-modal-overlay .modal-b{padding:7px}
+  #hoje-modal-overlay tbody td::before{flex-basis:66px}
+}
+
 /* Modal de Presença Única */
 #unicos-modal-overlay .modal-card{max-width:760px}
 #unicos-modal-overlay .modal-h{background:#7C3AED}
@@ -702,6 +749,30 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 <div id="print-db-section" style="display:none"></div>
 <footer style="max-width:1280px;margin:0 auto;padding:12px 14px;font-size:9px;color:var(--ink3);font-family:'JetBrains Mono';border-top:1px solid var(--line)">RDO - Painel de Mao de Obra</footer>
 <div id="toast"></div>
+
+<div id="hoje-modal-overlay" class="modal-overlay" onclick="if(event.target===this)closeHojeModal()">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-h">
+      <div><h4 id="hoje-modal-title">👥 Quem Chegou Hoje</h4><div class="mt2" id="hoje-modal-sub">—</div></div>
+      <button class="modal-close" onclick="closeHojeModal()" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="modal-b">
+      <div class="hj-summary" id="hoje-modal-summary"></div>
+      <div class="hj-filter">
+        <input type="text" id="hj-q" placeholder="Buscar nome, função, empresa..." oninput="renderHojeModal()">
+        <select id="hj-func" onchange="renderHojeModal()"><option value="">Todas as funções</option></select>
+        <select id="hj-emp" onchange="renderHojeModal()"><option value="">Todas as empresas</option></select>
+        <select id="hj-pav" onchange="renderHojeModal()"><option value="">Todos os pavimentos</option></select>
+        <select id="hj-status" onchange="renderHojeModal()">
+          <option value="">Todos</option>
+          <option value="ativo">Com atividade</option>
+          <option value="ferias">Férias / Ausente</option>
+        </select>
+      </div>
+      <div class="hj-table-wrap" id="hoje-modal-body"></div>
+    </div>
+  </div>
+</div>
 
 <div id="unicos-modal-overlay" class="modal-overlay" onclick="if(event.target===this)closeUnicosModal()">
   <div class="modal-card" role="dialog" aria-modal="true">
@@ -1342,6 +1413,7 @@ function renderKPIs(day){
   var pctPrevisto=previsto>0?(comAtiv/previsto*100).toFixed(0):'0';
   G('kpis').innerHTML=[
     {i:'👷',l:'Pessoas trabalhando no dia',   v:comAtiv,           f:'de '+previsto+' previstos ('+pctPrevisto+'%)', c:'#059669', click:''},
+    {i:'🆕',l:'Chegaram Hoje',                v:(function(){var prev=PARSED.days.slice(SELECTED_DATE_IDX+1);var ant=new Set();prev.forEach(function(d){d.all.forEach(function(p){ant.add(norm(p.nome))})});return day.all.filter(function(p){return !ant.has(norm(p.nome))}).length})(), f:'1ª vez na obra — clique para ver',c:'var(--navy)', click:'openHojeModal()'},
     {i:'🌴',l:'De Ferias',      v:day.ferias.length, f:'excluidos do efetivo',              c:'var(--amber)', click:'openPeopleModal(\'ferias\')'},
     {i:'🚫',l:'Faltosos',       v:faltosos,          f:'sem atividade — excluidos',         c:'var(--red)',   click:'openPeopleModal(\'faltosos\')'},
     {i:'🏢',l:'Empresas',       v:empCnt,            f:'ativas hoje',                       c:'var(--blue)',  click:''},
@@ -1528,6 +1600,142 @@ function openFuncModal(funcKey){
   G('emp-modal-overlay').classList.add('on');
 }
 
+/* ═══════ MODAL "CHEGARAM HOJE" ═══════ */
+var _hojeData = [];  /* cache: pessoas que apareceram pela primeira vez no dia selecionado */
+
+function openHojeModal() {
+  var day = getSelectedDay();
+  if (!day) { toast('Selecione um dia primeiro', 'warn'); return; }
+
+  /* Dias ANTERIORES ao selecionado (todos os que vêm depois no array, pois days está em ordem decrescente) */
+  var selectedIdx = SELECTED_DATE_IDX;
+  var diasAnteriores = PARSED.days.slice(selectedIdx + 1); /* índices maiores = datas mais antigas */
+
+  /* Conjunto de nomes que já apareceram em algum dia anterior */
+  var nomesAnteriores = new Set();
+  diasAnteriores.forEach(function(d) {
+    d.all.forEach(function(p) {
+      nomesAnteriores.add(norm(p.nome));
+    });
+  });
+
+  /* "Chegou hoje" = está no dia selecionado E nunca apareceu antes */
+  var todosHoje = day.ativos.concat(day.ferias);
+  _hojeData = todosHoje.filter(function(p) {
+    return !nomesAnteriores.has(norm(p.nome));
+  });
+
+  var feriasCnt = _hojeData.filter(function(p) { return p.ferias; }).length;
+  var funcoesDistintas = uniq(_hojeData.map(function(p) { return p.funcao; })).length;
+  var empresasDistintas = uniq(_hojeData.map(function(p) { return p.empresa; })).length;
+
+  G('hoje-modal-title').textContent = '🆕 Chegaram em ' + (day.date || '—') + ' (1ª vez na obra)';
+  G('hoje-modal-sub').textContent =
+    _hojeData.length + ' pessoa(s) nova(s)' +
+    (feriasCnt ? ' · ' + feriasCnt + ' férias' : '') +
+    (diasAnteriores.length === 0 ? ' · (sem histórico anterior para comparar)' : '');
+
+  G('hoje-modal-summary').innerHTML =
+    '<div class="hj-stat"><b>' + _hojeData.length + '</b><span>Novos</span></div>' +
+    '<div class="hj-stat"><b>' + funcoesDistintas + '</b><span>Funções</span></div>' +
+    '<div class="hj-stat"><b>' + empresasDistintas + '</b><span>Empresas</span></div>';
+
+  /* popular filtros */
+  function fillSel(id, vals, def) {
+    var sel = G(id), cur = sel.value;
+    sel.innerHTML = '<option value="">' + def + '</option>' +
+      vals.map(function(v) { return '<option value="' + esc(v) + '">' + esc(v) + '</option>'; }).join('');
+    if (vals.indexOf(cur) > -1) sel.value = cur; else sel.value = '';
+  }
+  fillSel('hj-func', uniq(_hojeData.map(function(p) { return p.funcao; })), 'Todas as funções');
+  fillSel('hj-emp',  uniq(_hojeData.map(function(p) { return p.empresa; })), 'Todas as empresas');
+  var pavs = PAVIMENTOS.filter(function(v) { return _hojeData.some(function(p) { return p.pav === v; }); });
+  fillSel('hj-pav', pavs, 'Todos os pavimentos');
+
+  G('hj-q').value = '';
+  G('hj-status').value = '';
+
+  renderHojeModal();
+  G('hoje-modal-overlay').classList.add('on');
+}
+
+function closeHojeModal() { G('hoje-modal-overlay').classList.remove('on'); }
+
+function renderHojeModal() {
+  var q    = norm(G('hj-q').value);
+  var func = G('hj-func').value;
+  var emp  = G('hj-emp').value;
+  var pav  = G('hj-pav').value;
+  var st   = G('hj-status').value;
+
+  var lista = _hojeData.filter(function(p) {
+    if (func && p.funcao !== func) return false;
+    if (emp  && p.empresa !== emp) return false;
+    if (pav  && p.pav !== pav) return false;
+    if (st === 'ativo'   && (!p.atividade || p.ferias)) return false;
+    if (st === 'ferias'  && !p.ferias) return false;
+    if (q) {
+      var full = norm(p.nome + ' ' + p.funcao + ' ' + p.empresa + ' ' + p.atividade + ' ' + p.regiao);
+      if (full.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+
+  lista.sort(function(a, b) {
+    var fa = a.funcao || '', fb = b.funcao || '';
+    if (fa !== fb) return fa.localeCompare(fb, 'pt-BR');
+    return (a.nome || '').localeCompare(b.nome || '', 'pt-BR');
+  });
+
+  var el = G('hoje-modal-body');
+  if (!lista.length) {
+    el.innerHTML = '<div class="modal-empty">Nenhuma pessoa encontrada com os filtros aplicados.</div>';
+    return;
+  }
+
+  var h = '<table><thead><tr>' +
+    '<th>#</th><th>Nome</th><th>Função</th><th>Empresa</th>' +
+    '<th>Pavimento</th><th>Local</th><th>Atividade / Status</th>' +
+    '</tr></thead><tbody>';
+
+  var num = 1, curFunc = null;
+  lista.forEach(function(p) {
+    if (p.funcao !== curFunc) {
+      curFunc = p.funcao;
+      var cntFunc = lista.filter(function(x) { return x.funcao === curFunc; }).length;
+      h += '<tr class="hj-func-header">' +
+        '<td colspan="7" data-label="">⚒️ ' + esc(curFunc) + ' — ' + cntFunc + ' pessoa(s)</td>' +
+        '</tr>';
+    }
+
+    var statusCell, statusStyle = '';
+    if (p.ferias) {
+      statusCell = '<span class="badge badge-ferias">' + esc(p.motivo || 'FÉRIAS') + '</span>';
+      statusStyle = 'background:#FFFBEB';
+    } else if (p.atividade) {
+      statusCell = '<span class="badge badge-green">ATIVO</span>' +
+        '<div style="margin-top:3px;color:var(--ink2);font-size:10px;line-height:1.4">' + esc(p.atividade) + '</div>';
+    } else {
+      statusCell = '<span class="badge badge-red">FALTOSO</span>' +
+        (p.atividadeRaw ? '<div style="margin-top:3px;color:var(--ink3);font-size:10px;font-style:italic">' + esc(p.atividadeRaw) + '</div>' : '');
+      statusStyle = 'background:#FFF5F5';
+    }
+
+    h += '<tr style="' + statusStyle + '">' +
+      '<td data-label="#" class="nr" style="color:#94A3B8;font-family:JetBrains Mono">' + num++ + '</td>' +
+      '<td data-label="Nome" style="font-weight:600;white-space:nowrap">' + esc(p.nome) + '</td>' +
+      '<td data-label="Função" style="color:var(--ink2)">' + esc(p.funcao) + '</td>' +
+      '<td data-label="Empresa"><span class="badge badge-gray">' + esc(p.empresa) + '</span></td>' +
+      '<td data-label="Pavimento">' + pavBadge(p.pav) + '</td>' +
+      '<td data-label="Local" style="color:var(--ink2);font-size:10px">' + esc(p.regiao || '—') + '</td>' +
+      '<td data-label="Status / Atividade">' + statusCell + '</td>' +
+    '</tr>';
+  });
+
+  h += '</tbody></table>';
+  el.innerHTML = h;
+}
+
 function closeEmpModal(){
   G('emp-modal-overlay').classList.remove('on');
   G('emp-modal-overlay').querySelector('.modal-h').style.background='';
@@ -1536,7 +1744,7 @@ function closeEmpModal(){
 function closePavModal(){closeEmpModal()}
 
 document.addEventListener('keydown',function(e){
-  if(e.key==='Escape'){closeEmpModal();closePeopleModal();closeUnicosModal();closePrintModal()}
+  if(e.key==='Escape'){closeEmpModal();closePeopleModal();closeUnicosModal();closePrintModal();closeHojeModal()}
 });
 
 /* ═══════ MODAL FALTOSOS / FÉRIAS ═══════ */
