@@ -341,25 +341,41 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 .prod-list .pd{white-space:nowrap;font-family:'JetBrains Mono';color:var(--ink3);font-weight:700;margin-right:4px}
 
 @media print{
-  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  body{background:#fff!important;padding:0!important}
-  .topbar,#toast,footer,.modal-overlay{display:none!important}
-  .container{display:block!important;max-width:100%!important;padding:0 7mm!important}
+  @page{size:A4 portrait;margin:8mm 8mm 10mm 8mm}
+  *{box-sizing:border-box!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  html,body{width:100%!important;min-width:0!important;margin:0!important;padding:0!important;background:#fff!important}
+  body{font-family:'Inter',Arial,sans-serif!important;color:#111827!important}
+  .topbar,#toast,footer,.modal-overlay,.container{display:none!important}
   .print-header{display:none!important}
   #print-db-section{display:none!important}
-  body.custom-print .container{display:none!important}
-  body.custom-print .print-header{display:block!important;padding:10px 0 8px;border-bottom:3px solid var(--navy);margin-bottom:14px}
-  body.custom-print .print-header h1{font-family:'Space Grotesk';font-size:18px;font-weight:700;color:var(--navy)}
-  body.custom-print .print-header p{font-family:'JetBrains Mono';font-size:10px;color:#475569;margin-top:3px}
-  body.custom-print #print-db-section{display:block!important;padding:0 7mm}
-  body.custom-print #print-db-section .cd{border:1px solid #ccc!important;margin-bottom:10px;page-break-inside:auto}
-  body.custom-print #print-db-section .cd-h{background:#f0f2f5!important;padding:8px 12px!important}
-  body.custom-print #print-db-section .cd-h h3{font-size:12px!important}
-  body.custom-print #print-db-section table.t{min-width:0!important;width:100%}
-  body.custom-print #print-db-section table.t th{background:#2a3f5f!important;position:static!important;font-size:8px!important;padding:5px 8px!important}
-  body.custom-print #print-db-section table.t td{padding:4px 8px!important;font-size:9px!important;border-bottom:1px solid #EEF2F6!important}
-  body.custom-print #print-db-section table.t tr{page-break-inside:avoid}
-  @page{size:A4 portrait;margin:10mm 0 12mm 0}
+  body.custom-print .print-header{display:block!important;width:100%!important;padding:0 0 7px!important;margin:0 0 9px!important;border-bottom:2px solid #1F3557!important}
+  body.custom-print .print-header h1{margin:0!important;font-family:'Space Grotesk',Arial,sans-serif!important;font-size:17px!important;line-height:1.2!important;font-weight:700!important;color:#1F3557!important}
+  body.custom-print .print-header p{margin:3px 0 0!important;font-family:'JetBrains Mono',monospace!important;font-size:8.5px!important;line-height:1.35!important;color:#475569!important}
+  body.custom-print #print-db-section{display:block!important;width:100%!important;margin:0!important;padding:0!important}
+  body.custom-print #print-db-section .cd{display:block!important;width:100%!important;margin:0 0 8px!important;border:1px solid #CBD5E1!important;border-radius:0!important;overflow:visible!important;page-break-inside:auto!important;background:#fff!important}
+  body.custom-print #print-db-section .cd-h{display:flex!important;width:100%!important;min-height:0!important;padding:6px 8px!important;margin:0!important;background:#F1F5F9!important;border-bottom:1px solid #CBD5E1!important;align-items:center!important}
+  body.custom-print #print-db-section .cd-h h3{margin:0!important;font-family:'Space Grotesk',Arial,sans-serif!important;font-size:10.5px!important;line-height:1.2!important;color:#1F3557!important}
+  body.custom-print #print-db-section .cd-h .mt{margin:0 0 0 auto!important;font-family:'JetBrains Mono',monospace!important;font-size:7.5px!important;line-height:1.2!important;color:#64748B!important}
+  body.custom-print #print-db-section table.t{display:table!important;width:100%!important;min-width:0!important;table-layout:fixed!important;border-collapse:collapse!important;margin:0!important}
+  body.custom-print #print-db-section table.t thead{display:table-header-group!important}
+  body.custom-print #print-db-section table.t tbody{display:table-row-group!important}
+  body.custom-print #print-db-section table.t tr{display:table-row!important;page-break-inside:avoid!important;break-inside:avoid!important}
+  body.custom-print #print-db-section table.t th{display:table-cell!important;position:static!important;background:#2A3F5F!important;color:#fff!important;font-family:'JetBrains Mono',monospace!important;font-size:7px!important;font-weight:700!important;line-height:1.15!important;padding:5px 5px!important;vertical-align:middle!important;white-space:normal!important;text-align:left!important;border:0!important}
+  body.custom-print #print-db-section table.t td{display:table-cell!important;font-size:7.8px!important;line-height:1.25!important;padding:4px 5px!important;vertical-align:top!important;white-space:normal!important;overflow-wrap:anywhere!important;border-bottom:1px solid #E2E8F0!important;color:#1E293B!important;background:#fff!important}
+  body.custom-print #print-db-section table.t tbody tr:last-child td{border-bottom:0!important}
+  body.custom-print #print-db-section table.t th:nth-child(1),body.custom-print #print-db-section table.t td:nth-child(1){width:4%}
+  body.custom-print #print-db-section table.t th:nth-child(2),body.custom-print #print-db-section table.t td:nth-child(2){width:14%}
+  body.custom-print #print-db-section table.t th:nth-child(3),body.custom-print #print-db-section table.t td:nth-child(3){width:11%}
+  body.custom-print #print-db-section table.t th:nth-child(4),body.custom-print #print-db-section table.t td:nth-child(4){width:12%}
+  body.custom-print #print-db-section table.t th:nth-child(5),body.custom-print #print-db-section table.t td:nth-child(5){width:23%}
+  body.custom-print #print-db-section table.t th:nth-child(6),body.custom-print #print-db-section table.t td:nth-child(6){width:14%}
+  body.custom-print #print-db-section table.t th:nth-child(7),body.custom-print #print-db-section table.t td:nth-child(7){width:7%}
+  body.custom-print #print-db-section table.t th:nth-child(8),body.custom-print #print-db-section table.t td:nth-child(8){width:15%}
+  body.custom-print #print-db-section table.t .nr{font-family:'JetBrains Mono',monospace!important;text-align:center!important}
+  body.custom-print #print-db-section table.t tr[style*="background:#FEE2E2"] td{background:#FEE2E2!important}
+  body.custom-print #print-db-section table.t tr[style*="background:#FFF5F5"] td{background:#FFF5F5!important}
+  body.custom-print #print-db-section table.t tr[style*="background:#FEF3C7"] td{background:#FEF3C7!important}
+  body.custom-print #print-db-section table.t tr[style*="background:#FFFBEB"] td{background:#FFFBEB!important}
 }
 
 @media(max-width:900px){.gg{grid-template-columns:1fr}.bar-label{min-width:100px;max-width:100px}}
@@ -1365,18 +1381,18 @@ function executePrint(){
     '<p>Data: '+esc(day.date)+' \u00b7 Efetivo: '+ativos.length+' \u00b7 Faltosos: '+semAtiv.length+' \u00b7 F\u00e9rias: '+ferias.length+sf+' \u00b7 Impresso em '+fmtNow()+'</p>';
   var h='<div class="cd"><div class="cd-h"><h3>Equipe do dia \u2014 '+esc(day.date)+'</h3>'+
     '<span class="mt">'+ativos.length+' ativo(s)'+(semAtiv.length?' \u00b7 '+semAtiv.length+' faltoso(s)':'')+(ferias.length?' \u00b7 '+ferias.length+' f\u00e9rias':'')+'</span></div>'+
-    '<table class="t"><thead><tr><th>#</th><th>Nome</th><th>Fun\u00e7\u00e3o</th><th>Empresa</th><th>Atividade / Servi\u00e7o</th><th>Pav.</th><th>Local</th></tr></thead><tbody>';
+    '<table class="t"><thead><tr><th>#</th><th>Nome</th><th>Fun\u00e7\u00e3o</th><th>Empresa</th><th>Atividade / Servi\u00e7o</th><th>Produ\u00e7\u00e3o</th><th>Pav.</th><th>Local</th></tr></thead><tbody>';
   var num=1;
   ativos.forEach(function(p){
-    h+='<tr><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td><td style="color:#475569">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td style="white-space:normal">'+esc(p.atividade)+'</td><td>'+esc(p.pav||'\u2014')+'</td><td style="color:#475569">'+esc(p.regiao||'\u2014')+'</td></tr>';
+    h+='<tr><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td><td style="color:#475569">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td style="white-space:normal">'+esc(p.atividade||'\u2014')+'</td><td style="white-space:normal;font-weight:600">'+esc(p.prod||'\u2014')+'</td><td>'+esc(p.pav||'\u2014')+'</td><td style="color:#475569">'+esc(p.regiao||'\u2014')+'</td></tr>';
   });
   if(semAtiv.length){
-    h+='<tr style="background:#FEE2E2"><td colspan="7" style="font-family:JetBrains Mono;font-size:9px;font-weight:700;color:#B91C1C;text-transform:uppercase;padding:6px 10px">🚫 '+semAtiv.length+' FALTOSO(S)</td></tr>';
-    semAtiv.forEach(function(p){h+='<tr style="background:#FFF5F5"><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;color:#B91C1C">'+esc(p.nome)+'</td><td style="color:#991B1B">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td style="color:#94A3B8;font-style:italic">'+esc(p.atividadeRaw||'\u2014')+'</td><td>'+esc(p.pav||'\u2014')+'</td><td>'+esc(p.regiao||'\u2014')+'</td></tr>';});
+    h+='<tr style="background:#FEE2E2"><td colspan="8" style="font-family:JetBrains Mono;font-size:9px;font-weight:700;color:#B91C1C;text-transform:uppercase;padding:6px 10px">🚫 '+semAtiv.length+' FALTOSO(S)</td></tr>';
+    semAtiv.forEach(function(p){h+='<tr style="background:#FFF5F5"><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;color:#B91C1C">'+esc(p.nome)+'</td><td style="color:#991B1B">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td style="color:#94A3B8;font-style:italic">'+esc(p.atividadeRaw||'\u2014')+'</td><td style="color:#94A3B8">\u2014</td><td>'+esc(p.pav||'\u2014')+'</td><td>'+esc(p.regiao||'\u2014')+'</td></tr>';});
   }
   if(ferias.length){
     h+='<tr style="background:#FEF3C7"><td colspan="7" style="font-family:JetBrains Mono;font-size:9px;font-weight:700;color:#92400E;text-transform:uppercase;padding:6px 10px">🌴 '+ferias.length+' FÉRIAS / AUSENTE(S)</td></tr>';
-    ferias.forEach(function(p){h+='<tr style="background:#FFFBEB"><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;color:#92400E">'+esc(p.nome)+'</td><td style="color:#B45309">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td colspan="3"><span style="font-family:JetBrains Mono;font-size:9px;font-weight:700;background:#FEF3C7;padding:2px 6px;border-radius:10px;color:#92400E">'+esc(p.motivo||'F\u00c9RIAS')+'</span></td></tr>';});
+    ferias.forEach(function(p){h+='<tr style="background:#FFFBEB"><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;color:#92400E">'+esc(p.nome)+'</td><td style="color:#B45309">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td colspan="4"><span style="font-family:JetBrains Mono;font-size:9px;font-weight:700;background:#FEF3C7;padding:2px 6px;border-radius:10px;color:#92400E">'+esc(p.motivo||'F\u00c9RIAS')+'</span></td></tr>';});
   }
   h+='</tbody></table></div>';
   var sec=G('print-db-section');
