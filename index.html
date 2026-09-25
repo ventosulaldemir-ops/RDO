@@ -36,8 +36,6 @@ input,select,button{-webkit-appearance:none;appearance:none}
 .tag-rdo{font-family:'JetBrains Mono';font-size:8px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;background:#059669;color:#fff;padding:2px 7px;border-radius:2px;margin-right:6px}
 .date-bar{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--w);border:1px solid var(--line);border-radius:4px;margin-bottom:14px;flex-wrap:wrap}
 .date-bar label{font-family:'JetBrains Mono';font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);white-space:nowrap}
-.date-bar select{font-family:'Inter';font-size:13px;padding:8px 12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:3px;min-height:38px;flex:1;min-width:180px;max-width:280px}
-.date-bar select:focus{outline:2px solid var(--amber);outline-offset:-1px}
 .date-bar .date-nav{display:flex;align-items:center;gap:4px}
 .date-bar .date-nav button{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);background:var(--w);color:var(--navy);border-radius:3px;cursor:pointer;transition:all .15s;font-size:14px;line-height:1;padding:0}
 .date-bar .date-nav button:hover{background:var(--paper);border-color:var(--navy)}
@@ -53,15 +51,36 @@ input,select,button{-webkit-appearance:none;appearance:none}
 .date-dd-item.sel{background:var(--navy);color:#fff}
 #hist-box{max-height:420px;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .kr{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+/* KPIs do dia: 6 cards compactos à esquerda (3×2) + card de produção em destaque à direita,
+   espelhando a divisão 1.618fr/1fr do .gg abaixo — o card 📐 alinha com a coluna "Por empresa" */
+@media(min-width:901px){
+  #kpis{grid-template-columns:1.618fr 1fr;gap:14px}
+  #kpis .kpis-left{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;grid-auto-rows:1fr}
+  .kp-feature{display:flex;flex-direction:column;justify-content:center;background:linear-gradient(135deg,rgba(8,145,178,.10),rgba(8,145,178,.03) 55%,#fff)!important;padding:16px 18px!important}
+  .kp-feature .kl{color:#0E7490!important}
+  .kp-feature .kv{font-size:36px!important;color:var(--navy)!important;margin:2px 0 4px!important}
+  .kp-feature .kf{margin-top:2px}
+}
+@media(max-width:900px){#kpis .kpis-left{display:contents}}
+/* Mini-ranking dentro do card de produção */
+.kp-mini{margin-top:12px;padding-top:10px;border-top:1px dashed rgba(8,145,178,.25);display:flex;flex-direction:column;gap:6px}
+.kp-mini-row{display:grid;grid-template-columns:minmax(70px,110px) 1fr auto;align-items:center;gap:8px}
+.kp-mini-row .nm{font-family:'JetBrains Mono';font-size:9px;color:var(--ink2);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kp-mini-row .tr{height:10px;background:rgba(8,145,178,.12);border-radius:99px;overflow:hidden}
+.kp-mini-row .fl{height:100%;border-radius:99px;background:linear-gradient(90deg,#0891B2,#22D3EE)}
+.kp-mini-row .vl{font-family:'JetBrains Mono';font-size:10px;font-weight:700;color:#0E7490;white-space:nowrap}
+#kpis.kpi-auto{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+/* Impede que conteúdo largo estoure as colunas do grid principal */
+.gg>div{min-width:0}
 .kp{background:var(--w);border:1px solid var(--line);padding:14px;position:relative;overflow:hidden;border-radius:4px;transition:box-shadow .2s}
 .kp:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
 .kp.kp-click{cursor:pointer;transition:box-shadow .2s,transform .12s}
-.kp.kp-click:hover{box-shadow:0 6px 20px rgba(0,0,0,.13);transform:translateY(-2px)}
-.kp.kp-click:active{transform:translateY(0)}
+.kp.kp-click:hover{box-shadow:0 6px 20px rgba(0,0,0,.13)}
+.kp.kp-click:active{box-shadow:0 4px 16px rgba(0,0,0,.08)}
 .kp.kp-click::after{content:'↗';position:absolute;top:8px;right:10px;font-size:10px;opacity:.35;font-family:'JetBrains Mono'}
 .kp::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:var(--kc,var(--navy))}
 .kp .ki{font-size:18px;margin-bottom:6px}
-.kp .kl{font-family:'JetBrains Mono';font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:4px}
+.kp .kl{font-family:'JetBrains Mono';font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:4px;min-height:27px}
 .kp .kv{font-family:'Space Grotesk';font-size:26px;font-weight:700;color:var(--navy);line-height:1}
 .kp .kf{font-size:10px;color:var(--ink2);margin-top:5px}
 .cd{background:var(--w);border:1px solid var(--line);border-radius:4px;margin-bottom:14px;overflow:hidden}
@@ -72,7 +91,6 @@ input,select,button{-webkit-appearance:none;appearance:none}
 .cd-t{display:flex;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--w);flex-wrap:wrap;align-items:center}
 .cd-t input,.cd-t select{font-family:'Inter';font-size:13px;padding:8px 10px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:3px;min-height:38px;flex:1;min-width:130px}
 .cd-t input:focus,.cd-t select:focus{outline:2px solid var(--amber);outline-offset:-1px}
-.cd-t .ct{font-family:'JetBrains Mono';font-size:9px;color:var(--ink3);white-space:nowrap;width:100%;text-align:right;margin-top:2px}
 table.t{width:100%;border-collapse:collapse;font-size:12px;min-width:620px}
 table.t th{position:sticky;top:0;background:var(--navy);color:#fff;font-family:'JetBrains Mono';font-weight:500;font-size:9px;letter-spacing:.04em;text-transform:uppercase;text-align:left;padding:9px 12px;white-space:nowrap;z-index:2;cursor:pointer;user-select:none}
 table.t th:hover{background:var(--navy2)}
@@ -153,12 +171,6 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 .modal-empty{text-align:center;color:var(--ink3);font-size:12px;padding:20px 0}
 
 /* ── modal de impressão ── */
-.pm-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
-.pm-row:last-child{border-bottom:none}
-.pm-row label{font-size:12px;color:var(--ink);flex:1;cursor:pointer}
-.pm-row select{font-family:'Inter';font-size:12px;padding:6px 10px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:3px;min-height:34px;flex:1}
-.pm-row select:focus{outline:2px solid var(--amber);outline-offset:-1px}
-.pm-check{width:16px;height:16px;accent-color:var(--navy);cursor:pointer;flex-shrink:0}
 .pm-section{font-family:'JetBrains Mono';font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);padding:10px 0 4px}
 .pm-preview{font-family:'JetBrains Mono';font-size:10px;color:var(--ink2);padding:8px 12px;background:var(--paper);border-radius:3px;margin-top:8px;border:1px solid var(--line)}
 .pm-checklist{display:flex;flex-wrap:wrap;gap:6px;padding:6px 0}
@@ -378,9 +390,23 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
   body.custom-print #print-db-section table.t tr[style*="background:#FFFBEB"] td{background:#FFFBEB!important}
 }
 
+
+/* Produção por empresa (dia único e período) */
+.prod-empresa-tools{display:flex;gap:6px;padding:10px 14px 2px;border-bottom:1px solid var(--line)}
+.prod-unit-tab{border:1px solid var(--line);background:#fff;color:var(--ink2);border-radius:7px;padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;cursor:pointer}
+.prod-unit-tab.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.prod-empresa-box{padding:10px 14px 14px}
+.prod-empresa-row{display:grid;grid-template-columns:150px minmax(120px,1fr) 80px;align-items:center;gap:10px;margin:6px 0}
+.prod-empresa-name{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink2);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prod-empresa-track{height:14px;background:#F1F5F9;border-radius:5px;overflow:hidden}
+.prod-empresa-fill{height:100%;border-radius:5px;min-width:2px}
+.prod-empresa-val{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:800;color:var(--navy);white-space:nowrap}
+.prod-empresa-empty{padding:14px;color:var(--ink3);font-size:11px}
+@media(max-width:640px){.prod-empresa-row{grid-template-columns:105px minmax(80px,1fr) 62px;gap:6px}.prod-empresa-name{font-size:8px}.prod-empresa-val{font-size:8px}}
+
 @media(max-width:900px){.gg{grid-template-columns:1fr}.bar-label{min-width:100px;max-width:100px}}
 .cd-b.can-scroll::after{content:'';position:sticky;top:0;right:0;float:right;width:18px;height:100%;margin-left:-18px;pointer-events:none;background:linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,.9));display:block}
-@media(max-width:640px){table.t th{top:var(--topbar-h,52px)}.kr{grid-template-columns:repeat(2,1fr)}.chart-wrap{padding:8px 6px}.chart-wrap svg{max-height:140px;max-width:100vw}}
+@media(max-width:640px){table.t th{top:var(--topbar-h,52px)}.kr,#kpis{grid-template-columns:repeat(2,1fr)}.chart-wrap{padding:8px 6px}.chart-wrap svg{max-height:140px;max-width:100vw}}
 
 @media(max-width:480px){
   html{scroll-padding-top:52px}
@@ -395,7 +421,8 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
   .chip{font-size:7.5px;padding:2px 5px}
   .container{padding:6px 5px}
   .sec-h h2{font-size:13px}
-  .kr{grid-template-columns:repeat(2,1fr);gap:5px;margin-bottom:8px}
+  .kr,#kpis{grid-template-columns:repeat(2,1fr);gap:5px;margin-bottom:8px}
+  #kpis .kl,.kp .kl{min-height:0}
   .kp{padding:7px 8px}
   .kp .ki{font-size:12px;margin-bottom:2px}
   .kp .kv{font-size:15px}
@@ -408,7 +435,6 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
   .cd-t{flex-direction:column;padding:5px 7px;gap:4px}
   .cd-t input,.cd-t select{width:100%;font-size:13px;padding:8px;min-height:38px}
   .date-bar{flex-direction:column;align-items:stretch;padding:7px 9px;gap:5px;margin-bottom:8px}
-  .date-bar select{width:100%;font-size:13px;min-height:36px}
   .date-dd-wrap{width:100%;max-width:100%}
   .date-dd-btn{font-size:13px;min-height:36px}
   .date-dd-panel{max-height:220px}
@@ -446,168 +472,155 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
   table.t td.nr{text-align:right}
 }
 @media(max-width:360px){
-  .kr{grid-template-columns:1fr}
+  .kr,#kpis{grid-template-columns:1fr}
   .btn span.btn-label{display:none}
   .btn{padding:8px;min-width:36px;justify-content:center}
 }
 </style>
 
-<style id="mobile-overlap-fix">
-/* =========================================================
-   MOBILE OVERLAP FIX — somente layout, sem alterar JS/HTML
-   ========================================================= */
-@media (max-width: 560px) {
-
-  /* Evita que o conteúdo interno force a largura da tela */
-  html, body {
-    max-width: 100%;
-    overflow-x: hidden;
+<style id="prod-modal-style">
+  #prod-month-modal-overlay .modal-card{max-width:1100px;width:min(1100px,calc(100vw - 24px));max-height:90vh;border-radius:10px}
+  #prod-month-modal-overlay .modal-h{background:#0891B2;padding:15px 18px;min-height:64px;align-items:center}
+  #prod-month-modal-overlay .modal-h h4{font-size:16px;line-height:1.2}
+  #prod-month-modal-overlay .modal-h-actions{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+  #prod-month-modal-overlay .modal-print-btn{font-family:'JetBrains Mono';font-size:9px;font-weight:700;background:#fff;color:#0E7490;border:0;border-radius:3px;padding:7px 10px;cursor:pointer;min-height:30px}
+  #prod-month-modal-overlay .modal-print-btn:hover{background:#ECFEFF}
+  #prod-month-modal-overlay .modal-b{padding:12px 14px}
+  .pm-prod-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:12px}
+  .pm-prod-stat{padding:9px 10px;background:var(--paper);border:1px solid #E5EAF0;border-radius:4px;min-width:0}
+  .pm-prod-stat .p-l{font-family:'JetBrains Mono';font-size:8px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink3);margin-bottom:3px}
+  .pm-prod-stat .p-v{font-family:'Space Grotesk';font-size:18px;font-weight:700;color:var(--navy);line-height:1.1}
+  .pm-prod-stat .p-f{font-size:8px;color:var(--ink2);margin-top:3px;line-height:1.3}
+  .pm-prod-filters{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+  .pm-prod-filters input,.pm-prod-filters select{font-family:'Inter';font-size:12px;padding:7px 10px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:3px;min-height:34px;flex:1;min-width:150px}
+  .pm-prod-break{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;background:#E0F7FA;border:1px solid #BCE8EE;border-bottom:0;color:#0E7490;font-family:'JetBrains Mono';font-size:9px}
+  .pm-prod-table-wrap{overflow:auto;max-height:48vh;-webkit-overflow-scrolling:touch;border:1px solid #BCE8EE;border-top:0}
+  .pm-prod-table{width:100%;border-collapse:collapse;font-size:11px;min-width:980px}
+  .pm-prod-table th{position:sticky;top:0;background:#E0F7FA;color:#0E7490;font-family:'JetBrains Mono';font-size:8px;text-transform:uppercase;letter-spacing:.04em;text-align:left;padding:8px 9px;z-index:2}
+  .pm-prod-table td{padding:8px 9px;border-bottom:1px solid #EAF4F6;vertical-align:top}
+  .pm-prod-table tr:hover td{background:#F8FAFC}
+  .pm-prod-table .unit-val{font-family:'JetBrains Mono';font-weight:700;white-space:nowrap}
+  .pm-prod-table .prod-launch{font-weight:600;color:#0E7490;max-width:220px}
+  .pm-prod-empty{text-align:center;color:var(--ink3);font-size:12px;padding:24px}
+  @media(max-width:900px){
+    .pm-prod-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
   }
-
-  .topbar, .topbar * {
-    min-width: 0;
+  @media(max-width:640px){
+    #prod-month-modal-overlay{padding:8px}
+    #prod-month-modal-overlay .modal-card{width:100%;max-width:none!important;max-height:calc(100vh - 16px)}
+    #prod-month-modal-overlay .modal-h{padding:12px 14px;min-height:58px}
+    #prod-month-modal-overlay .modal-h h4{font-size:14px}
+    #prod-month-modal-overlay .modal-h-actions{gap:4px}
+    #prod-month-modal-overlay .modal-print-btn{font-size:8px;padding:6px 8px}
+    #prod-month-modal-overlay .modal-b{padding:10px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+    .pm-prod-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;flex-shrink:0}
+    .pm-prod-stat{padding:8px}
+    .pm-prod-stat .p-v{font-size:16px}
+    .pm-prod-filters{flex-direction:column;flex-shrink:0}
+    .pm-prod-filters input,.pm-prod-filters select{width:100%;min-width:0}
+    .pm-prod-table-wrap{max-height:none;flex:1;min-height:0}
+    .pm-prod-table{min-width:0;border-collapse:separate;border-spacing:0 6px;font-size:11px}
+    .pm-prod-table thead{display:none}
+    .pm-prod-table tbody{display:block;width:100%}
+    .pm-prod-table tr{display:block;width:100%;border:1px solid var(--line);border-radius:7px;background:#fff;margin-bottom:7px;overflow:hidden}
+    .pm-prod-table td{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;width:100%;padding:7px 9px!important;border-bottom:1px solid #EEF2F6;line-height:1.35;overflow-wrap:anywhere}
+    .pm-prod-table td:last-child{border-bottom:none}
+    .pm-prod-table td::before{content:attr(data-label);flex:0 0 88px;text-align:left;font-family:'JetBrains Mono';font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#94A3B8;padding-top:1px}
+    .pm-prod-table td > *{max-width:calc(100% - 98px);overflow-wrap:anywhere}
   }
+  @page{size:A4 landscape;margin:10mm 9mm}
+  @media print{
+    body.monthly-prod-print{background:#fff!important;color:#111827!important}
+    body.monthly-prod-print .topbar,body.monthly-prod-print .container,body.monthly-prod-print footer{display:none!important}
+    body.monthly-prod-print .print-header{display:block!important;width:100%!important;padding:0 0 6px!important;margin:0 0 8px!important;border-bottom:2px solid #1F3557!important}
+    body.monthly-prod-print .print-header h1{margin:0!important;font-family:'Space Grotesk',Arial,sans-serif!important;font-size:16px!important;line-height:1.15!important;font-weight:700!important;color:#1F3557!important}
+    body.monthly-prod-print .print-header p{margin:3px 0 0!important;font-family:'JetBrains Mono',monospace!important;font-size:7.5px!important;line-height:1.25!important;color:#475569!important}
+    body.monthly-prod-print #print-db-section{display:block!important;width:100%!important;margin:0!important;padding:0!important}
+    body.monthly-prod-print .monthly-print-report{width:100%!important;font-family:Arial,sans-serif!important}
+    body.monthly-prod-print .monthly-print-report .mpr-summary{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:6px!important;margin:0 0 9px!important}
+    body.monthly-prod-print .monthly-print-report .mpr-group{border:1px solid #CBD5E1!important;border-radius:4px!important;overflow:hidden!important;break-inside:avoid!important}
+    body.monthly-prod-print .monthly-print-report .mpr-group-title{padding:4px 6px!important;background:#1F3557!important;color:#fff!important;font-size:8px!important;font-weight:700!important;letter-spacing:.04em!important;text-transform:uppercase!important}
+    body.monthly-prod-print .monthly-print-report .mpr-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important}
+    body.monthly-prod-print .monthly-print-report .mpr-stat{padding:5px 6px!important;border-right:1px solid #E2E8F0!important;border-bottom:1px solid #E2E8F0!important;min-height:42px!important}
+    body.monthly-prod-print .monthly-print-report .mpr-stat:nth-child(2n){border-right:0!important}
+    body.monthly-prod-print .monthly-print-report .mpr-stat:nth-last-child(-n+2){border-bottom:0!important}
+    body.monthly-prod-print .monthly-print-report .mpr-label{font-size:6.5px!important;color:#64748B!important;font-weight:700!important;text-transform:uppercase!important;letter-spacing:.03em!important}
+    body.monthly-prod-print .monthly-print-report .mpr-val{font-size:11px!important;line-height:1.1!important;font-weight:700!important;color:#0F172A!important;margin-top:2px!important}
+    body.monthly-prod-print .monthly-print-report .mpr-fact{font-size:5.8px!important;color:#94A3B8!important;margin-top:2px!important}
+    body.monthly-prod-print .monthly-print-report .mpr-section-title{font-size:8px!important;font-weight:700!important;color:#1F3557!important;margin:5px 0 4px!important}
+    body.monthly-prod-print .monthly-print-report table{width:100%!important;border-collapse:collapse!important;table-layout:fixed!important;font-size:6.3px!important}
+    body.monthly-prod-print .monthly-print-report thead{display:table-header-group!important}
+    body.monthly-prod-print .monthly-print-report tr{break-inside:avoid!important;page-break-inside:avoid!important}
+    body.monthly-prod-print .monthly-print-report th{background:#2A3F5F!important;color:#fff!important;font-size:5.8px!important;font-weight:700!important;padding:3px 3px!important;text-align:left!important;line-height:1.1!important}
+    body.monthly-prod-print .monthly-print-report td{font-size:6.1px!important;padding:3px 3px!important;line-height:1.15!important;vertical-align:top!important;border-bottom:1px solid #E2E8F0!important;overflow-wrap:anywhere!important}
+    body.monthly-prod-print .monthly-print-report tbody tr:nth-child(even) td{background:#F8FAFC!important}
+    body.monthly-prod-print .monthly-print-report table{font-size:7px!important}
+    body.monthly-prod-print .monthly-print-report th{font-size:6.4px!important;padding:4px 4px!important}
+    body.monthly-prod-print .monthly-print-report td{font-size:6.8px!important;padding:4px 4px!important;line-height:1.2!important}
+    body.monthly-prod-print .monthly-print-report th:nth-child(1),body.monthly-prod-print .monthly-print-report td:nth-child(1){width:2.5%!important}
+    body.monthly-prod-print .monthly-print-report th:nth-child(2),body.monthly-prod-print .monthly-print-report td:nth-child(2){width:7%!important;white-space:nowrap!important}
+    body.monthly-prod-print .monthly-print-report th:nth-child(3),body.monthly-prod-print .monthly-print-report td:nth-child(3){width:10%!important}
+    body.monthly-prod-print .monthly-print-report th:nth-child(4),body.monthly-prod-print .monthly-print-report td:nth-child(4){width:7%!important}
+    body.monthly-prod-print .monthly-print-report th:nth-child(5),body.monthly-prod-print .monthly-print-report td:nth-child(5){width:8%!important}
+    body.monthly-prod-print .monthly-print-report th:nth-child(6),body.monthly-prod-print .monthly-print-report td:nth-child(6){width:5%!important}
+    body.monthly-prod-print .monthly-print-report th:nth-child(7),body.monthly-prod-print .monthly-print-report td:nth-child(7){width:10%!important}
+    body.monthly-prod-print .monthly-print-report th:nth-child(8),body.monthly-prod-print .monthly-print-report td:nth-child(8){width:30%!important}
+    body.monthly-prod-print .monthly-print-report th:nth-child(9),body.monthly-prod-print .monthly-print-report td:nth-child(9){width:6%!important;text-align:right!important}
+    body.monthly-prod-print .monthly-print-report th:nth-child(10),body.monthly-prod-print .monthly-print-report td:nth-child(10){width:6%!important;text-align:right!important}
+    body.monthly-prod-print .monthly-print-report th:nth-child(11),body.monthly-prod-print .monthly-print-report td:nth-child(11){width:8%!important;text-align:right!important}
+    body.monthly-prod-print .monthly-print-report .mpr-emp-table th:nth-child(1),body.monthly-prod-print .monthly-print-report .mpr-emp-table td:nth-child(1){width:5%!important;text-align:center!important}
+    body.monthly-prod-print .monthly-print-report .mpr-emp-table th:nth-child(2),body.monthly-prod-print .monthly-print-report .mpr-emp-table td:nth-child(2){width:30%!important}
+    body.monthly-prod-print .monthly-print-report .mpr-emp-table th:nth-child(3),body.monthly-prod-print .monthly-print-report .mpr-emp-table td:nth-child(3){width:17%!important;text-align:right!important}
+    body.monthly-prod-print .monthly-print-report .mpr-emp-table th:nth-child(4),body.monthly-prod-print .monthly-print-report .mpr-emp-table td:nth-child(4){width:17%!important;text-align:right!important}
+    body.monthly-prod-print .monthly-print-report .mpr-emp-table th:nth-child(5),body.monthly-prod-print .monthly-print-report .mpr-emp-table td:nth-child(5){width:14%!important;text-align:right!important}
+    body.monthly-prod-print .monthly-print-report .mpr-emp-table th:nth-child(6),body.monthly-prod-print .monthly-print-report .mpr-emp-table td:nth-child(6){width:17%!important;text-align:right!important}
+    body.monthly-prod-print .monthly-print-report .mpr-emp-table td:nth-child(3),body.monthly-prod-print .monthly-print-report .mpr-emp-table td:nth-child(4),body.monthly-prod-print .monthly-print-report .mpr-emp-table td:nth-child(5){color:#334155!important}
+    body.monthly-prod-print .monthly-print-report td:nth-child(3){font-weight:600!important}
+    body.monthly-prod-print .monthly-print-report td:nth-child(8){color:#334155!important}
+    body.monthly-prod-print .monthly-print-report .mpr-summary{gap:8px!important;margin-bottom:10px!important}
+    body.monthly-prod-print .monthly-print-report .mpr-group-title{padding:5px 7px!important;font-size:8.5px!important}
+    body.monthly-prod-print .monthly-print-report .mpr-stat{padding:6px 7px!important;min-height:44px!important}
+    body.monthly-prod-print .monthly-print-report .mpr-val{font-size:11.5px!important}
+    body.monthly-prod-print .monthly-print-report .mpr-section-title{font-size:9px!important;margin:7px 0 5px!important}
+    body.monthly-prod-print .monthly-print-report tr:nth-child(even) td{background:#F8FAFC!important}
+  }</style>
 
-  /* Textos longos podem quebrar em vez de invadir o elemento vizinho */
-  .brand h1,
-  .brand small,
-  .chip,
-  .date-label,
-  .date-badge,
-  .card,
-  .card *,
-  .kpi,
-  .kpi *,
-  .modal,
-  .modal *,
-  .accordion,
-  .accordion *,
-  td,
-  th {
-    overflow-wrap: anywhere;
-    word-break: break-word;
-  }
-
-  /* Mantém números/ícones pequenos sem alterar o conteúdo */
-  .chip,
-  .date-badge {
-    max-width: 100%;
-  }
-
-  /* Grades: o minmax(0,...) permite a coluna realmente encolher */
-  .kr,
-  .gg {
-    min-width: 0;
-  }
-
-  .kr > *,
-  .gg > * {
-    min-width: 0;
-  }
-
-  /* Cabeçalhos e títulos que antes eram nowrap */
-  .brand h1,
-  .brand small,
-  .card h1,
-  .card h2,
-  .card h3,
-  .modal h1,
-  .modal h2,
-  .modal h3 {
-    white-space: normal !important;
-  }
-
-  /* Modal de funcionários:
-     mantém a estrutura original, apenas permite compressão/quebra */
-  #emp-modal-overlay .accordion-head {
-    grid-template-columns: 24px minmax(0,1fr) 42px 24px 24px !important;
-    min-width: 0;
-  }
-
-  #emp-modal-overlay .accordion-head > * {
-    min-width: 0;
-  }
-
-  #emp-modal-overlay .person-row,
-  #emp-modal-overlay .pav-person-row {
-    grid-template-columns: 8px minmax(0,1fr) auto !important;
-    min-width: 0;
-  }
-
-  #emp-modal-overlay .person-row > *,
-  #emp-modal-overlay .pav-person-row > * {
-    min-width: 0;
-  }
-
-  #emp-modal-overlay .person-name,
-  #emp-modal-overlay .person-activity {
-    white-space: normal !important;
-    overflow-wrap: anywhere !important;
-    word-break: break-word !important;
-    min-width: 0;
-  }
-
-  #emp-modal-overlay .pav-person-row .person-activity {
-    grid-column: 2 / -1;
-  }
-
-  /* Botões e selects não empurram o restante da interface */
-  button,
-  select,
-  input,
-  textarea {
-    max-width: 100%;
-    box-sizing: border-box;
-  }
-
-  /* Tabelas/cards não criam uma segunda largura de página */
-  .table-wrap,
-  .table-container,
-  .table-responsive {
-    max-width: 100%;
-    overflow-x: auto;
-  }
-
-  table {
-    max-width: 100%;
-  }
-
-  /* Rótulos e valores em componentes compactos */
-  .bar-label,
-  .person-name,
-  .person-activity,
-  .activity,
-  .name,
-  .label,
-  .value {
-    min-width: 0;
-    overflow-wrap: anywhere;
-    word-break: break-word;
-  }
-}
-
-@media (max-width: 360px) {
-  .brand h1 {
-    font-size: clamp(15px, 5vw, 20px);
-  }
-
-  .brand small {
-    font-size: 10px;
-  }
-
-  #emp-modal-overlay .accordion-head {
-    grid-template-columns: 22px minmax(0,1fr) 36px 22px 22px !important;
-    gap: 5px;
-  }
-
-  #emp-modal-overlay .person-row,
-  #emp-modal-overlay .pav-person-row {
-    grid-template-columns: 7px minmax(0,1fr) auto !important;
-    gap: 6px;
-  }
+<style id="range-print-style">
+@media print{
+  @page{size:A4 landscape;margin:9mm 9mm 10mm 9mm}
+  body.range-print{background:#fff!important;color:#111827!important}
+  body.range-print .topbar,body.range-print .container,body.range-print footer,body.range-print .modal-overlay{display:none!important}
+  body.range-print .print-header{display:block!important;width:100%!important;padding:0 0 6px!important;margin:0 0 8px!important;border-bottom:2px solid #1F3557!important}
+  body.range-print .print-header h1{margin:0!important;font-family:'Space Grotesk',Arial,sans-serif!important;font-size:16px!important;line-height:1.2!important;color:#1F3557!important}
+  body.range-print .print-header p{margin:3px 0 0!important;font-family:'JetBrains Mono',monospace!important;font-size:7.5px!important;line-height:1.3!important;color:#475569!important}
+  body.range-print #print-db-section{display:block!important;width:100%!important;margin:0!important;padding:0!important}
+  body.range-print .range-print{font-family:Arial,sans-serif!important;width:100%!important}
+  body.range-print .range-print-title{font-family:'Space Grotesk',Arial,sans-serif!important;font-size:11px!important;font-weight:700!important;color:#1F3557!important;margin:0 0 4px!important}
+  body.range-print .range-print-total-grid{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:6px!important;margin-bottom:8px!important}
+  body.range-print .range-print-total{border:1px solid #CBD5E1!important;background:#F8FAFC!important;padding:6px 8px!important;border-radius:4px!important}
+  body.range-print .range-print-total span{display:block!important;font-size:6.5px!important;text-transform:uppercase!important;font-weight:700!important;color:#64748B!important}
+  body.range-print .range-print-total b{display:block!important;font-size:11px!important;color:#0F172A!important;margin-top:2px!important}
+  body.range-print .range-print-section-title{font-family:'Space Grotesk',Arial,sans-serif!important;font-size:9px!important;font-weight:700!important;color:#1F3557!important;margin:7px 0 4px!important}
+  body.range-print .range-print-table,body.range-print .range-print-summary-table{width:100%!important;border-collapse:collapse!important;table-layout:fixed!important}
+  body.range-print .range-print-table{font-size:6.5px!important}
+  body.range-print .range-print-summary-table{font-size:7px!important}
+  body.range-print .range-print-table th,body.range-print .range-print-summary-table th{background:#2A3F5F!important;color:#fff!important;font-size:5.8px!important;font-weight:700!important;padding:4px!important;text-align:left!important}
+  body.range-print .range-print-table td,body.range-print .range-print-summary-table td{padding:3px 4px!important;border-bottom:1px solid #E2E8F0!important;vertical-align:top!important;line-height:1.15!important;overflow-wrap:anywhere!important}
+  body.range-print .range-print-table tbody tr:nth-child(even) td,body.range-print .range-print-summary-table tbody tr:nth-child(even) td{background:#F8FAFC!important}
+  body.range-print .range-print-table th:nth-child(1),body.range-print .range-print-table td:nth-child(1){width:7%!important;white-space:nowrap!important}
+  body.range-print .range-print-table th:nth-child(2),body.range-print .range-print-table td:nth-child(2){width:11%!important}
+  body.range-print .range-print-table th:nth-child(3),body.range-print .range-print-table td:nth-child(3){width:9%!important}
+  body.range-print .range-print-table th:nth-child(4),body.range-print .range-print-table td:nth-child(4){width:9%!important}
+  body.range-print .range-print-table th:nth-child(5),body.range-print .range-print-table td:nth-child(5){width:7%!important}
+  body.range-print .range-print-table th:nth-child(6),body.range-print .range-print-table td:nth-child(6){width:12%!important}
+  body.range-print .range-print-table th:nth-child(7),body.range-print .range-print-table td:nth-child(7){width:31%!important}
+  body.range-print .range-print-table th:nth-child(8),body.range-print .range-print-table td:nth-child(8){width:14%!important}
+  body.range-print .range-print-summary-table th:nth-child(1),body.range-print .range-print-summary-table td:nth-child(1){width:40%!important}
+  body.range-print .range-print-summary-table th:nth-child(2),body.range-print .range-print-summary-table td:nth-child(2){width:20%!important;text-align:right!important}
+  body.range-print .range-print-summary-table th:nth-child(3),body.range-print .range-print-summary-table td:nth-child(3){width:20%!important;text-align:right!important}
+  body.range-print .range-print-summary-table th:nth-child(4),body.range-print .range-print-summary-table td:nth-child(4){width:20%!important;text-align:right!important}
 }
 </style>
-
 </head>
 <body>
 <div class="print-header" id="print-header"></div>
@@ -670,6 +683,7 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
   </div>
 
   <div class="kr" id="kpis"></div>
+
   <div class="kr" id="kpis2" style="display:none"></div>
 
   <div class="gg" id="range-extra" style="display:none">
@@ -684,6 +698,7 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
         <div class="cd-h"><h3>Empresa em destaque</h3><span class="mt" id="rtop-emp-meta" title="Clique em uma empresa para ver os cargos"></span></div>
         <div style="padding:12px 14px" id="rtop-emp-bars"></div>
       </div>
+
       <div class="cd">
         <div class="cd-h"><h3>Funcao em destaque</h3><span class="mt" id="rtop-func-meta"></span></div>
         <div style="padding:12px 14px" id="rtop-func-bars"></div>
@@ -720,7 +735,6 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
             <option value="az">A → Z (nome)</option>
             <option value="za">Z → A (nome)</option>
           </select>
-          <span class="ct" id="tbl-ct"></span>
         </div>
         <div class="cd-b" id="tbl-box"></div>
       </div>
@@ -729,6 +743,15 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
       <div class="cd">
         <div class="cd-h"><h3>Por empresa</h3><span class="mt" id="emp-meta" title="Clique em uma empresa para ver os cargos"></span></div>
         <div style="padding:12px 14px" id="emp-bars"></div>
+      </div>
+      <div class="cd" id="single-prod-empresa-card">
+        <div class="cd-h"><h3>Produção por empresa</h3><span class="mt" id="single-prod-empresa-meta"></span></div>
+        <div class="prod-empresa-tools">
+          <button class="prod-unit-tab on" id="single-prod-tab-m2" onclick="setSingleProdEmpresaUnit('M2')">m²</button>
+          <button class="prod-unit-tab" id="single-prod-tab-m3" onclick="setSingleProdEmpresaUnit('M3')">m³</button>
+          <button class="prod-unit-tab" id="single-prod-tab-un" onclick="setSingleProdEmpresaUnit('UN')">UN</button>
+        </div>
+        <div id="single-prod-empresa-box" class="prod-empresa-box"></div>
       </div>
       <div class="cd">
         <div class="cd-h"><h3>Por funcao</h3><span class="mt" id="func-meta"></span></div>
@@ -745,6 +768,7 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
     </div>
   </div>
 
+
   <div class="cd" id="range-view" style="display:none">
     <div class="cd-h"><h3>Producao por pessoa no periodo selecionado</h3><span class="mt" id="range-tbl-meta"></span></div>
     <div class="cd-t">
@@ -752,7 +776,6 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
       <select id="remp" onchange="renderRangeTable()"><option value="">Todas empresas</option></select>
       <select id="rfunc" onchange="renderRangeTable()"><option value="">Todas funcoes</option></select>
       <select id="rpav" onchange="renderRangeTable()"><option value="">Todos pavimentos</option></select>
-      <span class="ct" id="range-tbl-ct"></span>
     </div>
     <div class="cd-b" id="range-tbl-box"></div>
   </div>
@@ -765,6 +788,31 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 <div id="print-db-section" style="display:none"></div>
 <footer style="max-width:1280px;margin:0 auto;padding:12px 14px;font-size:9px;color:var(--ink3);font-family:'JetBrains Mono';border-top:1px solid var(--line)">RDO - Painel de Mao de Obra</footer>
 <div id="toast"></div>
+
+
+<div id="prod-month-modal-overlay" class="modal-overlay" onclick="if(event.target===this)closeMonthlyProdModal()">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-h">
+      <div><h4 id="prod-month-modal-title">📐 Produção Total</h4><div class="mt2" id="prod-month-modal-sub">—</div></div>
+      <div class="modal-h-actions">
+        <button class="modal-print-btn" onclick="printMonthlyProdModal()" aria-label="Imprimir produção do período">🖨 Imprimir</button>
+        <button class="modal-close" onclick="closeMonthlyProdModal()" aria-label="Fechar">&times;</button>
+      </div>
+    </div>
+    <div class="modal-b">
+      <div class="pm-prod-summary" id="prod-month-modal-summary"></div>
+      <div id="pm-emp-summary"></div>
+      <div class="pm-prod-filters">
+        <input type="text" id="pm-prod-q" placeholder="Buscar nome, empresa, função, atividade..." oninput="renderMonthlyProdModal()">
+        <select id="pm-prod-emp" onchange="renderMonthlyProdModal()"><option value="">Todas as empresas</option></select>
+        <select id="pm-prod-func" onchange="renderMonthlyProdModal()"><option value="">Todas as funções</option></select>
+        <select id="pm-prod-pav" onchange="renderMonthlyProdModal()"><option value="">Todos os pavimentos</option></select>
+      </div>
+      <div class="pm-prod-break"><span>Lançamentos de produção do período</span><strong id="pm-prod-results">0 registro(s)</strong></div>
+      <div class="pm-prod-table-wrap" id="prod-month-modal-body"></div>
+    </div>
+  </div>
+</div>
 
 <div id="hoje-modal-overlay" class="modal-overlay" onclick="if(event.target===this)closeHojeModal()">
   <div class="modal-card" role="dialog" aria-modal="true">
@@ -869,12 +917,272 @@ function esc(s){return(s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt
 function uniq(arr){return[...new Set(arr.filter(function(v){return v!==''}))].sort(function(a,b){return a.localeCompare(b,'pt-BR')})}
 function fmtNow(){return new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'})}
 function G(id){return document.getElementById(id)}
+function alignSingleView(){
+  var root=G('single-view');
+  if(!root || root.style.display==='none') return;
+  var left=root.children[0], right=root.children[1];
+  if(!left || !right) return;
+  var leftTop=left.querySelector('.cd');
+  var rightTop=right.querySelector('.cd');
+  if(!leftTop || !rightTop) return;
+  rightTop.style.minHeight='';
+  var h=leftTop.getBoundingClientRect().height;
+  if(h>0) rightTop.style.minHeight=Math.round(h)+'px';
+}
+window.addEventListener('resize',function(){setTimeout(alignSingleView,30)});
+
 
 var KW_VAZIO=['nao encontrado','não encontrado','n/a','na','nenhum','nenhuma','sem atividade','sem lancamento','sem lançamento','sem serviço','sem frente de servico','sem frente de serviço','sem frente','indefinido','—','--','-'];
 function temAtividade(v){if(!v||!v.trim())return false;var n=norm(v);if(!n)return false;for(var i=0;i<KW_VAZIO.length;i++){if(n===KW_VAZIO[i]||n.indexOf(KW_VAZIO[i])===0)return false}return true}
 
 /* Efetivo real de um dia = pessoas com atividade lancada (excluindo ferias e faltosos) */
 function comAtividadeCount(day){return day.ativos.filter(function(p){return !!p.atividade}).length}
+
+
+/* ═══════ PRODUÇÃO MENSAL — KPI ÚNICO, DETALHE COMPLETO AO CLICAR ═══════ */
+var JORNADA_HORAS=8;
+function getMonthlyProdRows(days){
+  /* Antes alimentava o modal mensal (removido); hoje só serve ao KPI do período. */
+  var rows=[];
+  (days||[]).forEach(function(day){
+    (day.ativos||[]).forEach(function(p){
+      var parsed=parseProducaoUnidades(p.prod||'');
+      if(!parsed.length)return;
+      var m2=0,un=0,m3=0;
+      parsed.forEach(function(u){if(u.unidade==='M2')m2+=u.valor;else if(u.unidade==='UN')un+=u.valor;else if(u.unidade==='M3')m3+=u.valor;});
+      rows.push({date:day.date||p.data||'—',nome:p.nome||'—',empresa:p.empresa||'—',funcao:p.funcao||'—',pav:p.pav||'—',local:p.regiao||'—',atividade:p.atividade||p.atividadeRaw||'—',prod:p.prod||'—',m2:m2,un:un,m3:m3,ponto:m2>0,horas:JORNADA_HORAS});
+    });
+  });
+  return rows;
+}
+function calcMonthlyProd(rows){
+  /*
+   * Regra dos indicadores por unidade:
+   * - Cada trabalhador/dia que possui lançamento em uma unidade gera 1 ponto daquela unidade.
+   * - Todo ponto corresponde a 8 horas de trabalho.
+   * - Portanto, para cada unidade: produção/hora = produção ÷ (pontos × 8).
+   * - Produção/colaborador = produção ÷ pontos.
+   * - Os pontos são independentes por unidade: m², m³ e UN não são misturados.
+   */
+  var t={m2:0,un:0,m3:0,pontosM2:0,pontosM3:0,pontosUN:0};
+  (rows||[]).forEach(function(r){
+    t.m2+=r.m2; t.un+=r.un; t.m3+=r.m3;
+    if(r.m2>0)t.pontosM2++;
+    if(r.m3>0)t.pontosM3++;
+    if(r.un>0)t.pontosUN++;
+  });
+  t.m2=Number(t.m2.toFixed(2)); t.un=Number(t.un.toFixed(2)); t.m3=Number(t.m3.toFixed(3));
+  t.horasM2=t.pontosM2*JORNADA_HORAS;
+  t.horasM3=t.pontosM3*JORNADA_HORAS;
+  t.horasUN=t.pontosUN*JORNADA_HORAS;
+  t.m2Hora=t.pontosM2>0?Number((t.m2/t.horasM2).toFixed(2)):null;
+  t.m3Hora=t.pontosM3>0?Number((t.m3/t.horasM3).toFixed(3)):null;
+  t.unHora=t.pontosUN>0?Number((t.un/t.horasUN).toFixed(2)):null;
+  t.m2Ponto=t.pontosM2>0?Number((t.m2/t.pontosM2).toFixed(2)):null;
+  t.m3Ponto=t.pontosM3>0?Number((t.m3/t.pontosM3).toFixed(3)):null;
+  t.unPonto=t.pontosUN>0?Number((t.un/t.pontosUN).toFixed(2)):null;
+  t.dias=[...new Set((rows||[]).map(function(r){return r.date;}).filter(Boolean))].length;
+  return t;
+}
+
+function openProducaoPeriodoModal(){
+  if(!PARSED)return;
+  var days=getRangeDays();
+  if(!days.length){toast('Selecione um ou mais dias no periodo','warn');return}
+  G('prod-month-modal-title').textContent='📐 Produção do Período';
+  G('prod-month-modal-sub').textContent=days.length+' dia(s) selecionados · jornada considerada: '+JORNADA_HORAS+' h por colaborador';
+  var emps=uniq(days.flatMap(function(d){return (d.ativos||[]).map(function(p){return p.empresa;}).filter(Boolean);}));
+  var funcs=uniq(days.flatMap(function(d){return (d.ativos||[]).map(function(p){return p.funcao;}).filter(Boolean);}));
+  var pavs=uniq(days.flatMap(function(d){return (d.ativos||[]).map(function(p){return p.pav;}).filter(Boolean);}));
+  G('pm-prod-emp').innerHTML='<option value="">Todas as empresas</option>'+emps.map(function(v){return '<option value="'+esc(v)+'">'+esc(v)+'</option>';}).join('');
+  G('pm-prod-func').innerHTML='<option value="">Todas as funções</option>'+funcs.map(function(v){return '<option value="'+esc(v)+'">'+esc(v)+'</option>';}).join('');
+  G('pm-prod-pav').innerHTML='<option value="">Todos os pavimentos</option>'+pavs.map(function(v){return '<option value="'+esc(v)+'">'+esc(v)+'</option>';}).join('');
+  G('pm-prod-q').value='';G('pm-prod-emp').value='';G('pm-prod-func').value='';G('pm-prod-pav').value='';
+  renderMonthlyProdModal();G('prod-month-modal-overlay').classList.add('on');
+}
+/* ═══ Modal: produção por empresa no período (KPI 🏗️) ═══ */
+function openProducaoEmpresaModal(){
+  if(!PARSED)return;
+  var days=getRangeDays();
+  if(!days.length){toast('Selecione um ou mais dias no periodo','warn');return}
+  var byEmp={};
+  days.forEach(function(day){
+    (day.ativos||[]).forEach(function(p){
+      if(!temAtividade(p.prod))return;
+      var us=parseProducaoUnidades(p.prod);
+      if(!us.length)return;
+      if(!byEmp[p.empresa])byEmp[p.empresa]={M2:0,M3:0,UN:0,lan:0};
+      byEmp[p.empresa].lan+=us.length;
+      us.forEach(function(u){byEmp[p.empresa][u.unidade]+=u.valor});
+    });
+  });
+  var keys=Object.keys(byEmp).filter(function(k){return byEmp[k].M2>0||byEmp[k].M3>0||byEmp[k].UN>0}).sort(function(a,b){return byEmp[b].M2-byEmp[a].M2||byEmp[b].M3-byEmp[a].M3||a.localeCompare(b,'pt-BR')});
+  var hdr=G('emp-modal-overlay').querySelector('.modal-h');
+  hdr.style.background='#0891B2';
+  G('emp-modal-title').textContent='🏗️ Produção por Empresa';
+  G('emp-modal-sub').textContent=days.length+' dia(s) selecionados · '+keys.length+' empresa(s) com produção';
+  var body=G('emp-modal-body');
+  if(!keys.length){
+    body.innerHTML='<div class="modal-empty">Nenhuma produção lançada no período selecionado.</div>';
+    G('emp-modal-overlay').classList.add('on');
+    return;
+  }
+  var tM2=0,tM3=0,tUN=0,tLan=0;
+  keys.forEach(function(k){tM2+=byEmp[k].M2;tM3+=byEmp[k].M3;tUN+=byEmp[k].UN;tLan+=byEmp[k].lan});
+  var html='<div class="local-summary">'+
+    '<div class="local-stat"><b>'+fmtNum(tM2)+'</b><span>Total m²</span></div>'+
+    '<div class="local-stat"><b>'+tM3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+'</b><span>Total m³</span></div>'+
+    '<div class="local-stat"><b>'+fmtNum(tUN)+'</b><span>Total UN</span></div>'+
+  '</div>';
+  var th='text-align:left;padding:8px 10px;background:#E0F7FA;color:#0E7490;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em';
+  var td='padding:8px 10px;border-bottom:1px solid #EAF4F6';
+  html+='<table class="people-modal-table" style="width:100%;border-collapse:collapse;font-size:12px">'+
+    '<thead><tr><th style="'+th+'">#</th><th style="'+th+'">Empresa</th><th style="'+th+'">m²</th><th style="'+th+'">m³</th><th style="'+th+'">UN</th><th style="'+th+'">Lançamentos</th></tr></thead><tbody>';
+  keys.forEach(function(k,i){
+    var v=byEmp[k];
+    html+='<tr style="background:'+(i%2===0?'#fff':'#F8FAFC')+'">'+
+      '<td data-label="#" class="nr" style="'+td+';color:var(--ink3)">'+(i+1)+'</td>'+
+      '<td data-label="Empresa" style="'+td+'"><span class="badge badge-gray">'+esc(k)+'</span></td>'+
+      '<td data-label="m²" class="nr" style="'+td+';font-weight:700;color:#2563EB">'+(v.M2>0?fmtNum(v.M2):'—')+'</td>'+
+      '<td data-label="m³" class="nr" style="'+td+';font-weight:700;color:#D97706">'+(v.M3>0?v.M3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3}):'—')+'</td>'+
+      '<td data-label="UN" class="nr" style="'+td+';font-weight:700;color:#7C3AED">'+(v.UN>0?fmtNum(v.UN):'—')+'</td>'+
+      '<td data-label="Lançamentos" class="nr" style="'+td+';color:var(--ink2)">'+v.lan+'</td>'+
+    '</tr>';
+  });
+  html+='<tr style="background:#E0F7FA;font-weight:700">'+
+    '<td colspan="2" style="padding:8px 10px;color:#0E7490;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Total</td>'+
+    '<td class="nr" style="padding:8px 10px;color:#0E7490">'+fmtNum(tM2)+'</td>'+
+    '<td class="nr" style="padding:8px 10px;color:#0E7490">'+tM3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+'</td>'+
+    '<td class="nr" style="padding:8px 10px;color:#0E7490">'+fmtNum(tUN)+'</td>'+
+    '<td class="nr" style="padding:8px 10px;color:#0E7490">'+tLan+'</td>'+
+  '</tr>';
+  html+='</tbody></table>';
+  body.innerHTML=html;
+  G('emp-modal-overlay').classList.add('on');
+}
+function monthlyProdMatches(r,q,emp,func,pav){
+  if(emp&&r.empresa!==emp)return false;if(func&&r.funcao!==func)return false;if(pav&&r.pav!==pav)return false;
+  if(q){var txt=norm([r.date,r.nome,r.empresa,r.funcao,r.pav,r.local,r.atividade,r.prod].join(' '));if(txt.indexOf(q)===-1)return false;}
+  return true;
+}
+
+/* Agrega lançamentos por empresa: totais por unidade + nº de lançamentos */
+function prodPorEmpresa(rows){
+  var byEmp={};
+  (rows||[]).forEach(function(r){
+    if(!byEmp[r.empresa])byEmp[r.empresa]={M2:0,M3:0,UN:0,lan:0};
+    var e=byEmp[r.empresa];e.M2+=r.m2;e.M3+=r.m3;e.UN+=r.un;e.lan++;
+  });
+  return Object.keys(byEmp).map(function(k){var e=byEmp[k];return{nome:k,M2:e.M2,M3:e.M3,UN:e.UN,lan:e.lan}}).sort(function(a,b){return b.M2-a.M2||b.M3-a.M3||b.UN-a.UN||a.nome.localeCompare(b.nome,'pt-BR')});
+}
+function pmEmpTableHTML(emps){
+  if(!emps.length)return '';
+  var t={M2:0,M3:0,UN:0,lan:0};
+  emps.forEach(function(e){t.M2+=e.M2;t.M3+=e.M3;t.UN+=e.UN;t.lan+=e.lan});
+  var h='<div class="pm-prod-break" style="margin-top:10px"><span>🏗️ Produção por empresa</span><strong>'+emps.length+' empresa(s)</strong></div>'+
+    '<div class="pm-prod-table-wrap" style="margin-bottom:10px"><table class="pm-prod-table"><thead><tr><th>#</th><th>Empresa</th><th>m²</th><th>m³</th><th>UN</th><th>Lançamentos</th></tr></thead><tbody>';
+  emps.forEach(function(e,i){
+    h+='<tr><td class="nr" data-label="#">'+(i+1)+'</td><td data-label="Empresa"><span class="badge badge-gray">'+esc(e.nome)+'</span></td>'+
+      '<td class="unit-val" data-label="m²">'+(e.M2>0?fmtNum(e.M2):'—')+'</td>'+
+      '<td class="unit-val" data-label="m³">'+(e.M3>0?e.M3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3}):'—')+'</td>'+
+      '<td class="unit-val" data-label="UN">'+(e.UN>0?fmtNum(e.UN):'—')+'</td>'+
+      '<td class="nr" data-label="Lançamentos">'+e.lan+'</td></tr>';
+  });
+  h+='<tr><td colspan="2" data-label="Total" style="font-weight:700;color:#0E7490">TOTAL</td>'+
+    '<td class="unit-val" data-label="m²" style="font-weight:700;color:#0E7490">'+fmtNum(t.M2)+'</td>'+
+    '<td class="unit-val" data-label="m³" style="font-weight:700;color:#0E7490">'+t.M3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+'</td>'+
+    '<td class="unit-val" data-label="UN" style="font-weight:700;color:#0E7490">'+fmtNum(t.UN)+'</td>'+
+    '<td class="nr" data-label="Lançamentos" style="font-weight:700;color:#0E7490">'+t.lan+'</td></tr>';
+  h+='</tbody></table></div>';
+  return h;
+}
+function renderMonthlyProdModal(){
+  if(!PARSED)return;
+  var rows=getMonthlyProdRows(getRangeDays());
+  var q=norm(G('pm-prod-q').value),emp=G('pm-prod-emp').value,func=G('pm-prod-func').value,pav=G('pm-prod-pav').value;
+  rows=rows.filter(function(r){return monthlyProdMatches(r,q,emp,func,pav);}).sort(function(a,b){var da=parseDateBR(a.date),db=parseDateBR(b.date);var va=da?da.y*10000+da.m*100+da.d:0,vb=db?db.y*10000+db.m*100+db.d:0;return va-vb||a.nome.localeCompare(b.nome,'pt-BR');});
+  var m=calcMonthlyProd(rows);
+  G('prod-month-modal-summary').innerHTML=
+    '<div class="pm-prod-stat"><div class="p-l">Produção do período m²</div><div class="p-v">'+fmtNum(m.m2)+' m²</div><div class="p-f">soma dos lançamentos em m²</div></div>'+    '<div class="pm-prod-stat"><div class="p-l">Trabalhador-dia m²</div><div class="p-v">'+m.pontosM2+'</div><div class="p-f">1 trabalhador/dia com m²</div></div>'+    '<div class="pm-prod-stat"><div class="p-l">Produção/hora m²</div><div class="p-v">'+(m.m2Hora===null?'N/D':fmtNum(m.m2Hora)+' m²/h')+'</div><div class="p-f">m² ÷ (pontos × 8 h)</div></div>'+    '<div class="pm-prod-stat"><div class="p-l">Produção/trabalhador-dia m²</div><div class="p-v">'+(m.m2Ponto===null?'N/D':fmtNum(m.m2Ponto)+' m²')+'</div><div class="p-f">m² ÷ pontos</div></div>'+    '<div class="pm-prod-stat"><div class="p-l">Produção do período m³</div><div class="p-v">'+m.m3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+' m³</div><div class="p-f">soma dos lançamentos em m³</div></div>'+    '<div class="pm-prod-stat"><div class="p-l">Trabalhador-dia m³</div><div class="p-v">'+m.pontosM3+'</div><div class="p-f">1 trabalhador/dia com m³</div></div>'+    '<div class="pm-prod-stat"><div class="p-l">Produção/hora m³</div><div class="p-v">'+(m.m3Hora===null?'N/D':m.m3Hora.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+' m³/h')+'</div><div class="p-f">m³ ÷ (pontos × 8 h)</div></div>'+    '<div class="pm-prod-stat"><div class="p-l">Produção/trabalhador-dia m³</div><div class="p-v">'+(m.m3Ponto===null?'N/D':m.m3Ponto.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+' m³')+'</div><div class="p-f">m³ ÷ pontos</div></div>'+    '<div class="pm-prod-stat"><div class="p-l">Produção do período UN</div><div class="p-v">'+fmtNum(m.un)+' UN</div><div class="p-f">soma dos lançamentos em UN</div></div>'+    '<div class="pm-prod-stat"><div class="p-l">Trabalhador-dia UN</div><div class="p-v">'+m.pontosUN+'</div><div class="p-f">1 trabalhador/dia com UN</div></div>'+    '<div class="pm-prod-stat"><div class="p-l">Produção/hora UN</div><div class="p-v">'+(m.unHora===null?'N/D':fmtNum(m.unHora)+' UN/h')+'</div><div class="p-f">UN ÷ (pontos × 8 h)</div></div>'+    '<div class="pm-prod-stat"><div class="p-l">Produção/trabalhador-dia UN</div><div class="p-v">'+(m.unPonto===null?'N/D':fmtNum(m.unPonto)+' UN')+'</div><div class="p-f">UN ÷ pontos</div></div>';
+  G('pm-prod-results').textContent=rows.length+' lançamento(s)';
+  G('pm-emp-summary').innerHTML=pmEmpTableHTML(prodPorEmpresa(rows));
+  var body=G('prod-month-modal-body');
+  if(!rows.length){body.innerHTML='<div class="pm-prod-empty">Nenhuma produção encontrada com os filtros aplicados.</div>';return;}
+  var h='<table class="pm-prod-table"><thead><tr><th>#</th><th>Data</th><th>Nome</th><th>Empresa</th><th>Função</th><th>Pavimento</th><th>Local</th><th>Atividade</th><th>Produção lançada</th><th>M²</th><th>UN</th><th>M³</th><th>Horas</th></tr></thead><tbody>';
+  rows.forEach(function(r,i){
+    var m3txt=r.m3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3});
+    h+='<tr><td class="nr" data-label="#">'+(i+1)+'</td>'+
+      '<td data-label="Data">'+esc(r.date)+'</td>'+
+      '<td data-label="Nome" style="font-weight:700">'+esc(r.nome)+'</td>'+
+      '<td data-label="Empresa"><span class="badge badge-gray">'+esc(r.empresa)+'</span></td>'+
+      '<td data-label="Função" style="color:var(--ink2)">'+esc(r.funcao)+'</td>'+
+      '<td data-label="Pavimento">'+pavBadge(r.pav)+'</td>'+
+      '<td data-label="Local">'+esc(r.local)+'</td>'+
+      '<td data-label="Atividade">'+esc(r.atividade)+'</td>'+
+      '<td data-label="Produção" class="prod-launch">'+esc(r.prod)+'</td>'+
+      '<td data-label="M²" class="unit-val">'+fmtNum(r.m2)+' m²</td>'+
+      '<td data-label="UN" class="unit-val">'+fmtNum(r.un)+'</td>'+
+      '<td data-label="M³" class="unit-val">'+m3txt+' m³</td>'+
+      '<td data-label="Horas" class="unit-val">'+JORNADA_HORAS+' h</td>'+
+      '</tr>';
+  });
+  h+='</tbody></table>';body.innerHTML=h;
+}
+function printMonthlyProdModal(){
+  if(!PARSED)return;
+  var rows=getMonthlyProdRows(getRangeDays());
+  var q=norm(G('pm-prod-q').value),emp=G('pm-prod-emp').value,func=G('pm-prod-func').value,pav=G('pm-prod-pav').value;
+  rows=rows.filter(function(r){return monthlyProdMatches(r,q,emp,func,pav);}).sort(function(a,b){var da=parseDateBR(a.date),db=parseDateBR(b.date);var va=da?da.y*10000+da.m*100+da.d:0,vb=db?db.y*10000+db.m*100+db.d:0;return va-vb||a.nome.localeCompare(b.nome,'pt-BR');});
+  var m=calcMonthlyProd(rows);
+  var printTitle='Produção — Período selecionado';
+  var empsPrint=prodPorEmpresa(rows);
+  var tP={M2:0,M3:0,UN:0,lan:0};
+  empsPrint.forEach(function(e){tP.M2+=e.M2;tP.M3+=e.M3;tP.UN+=e.UN;tP.lan+=e.lan});
+  G('print-header').innerHTML='<h1>RDO — '+esc(printTitle)+'</h1><p>'+rows.length+' lançamento(s) · '+empsPrint.length+' empresa(s) · '+m.pontosM2+' colaborador(es) m² · '+fmtNum(m.m2)+' m² · '+m.horasM2+' h m² · '+m.dias+' dia(s) · Impresso em '+fmtNow()+'</p>';
+  var h='<div class="monthly-print-report"><div class="mpr-summary">'+
+    '<section class="mpr-group"><div class="mpr-group-title">M²</div><div class="mpr-grid">'+
+    '<div class="mpr-stat"><div class="mpr-label">Produção do período</div><div class="mpr-val">'+fmtNum(m.m2)+' m²</div><div class="mpr-fact">soma dos lançamentos</div></div>'+
+    '<div class="mpr-stat"><div class="mpr-label">Colaboradores</div><div class="mpr-val">'+m.pontosM2+'</div><div class="mpr-fact">trabalhadores/dia com m²</div></div>'+
+    '<div class="mpr-stat"><div class="mpr-label">Produção/hora</div><div class="mpr-val">'+(m.m2Hora===null?'N/D':fmtNum(m.m2Hora)+' m²/h')+'</div><div class="mpr-fact">m² ÷ (colaboradores × 8 h)</div></div>'+
+    '<div class="mpr-stat"><div class="mpr-label">Produção/colaborador</div><div class="mpr-val">'+(m.m2Ponto===null?'N/D':fmtNum(m.m2Ponto)+' m²')+'</div><div class="mpr-fact">m² ÷ colaboradores</div></div>'+
+    '</div></section>'+
+    '<section class="mpr-group"><div class="mpr-group-title">M³</div><div class="mpr-grid">'+
+    '<div class="mpr-stat"><div class="mpr-label">Produção do período</div><div class="mpr-val">'+m.m3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+' m³</div><div class="mpr-fact">soma dos lançamentos</div></div>'+
+    '<div class="mpr-stat"><div class="mpr-label">Colaboradores</div><div class="mpr-val">'+m.pontosM3+'</div><div class="mpr-fact">trabalhadores/dia com m³</div></div>'+
+    '<div class="mpr-stat"><div class="mpr-label">Produção/hora</div><div class="mpr-val">'+(m.m3Hora===null?'N/D':m.m3Hora.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+' m³/h')+'</div><div class="mpr-fact">m³ ÷ (colaboradores × 8 h)</div></div>'+
+    '<div class="mpr-stat"><div class="mpr-label">Produção/colaborador</div><div class="mpr-val">'+(m.m3Ponto===null?'N/D':m.m3Ponto.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+' m³')+'</div><div class="mpr-fact">m³ ÷ colaboradores</div></div>'+
+    '</div></section>'+
+    '<section class="mpr-group"><div class="mpr-group-title">UN</div><div class="mpr-grid">'+
+    '<div class="mpr-stat"><div class="mpr-label">Produção do período</div><div class="mpr-val">'+fmtNum(m.un)+' UN</div><div class="mpr-fact">soma dos lançamentos</div></div>'+
+    '<div class="mpr-stat"><div class="mpr-label">Colaboradores</div><div class="mpr-val">'+m.pontosUN+'</div><div class="mpr-fact">trabalhadores/dia com UN</div></div>'+
+    '<div class="mpr-stat"><div class="mpr-label">Produção/hora</div><div class="mpr-val">'+(m.unHora===null?'N/D':fmtNum(m.unHora)+' UN/h')+'</div><div class="mpr-fact">UN ÷ (colaboradores × 8 h)</div></div>'+
+    '<div class="mpr-stat"><div class="mpr-label">Produção/colaborador</div><div class="mpr-val">'+(m.unPonto===null?'N/D':fmtNum(m.unPonto)+' UN')+'</div><div class="mpr-fact">UN ÷ colaboradores</div></div>'+
+    '</div></section>'+
+    '</div>';
+  if(empsPrint.length){
+    h+='<div class="mpr-section-title">Produção por empresa</div><table class="mpr-emp-table"><thead><tr><th>#</th><th>Empresa</th><th>m²</th><th>m³</th><th>UN</th><th>Lançamentos</th></tr></thead><tbody>';
+    empsPrint.forEach(function(e,i){
+      h+='<tr><td>'+(i+1)+'</td><td style="text-align:left!important"><b>'+esc(e.nome)+'</b></td>'+
+        '<td>'+(e.M2>0?fmtNum(e.M2):'—')+'</td>'+
+        '<td>'+(e.M3>0?e.M3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3}):'—')+'</td>'+
+        '<td>'+(e.UN>0?fmtNum(e.UN):'—')+'</td>'+
+        '<td>'+e.lan+'</td></tr>';
+    });
+    h+='<tr><td colspan="2" style="text-align:left!important;font-weight:700">TOTAL</td><td style="font-weight:700">'+fmtNum(tP.M2)+'</td><td style="font-weight:700">'+tP.M3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+'</td><td style="font-weight:700">'+fmtNum(tP.UN)+'</td><td style="font-weight:700">'+tP.lan+'</td></tr>';
+    h+='</tbody></table>';
+  }
+  h+='<div class="mpr-section-title">Detalhamento da produção</div><table><thead><tr><th>#</th><th>Data</th><th>Nome</th><th>Empresa</th><th>Função</th><th>Pav.</th><th>Local</th><th>Atividade</th><th>M²</th><th>UN</th><th>M³</th></tr></thead><tbody>';
+  rows.forEach(function(r,i){
+    var m3txt=r.m3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3});
+    h+='<tr><td>'+
+      (i+1)+'</td><td>'+esc(r.date)+'</td><td>'+esc(r.nome)+'</td><td>'+esc(r.empresa)+'</td><td>'+esc(r.funcao)+'</td><td>'+esc(r.pav)+'</td><td>'+esc(r.local)+'</td><td>'+esc(r.atividade)+'</td><td><b>'+fmtNum(r.m2)+' m²</b></td><td><b>'+fmtNum(r.un)+'</b></td><td><b>'+m3txt+' m³</b></td></tr>';
+  });
+  if(!rows.length)h+='<tr><td colspan="11" style="text-align:center;padding:14px">Nenhuma produção encontrada.</td></tr>';
+  h+='</tbody></table></div>';
+  G('print-db-section').innerHTML=h;G('print-db-section').style.display='block';document.body.classList.add('monthly-prod-print');closeMonthlyProdModal();
+  requestAnimationFrame(function(){window.print();setTimeout(function(){G('print-db-section').style.display='none';G('print-db-section').innerHTML='';document.body.classList.remove('monthly-prod-print');},700);});
+}
+function closeMonthlyProdModal(){var el=G('prod-month-modal-overlay');if(el)el.classList.remove('on');}
 
 function setChip(state,txt){var el=G('chip'),dot=G('livedot'),t=G('chip-txt');el.className='chip chip-'+state;dot.style.display=state==='ok'?'inline-block':'none';t.textContent=txt}
 var _ttmr=null;
@@ -969,17 +1277,16 @@ function regiaoPavKey(p){
 function parseData(raw){
   if(!raw||raw.length<2)return null;
   var hd=raw[0];
-  var ci={nome:findCol(hd,['funcionario','lider','nome']),empresa:findCol(hd,['empresa']),funcao:findCol(hd,['funcao','função']),atividade:findCol(hd,['servico','serviço','atividade']),regiao:findCol(hd,['local','regiao','região','area','área']),pav:findCol(hd,['pav']),data:findCol(hd,['data inicio','data']),status:findCol(hd,['status']),prod:findCol(hd,['prod'])};
+  var ci={nome:findCol(hd,['funcionario','lider','nome']),empresa:findCol(hd,['empresa']),funcao:findCol(hd,['funcao','função']),atividade:findCol(hd,['servico','serviço','atividade']),regiao:findCol(hd,['local','regiao','região','area','área']),pav:findCol(hd,['pav']),data:findCol(hd,['data inicio','data']),prod:findCol(hd,['prod'])};
   var people=[];
   for(var r=1;r<raw.length;r++){
     var row=raw[r];var nome=(ci.nome>-1?row[ci.nome]||'':'').trim();
     if(!nome||nome.length<2)continue;if(norm(nome).indexOf('total')>-1)continue;
     var motivo=motivoAusencia(row);var vac=!!motivo;
     var atividadeRaw=(ci.atividade>-1?row[ci.atividade]||'':'').trim();
-    var pavRaw=(ci.pav>-1?row[ci.pav]||'':'').trim();
-    var pavNorm=normalizarPavimento(pavRaw);
+    var pavNorm=normalizarPavimento((ci.pav>-1?row[ci.pav]||'':'').trim());
     if(!pavNorm&&atividadeRaw)pavNorm=detectarDoTexto(atividadeRaw);
-    people.push({nome:nome,empresa:normalizarEmpresa((ci.empresa>-1?row[ci.empresa]||'':'').trim())||'—',funcao:normalizarFuncao((ci.funcao>-1?row[ci.funcao]||'':'').trim())||'—',atividade:temAtividade(atividadeRaw)?atividadeRaw:'',atividadeRaw:atividadeRaw,regiao:(ci.regiao>-1?row[ci.regiao]||'':'').trim(),pav:pavNorm,pavRaw:pavRaw,prod:(ci.prod>-1?row[ci.prod]||'':'').trim(),data:(ci.data>-1?row[ci.data]||'':'').trim(),status:(ci.status>-1?row[ci.status]||'':'').trim(),ferias:vac,motivo:motivo});
+    people.push({nome:nome,empresa:normalizarEmpresa((ci.empresa>-1?row[ci.empresa]||'':'').trim())||'—',funcao:normalizarFuncao((ci.funcao>-1?row[ci.funcao]||'':'').trim())||'—',atividade:temAtividade(atividadeRaw)?atividadeRaw:'',atividadeRaw:atividadeRaw,regiao:(ci.regiao>-1?row[ci.regiao]||'':'').trim(),pav:pavNorm,prod:(ci.prod>-1?row[ci.prod]||'':'').trim(),data:(ci.data>-1?row[ci.data]||'':'').trim(),ferias:vac,motivo:motivo});
   }
   var byDate={};
   people.forEach(function(p){var d=p.data||'(sem data)';if(!byDate[d])byDate[d]={date:d,all:[],ativos:[],ferias:[],byEmp:{},byFunc:{},byPav:{},byRegiao:{}};byDate[d].all.push(p);if(p.ferias){byDate[d].ferias.push(p);return}byDate[d].ativos.push(p);byDate[d].byEmp[p.empresa]=(byDate[d].byEmp[p.empresa]||0)+1;byDate[d].byFunc[p.funcao]=(byDate[d].byFunc[p.funcao]||0)+1;if(!byDate[d].byEmpAtiv)byDate[d].byEmpAtiv={};if(!byDate[d].byFuncAtiv)byDate[d].byFuncAtiv={};if(p.atividade){byDate[d].byEmpAtiv[p.empresa]=(byDate[d].byEmpAtiv[p.empresa]||0)+1;byDate[d].byFuncAtiv[p.funcao]=(byDate[d].byFuncAtiv[p.funcao]||0)+1;}if(p.pav)byDate[d].byPav[p.pav]=(byDate[d].byPav[p.pav]||0)+1;if(p.regiao){var regKey=regiaoPavKey(p);byDate[d].byRegiao[regKey]=(byDate[d].byRegiao[regKey]||0)+1}});
@@ -1132,6 +1439,7 @@ function populateRangeFilters(agg){
 
 function renderRangeKPIs(days,agg){
   var el=G('kpis');
+  el.classList.add('kpi-auto');
   if(!days.length){el.innerHTML='<div class="kp"><div class="kl">Nenhuma data selecionada</div><div class="kv">—</div></div>';G('kpis2').innerHTML='';return}
   var totalPessoaDias=agg.reduce(function(s,p){return s+p.diasPresente},0);
   var pessoasDistintas=agg.length;
@@ -1139,6 +1447,7 @@ function renderRangeKPIs(days,agg){
   var totalAtivo=agg.reduce(function(s,p){return s+p.diasAtivo},0);
   var totalFerias=agg.reduce(function(s,p){return s+p.diasFerias},0);
   var empresas=uniq(agg.map(function(p){return p.empresa})).length;
+  var prodPeriodo=calcMonthlyProd(getMonthlyProdRows(days));
   el.innerHTML=[
     {i:'📅',l:'Dias no periodo',v:days.length,f:'datas selecionadas',c:'var(--blue)'},
     {i:'👷',l:'Pessoas distintas',v:pessoasDistintas,f:'no periodo',c:'#059669'},
@@ -1146,8 +1455,10 @@ function renderRangeKPIs(days,agg){
     {i:'📈',l:'Media dias/pessoa',v:mediaDias,f:'presenca media',c:'#7C3AED'},
     {i:'✅',l:'Dias c/ atividade',v:totalAtivo,f:'lancamentos',c:'var(--green)'},
     {i:'🌴',l:'Dias de ferias',v:totalFerias,f:'no periodo',c:'var(--amber)'},
-    {i:'🏢',l:'Empresas',v:empresas,f:'envolvidas',c:'var(--navy)'}
-  ].map(function(k){return '<div class="kp" style="--kc:'+k.c+'"><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div></div>'}).join('');
+    {i:'🏢',l:'Empresas',v:empresas,f:'envolvidas',c:'var(--navy)'},
+    {i:'📐',l:'Produção do período',v:fmtNum(prodPeriodo.m2)+' m²',f:(prodPeriodo.m3>0||prodPeriodo.un>0?'m² · m³ · UN — clique para ver':'m² — clique para ver'),c:'#0891B2',click:'openProducaoPeriodoModal()'},
+    {i:'🏗️',l:'Produção por empresa',v:uniq(getMonthlyProdRows(days).filter(function(r){return r.empresa;}).map(function(r){return r.empresa;})).length,f:'empresas com produção — clique para ver',c:'#7C3AED',click:'openProducaoEmpresaModal()'}
+  ].map(function(k){var clickAttr=k.click?(' onclick="'+k.click+'" role="button" tabindex="0" title="Clique para ver a produção do periodo"'):'';var cls='kp'+(k.click?' kp-click':'');return '<div class="'+cls+'" style="--kc:'+k.c+'"'+clickAttr+'><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div></div>'}).join('');
 }
 
 function renderRangeKPIs2(days,agg){
@@ -1248,15 +1559,14 @@ function getFilteredRangeAgg(){
 function setRangeSort(k){if(rangeSortKey===k)rangeSortDir*=-1;else{rangeSortKey=k;rangeSortDir=1}renderRangeTable()}
 
 function renderRangeTable(){
-  var el=G('range-tbl-box'),meta=G('range-tbl-meta'),ct=G('range-tbl-ct');
+  var el=G('range-tbl-box'),meta=G('range-tbl-meta');
   var days=getRangeDays();
-  if(!days.length){el.innerHTML='<div class="em">Selecione um ou mais dias acima para ver a producao por pessoa.</div>';meta.textContent='';ct.textContent='';return}
+  if(!days.length){el.innerHTML='<div class="em">Selecione um ou mais dias acima para ver a producao por pessoa.</div>';meta.textContent='';return}
   var agg=getFilteredRangeAgg();
   if(rangeSortKey==='nome'||rangeSortKey==='empresa'||rangeSortKey==='funcao')agg=agg.slice().sort(function(a,b){return(a[rangeSortKey]||'').localeCompare(b[rangeSortKey]||'','pt-BR')*rangeSortDir});
   else if(rangeSortKey)agg=agg.slice().sort(function(a,b){return((a[rangeSortKey]||0)-(b[rangeSortKey]||0))*rangeSortDir});
   else agg=agg.slice().sort(function(a,b){return b.diasPresente-a.diasPresente});
   meta.textContent=days.length+' dia(s) selecionados · '+agg.length+' pessoa(s)';
-  ct.textContent=agg.length+' registro(s)';
   var sk=rangeSortKey,sd=rangeSortDir;
   function th(label,key){return '<th onclick="setRangeSort(\''+key+'\')" class="'+(sk===key?(sd>0?'asc':'desc'):'')+'">'+label+'</th>'}
   var h='<table class="t"><thead><tr>'+th('Nome','nome')+th('Empresa','empresa')+th('Funcao','funcao')+th('Dias presente','diasPresente')+th('Dias c/ ativ.','diasAtivo')+th('Dias s/ ativ.','diasSem')+th('Dias s/ producao','diasSemProd')+th('Dias ferias','diasFerias')+'<th>Pavimentos</th><th>Producao / Atividades por dia</th></tr></thead><tbody>';
@@ -1303,6 +1613,7 @@ function renderRangeAll(){
 
 /* ═══════ IMPRESSÃO ═══════ */
 function doPrint(){
+  if(VIEW_MODE==='range'){ executeRangePrint(); return; }
   var day=getSelectedDay();
   if(!day){toast('Selecione um dia primeiro','warn');return}
   G('pm-sub').textContent='Dia '+day.date+' \u00b7 '+day.all.length+' pessoas no total';
@@ -1354,6 +1665,78 @@ function updatePrintPreview(){
     (a.length+f.length+v.length)+' pessoa(s) — '+a.length+' ativo(s)'+(iF?' \u00b7 '+f.length+' faltoso(s)':'')+(iV?' \u00b7 '+v.length+' f\u00e9rias':'');
 }
 
+function executeRangePrint(){
+  var days=getRangeDays();
+  if(!days.length){toast('Selecione um ou mais dias no periodo','warn');return;}
+  var q=norm(G('rq').value),empFilter=G('remp').value,funcFilter=G('rfunc').value,pavFilter=G('rpav').value;
+  function match(p){
+    if(empFilter&&p.empresa!==empFilter)return false;
+    if(funcFilter&&p.funcao!==funcFilter)return false;
+    if(pavFilter&&p.pav&&!samePavForMatch(p.pav,pavFilter))return false;
+    if(q){var full=norm((p.nome||'')+' '+(p.empresa||'')+' '+(p.funcao||'')+' '+(p.atividade||'')+' '+(p.prod||'')+' '+(p.regiao||''));if(full.indexOf(q)===-1)return false;}
+    return true;
+  }
+  var agg=getFilteredRangeAgg();
+  var summary={};
+  var launchRows=[];
+  days.forEach(function(day){
+    (day.ativos||[]).forEach(function(p){
+      if(!match(p))return;
+      var parsed=parseProducaoUnidades(p.prod||'');
+      if(!parsed.length)return;
+      parsed.forEach(function(u){
+        if(!summary[p.empresa])summary[p.empresa]={M2:0,M3:0,UN:0};
+        summary[p.empresa][u.unidade]+=u.valor;
+      });
+      launchRows.push({date:day.date,nome:p.nome,empresa:p.empresa,funcao:p.funcao,pav:p.pav||'—',local:p.regiao||'—',atividade:p.atividade||p.atividadeRaw||'—',prod:p.prod||'—'});
+    });
+  });
+  var companies=Object.keys(summary).filter(function(k){return summary[k].M2>0||summary[k].M3>0||summary[k].UN>0}).sort(function(a,b){return a.localeCompare(b,'pt-BR')});
+  var totals=companies.reduce(function(t,k){t.M2+=summary[k].M2;t.M3+=summary[k].M3;t.UN+=summary[k].UN;return t;},{M2:0,M3:0,UN:0});
+  var titleParts=[days.length+' dia(s) selecionados'];
+  if(empFilter)titleParts.push('Empreiteira: '+empFilter);
+  if(funcFilter)titleParts.push('Função: '+funcFilter);
+  if(pavFilter)titleParts.push('Pav.: '+pavFilter);
+  if(q)titleParts.push('Busca: '+G('rq').value);
+  G('print-header').innerHTML=
+    '<h1>RDO — Relatório Filtrado de Produção</h1>'+
+    '<p>'+esc(titleParts.join(' · '))+' · '+launchRows.length+' lançamento(s) · Impresso em '+fmtNow()+'</p>';
+
+  var h='<div class="range-print-report">';
+  h+='<div class="range-print-title">Produção do período</div>';
+  h+='<div class="range-print-total-grid">'+
+    '<div class="range-print-total"><span>M²</span><b>'+fmtNum(totals.M2)+' m²</b></div>'+
+    '<div class="range-print-total"><span>M³</span><b>'+totals.M3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+' m³</b></div>'+
+    '<div class="range-print-total"><span>UN</span><b>'+fmtNum(totals.UN)+' UN</b></div>'+
+    '</div>';
+
+  h+='<div class="range-print-section-title">Lançamentos de produção</div>';
+  h+='<table class="range-print-table"><thead><tr><th>Data</th><th>Nome</th><th>Empresa</th><th>Função</th><th>Pav.</th><th>Local</th><th>Atividade</th><th>Produção</th></tr></thead><tbody>';
+  launchRows.sort(function(a,b){var da=parseDateBR(a.date),db=parseDateBR(b.date);var va=da?da.y*10000+da.m*100+da.d:0,vb=db?db.y*10000+db.m*100+db.d:0;return va-vb||a.empresa.localeCompare(b.empresa,'pt-BR')||a.nome.localeCompare(b.nome,'pt-BR')});
+  launchRows.forEach(function(r){
+    h+='<tr><td>'+esc(r.date)+'</td><td><b>'+esc(r.nome)+'</b></td><td>'+esc(r.empresa)+'</td><td>'+esc(r.funcao)+'</td><td>'+esc(r.pav)+'</td><td>'+esc(r.local)+'</td><td>'+esc(r.atividade)+'</td><td><b>'+esc(r.prod)+'</b></td></tr>';
+  });
+  if(!launchRows.length)h+='<tr><td colspan="8" style="text-align:center;padding:12px">Nenhum lançamento de produção encontrado.</td></tr>';
+  h+='</tbody></table>';
+
+  h+='<div class="range-print-section-title">Resumo da produção por empreiteira</div>';
+  h+='<table class="range-print-summary-table"><thead><tr><th>Empreiteira</th><th>M²</th><th>M³</th><th>UN</th></tr></thead><tbody>';
+  companies.forEach(function(k){
+    var v=summary[k];
+    h+='<tr><td><b>'+esc(k)+'</b></td><td>'+fmtNum(v.M2)+' m²</td><td>'+v.M3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+' m³</td><td>'+fmtNum(v.UN)+' UN</td></tr>';
+  });
+  if(!companies.length)h+='<tr><td colspan="4" style="text-align:center;padding:10px">Nenhuma produção encontrada para os filtros selecionados.</td></tr>';
+  h+='</tbody></table>';
+  h+='</div>';
+
+  var sec=G('print-db-section');
+  sec.innerHTML=h;sec.style.display='block';document.body.classList.add('range-print');
+  requestAnimationFrame(function(){
+    window.print();
+    setTimeout(function(){sec.style.display='none';sec.innerHTML='';document.body.classList.remove('range-print');},700);
+  });
+}
+
 function executePrint(){
   var day=getSelectedDay();if(!day)return;
   var emps=pmGetSelected('pm-emps'),funcs=pmGetSelected('pm-funcs'),pavs=pmGetSelected('pm-pavs');
@@ -1395,6 +1778,8 @@ function executePrint(){
     ferias.forEach(function(p){h+='<tr style="background:#FFFBEB"><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;color:#92400E">'+esc(p.nome)+'</td><td style="color:#B45309">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td colspan="4"><span style="font-family:JetBrains Mono;font-size:9px;font-weight:700;background:#FEF3C7;padding:2px 6px;border-radius:10px;color:#92400E">'+esc(p.motivo||'F\u00c9RIAS')+'</span></td></tr>';});
   }
   h+='</tbody></table></div>';
+
+
   var sec=G('print-db-section');
   sec.innerHTML=h;
   sec.style.display='block';
@@ -1422,23 +1807,127 @@ function populateFilters(day){
 
 function renderKPIs(day){
   if(!day){G('kpis').innerHTML='<div class="kp"><div class="kl">Sem dados</div><div class="kv">—</div></div>';return}
+  G('kpis').classList.remove('kpi-auto');
   var empCnt=Object.keys(day.byEmp).length,funcCnt=Object.keys(day.byFunc).length;
   var comAtiv=day.ativos.filter(function(p){return !!p.atividade}).length;
   var faltosos=day.ativos.length-comAtiv;
   var previsto=day.ativos.length;
   var pctPrevisto=previsto>0?(comAtiv/previsto*100).toFixed(0):'0';
-  G('kpis').innerHTML=[
-    {i:'👷',l:'Pessoas trabalhando no dia',   v:comAtiv,           f:'de '+previsto+' previstos ('+pctPrevisto+'%)', c:'#059669', click:''},
+  var prodDia=computeProducaoDia(day);
+  var prodM2Dia=prodDia.totals.M2||0;
+  /* Mini-ranking: top 3 empresas do dia em m², exibido dentro do card 📐 */
+  var byEmpMini={};
+  prodDia.producers.forEach(function(pr){pr.parsed.forEach(function(u){if(u.unidade==='M2')byEmpMini[pr.p.empresa]=(byEmpMini[pr.p.empresa]||0)+u.valor})});
+  var miniTop=Object.keys(byEmpMini).map(function(k){return{n:k,v:byEmpMini[k]}}).sort(function(a,b){return b.v-a.v}).slice(0,3);
+  var miniHtml='';
+  if(miniTop.length){
+    var mxMini=miniTop[0].v||1;
+    miniHtml='<div class="kp-mini">'+miniTop.map(function(m){return '<div class="kp-mini-row"><span class="nm" title="'+esc(m.n)+'">'+esc(m.n)+'</span><div class="tr"><div class="fl" style="width:'+(m.v/mxMini*100).toFixed(0)+'%"></div></div><span class="vl">'+fmtNum(m.v)+' m²</span></div>'}).join('')+'</div>';
+  }
+  var cards=[
+    {i:'👷',l:'Pessoas no dia',             v:comAtiv,           f:'de '+previsto+' previstos ('+pctPrevisto+'%)', c:'#059669', click:''},
     {i:'🆕',l:'Chegaram Hoje',                v:(function(){var prev=PARSED.days.slice(SELECTED_DATE_IDX+1);var ant=new Set();prev.forEach(function(d){d.all.forEach(function(p){ant.add(norm(p.nome))})});return day.all.filter(function(p){return !ant.has(norm(p.nome))}).length})(), f:'1ª vez na obra — clique para ver',c:'var(--navy)', click:'openHojeModal()'},
     {i:'🌴',l:'De Ferias',      v:day.ferias.length, f:'excluidos do efetivo',              c:'var(--amber)', click:'openPeopleModal(\'ferias\')'},
     {i:'🚫',l:'Faltosos',       v:faltosos,          f:'sem atividade — excluidos',         c:'var(--red)',   click:'openPeopleModal(\'faltosos\')'},
     {i:'🏢',l:'Empresas',       v:empCnt,            f:'ativas hoje',                       c:'var(--blue)',  click:''},
-    {i:'⚒️',l:'Funcoes',        v:funcCnt,           f:'distintas',                         c:'var(--cyan)',  click:''}
+    {i:'⚒️',l:'Funcoes',        v:funcCnt,           f:'distintas',                         c:'var(--cyan)',  click:''},
+    {i:'📐',l:'Produção diária', v:fmtNum(prodM2Dia)+' m²', f:day.date+' — clique para ver', c:'#0891B2', click:'openProducaoModal()', feature:true, extra:miniHtml}
   ].map(function(k){
     var clickAttr=k.click?(' onclick="'+k.click+'" role="button" tabindex="0"'):'';
-    var cls='kp'+(k.click?' kp-click':'');
-    return '<div class="'+cls+'" style="--kc:'+k.c+'"'+clickAttr+'><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div></div>';
-  }).join('');
+    var cls='kp'+(k.click?' kp-click':'')+(k.feature?' kp-feature':'');
+    return '<div class="'+cls+'" style="--kc:'+k.c+'"'+clickAttr+'><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div>'+(k.extra||'')+'</div>';
+  });
+  G('kpis').innerHTML='<div class="kpis-left">'+cards.slice(0,6).join('')+'</div>'+cards.slice(6).join('');
+}
+
+/* ═══════ PRODUÇÃO POR UNIDADE (UN / M² / M³) ═══════ */
+/* Extrai pares {valor, unidade} do texto livre da coluna Produção.
+   Reconhece m²/m2 -> M2, m³/m3 -> M3, un/und/unid/unidade(s) -> UN.
+   Um mesmo texto pode ter mais de uma unidade (ex.: "12m² + 3un portas"). */
+function parseProducaoUnidades(texto){
+  if(!texto)return[];
+  var resultados=[];
+  /* Aceita números no padrão brasileiro (50,73 / 1.234,56) e evita \b após m²/m³,
+     pois os caracteres sobrescritos não funcionam como "word boundary" em JS. */
+  var re=/(\d[\d.,]*\d|\d)\s*(m³|m3|m²|m2|und?\.?|unid(?:ade)?s?)(?=$|[^A-Za-z0-9])/gi;
+  var m;
+  while((m=re.exec(texto))!==null){
+    var bruto=m[1].replace(/\s/g,'');
+    var valor;
+    if(bruto.indexOf(',')>-1 && bruto.indexOf('.')>-1){
+      valor=bruto.lastIndexOf(',')>bruto.lastIndexOf('.')?parseFloat(bruto.replace(/\./g,'').replace(',','.')):parseFloat(bruto.replace(/,/g,''));
+    }else if(bruto.indexOf(',')>-1){
+      valor=parseFloat(bruto.replace(',','.'));
+    }else{
+      valor=parseFloat(bruto);
+    }
+    if(isNaN(valor))continue;
+    var u=m[2].toLowerCase();
+    var unidade=(u==='m³'||u==='m3')?'M3':(u==='m²'||u==='m2')?'M2':'UN';
+    resultados.push({valor:valor,unidade:unidade});
+  }
+  return resultados;
+}
+
+/* Agrega a produção do dia: só considera quem tem produção preenchida
+   (mesma regra de temAtividade usada no filtro "Com producao" da tabela). */
+function computeProducaoDia(day){
+  var producers=[],totals={UN:0,M2:0,M3:0};
+  if(!day)return{producers:producers,totals:totals};
+  day.ativos.forEach(function(p){
+    if(!temAtividade(p.prod))return;
+    var parsed=parseProducaoUnidades(p.prod);
+    parsed.forEach(function(u){totals[u.unidade]+=u.valor});
+    producers.push({p:p,parsed:parsed});
+  });
+  return{producers:producers,totals:totals};
+}
+
+function fmtNum(v){return v.toLocaleString('pt-BR',{maximumFractionDigits:2})}
+
+function openProducaoModal(){
+  var day=getSelectedDay();
+  if(!day){toast('Selecione um dia primeiro','warn');return}
+  var agg=computeProducaoDia(day);
+  var hdr=G('emp-modal-overlay').querySelector('.modal-h');
+  hdr.style.background='#0891B2';
+  G('emp-modal-title').textContent='📦 Produção Total';
+  G('emp-modal-sub').textContent=day.date+' · '+agg.producers.length+' pessoa(s) com produção lançada';
+  var body=G('emp-modal-body');
+  if(!agg.producers.length){
+    body.innerHTML='<div class="modal-empty">Nenhuma produção lançada neste dia.</div>';
+    G('emp-modal-overlay').classList.add('on');
+    return;
+  }
+  var lista=agg.producers.slice().sort(function(a,b){return(a.p.nome||'').localeCompare(b.p.nome||'','pt-BR')});
+  var html='<div class="local-summary">'+
+    '<div class="local-stat"><b>'+fmtNum(agg.totals.UN)+'</b><span>Total UN</span></div>'+
+    '<div class="local-stat"><b>'+fmtNum(agg.totals.M2)+'</b><span>Total M²</span></div>'+
+    '<div class="local-stat"><b>'+fmtNum(agg.totals.M3)+'</b><span>Total M³</span></div>'+
+  '</div>';
+  html+='<table class="people-modal-table" style="width:100%;border-collapse:collapse;font-size:12px">'+
+    '<thead><tr>'+
+    '<th style="text-align:left;padding:8px 10px;background:#E0F7FA;color:#0E7490;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Nome</th>'+
+    '<th style="text-align:left;padding:8px 10px;background:#E0F7FA;color:#0E7490;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Empresa</th>'+
+    '<th style="text-align:left;padding:8px 10px;background:#E0F7FA;color:#0E7490;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Pavimento</th>'+
+    '<th style="text-align:left;padding:8px 10px;background:#E0F7FA;color:#0E7490;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Produção</th>'+
+    '</tr></thead><tbody>'+
+    lista.map(function(item,i){
+      var p=item.p;var bg=i%2===0?'#fff':'#F8FAFC';
+      var unidadesTxt=item.parsed.length?item.parsed.map(function(u){return fmtNum(u.valor)+' '+(u.unidade==='M2'?'m²':u.unidade==='M3'?'m³':'un')}).join(' + '):'—';
+      return '<tr style="background:'+bg+'">'+
+        '<td data-label="Nome" style="padding:8px 10px;font-weight:600;border-bottom:1px solid #E0F7FA">'+esc(p.nome)+'</td>'+
+        '<td data-label="Empresa" style="padding:8px 10px;border-bottom:1px solid #E0F7FA"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
+        '<td data-label="Pavimento" style="padding:8px 10px;border-bottom:1px solid #E0F7FA">'+pavBadge(p.pav)+'</td>'+
+        '<td data-label="Produção" style="padding:8px 10px;border-bottom:1px solid #E0F7FA">'+
+          '<div style="font-weight:700;color:#0E7490">'+esc(unidadesTxt)+'</div>'+
+          '<div style="margin-top:2px;color:var(--ink2);font-size:10px">'+esc(p.prod)+'</div>'+
+        '</td>'+
+      '</tr>';
+    }).join('')+
+    '</tbody></table>';
+  body.innerHTML=html;
+  G('emp-modal-overlay').classList.add('on');
 }
 
 function renderBars(elId,metaId,counts,colorMap,ativCounts,clickMode){
@@ -1756,8 +2245,6 @@ function closeEmpModal(){
   G('emp-modal-overlay').classList.remove('on');
   G('emp-modal-overlay').querySelector('.modal-h').style.background='';
 }
-/* closePavModal era um alias — mantido só por compatibilidade com chamadas antigas */
-function closePavModal(){closeEmpModal()}
 
 document.addEventListener('keydown',function(e){
   if(e.key==='Escape'){closeEmpModal();closePeopleModal();closeUnicosModal();closePrintModal();closeHojeModal()}
@@ -1957,7 +2444,8 @@ function markScrollable(container){
 function setSort(k){if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=1}renderTable()}
 
 function renderTable(){
-  var day=getSelectedDay(),el=G('tbl-box'),meta=G('tbl-meta'),ct=G('tbl-ct');
+  setTimeout(alignSingleView,30);
+  var day=getSelectedDay(),el=G('tbl-box'),meta=G('tbl-meta');
   if(!day){el.innerHTML='<div class="em">Sem dados</div>';return}
   var r=getFilteredPeople(day),ferias=r.ferias;
   var az=G('faz').value;
@@ -1976,7 +2464,6 @@ function renderTable(){
   ferias=sortPpl(ferias);
 
   meta.textContent=ativos.length+' ativos'+(faltosos.length?' · '+faltosos.length+' faltosos':'')+(ferias.length?' · '+ferias.length+' ferias':'');
-  ct.textContent=(ativos.length+faltosos.length+ferias.length)+' registro(s)';
 
   var sk=sortKey,sd=sortDir;
   var h='<table class="t"><thead><tr>'+
@@ -2063,13 +2550,44 @@ function selectDateByValue(idx){
   renderAllForDate();G('kpis').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
+var SINGLE_PROD_EMPRESA_UNIT='M2';
+function setSingleProdEmpresaUnit(unit){
+  SINGLE_PROD_EMPRESA_UNIT=unit||'M2';
+  ['m2','m3','un'].forEach(function(k){var b=G('single-prod-tab-'+k);if(b)b.classList.toggle('on',SINGLE_PROD_EMPRESA_UNIT===k.toUpperCase())});
+  renderProducaoEmpresaDia(getSelectedDay());
+}
+
+function renderProducaoEmpresaDia(day){
+  var box=G('single-prod-empresa-box'),meta=G('single-prod-empresa-meta');
+  if(!box||!meta)return;
+  if(!day){box.innerHTML='<div class="prod-empresa-empty">Selecione um dia para ver a produção por empresa.</div>';meta.textContent='';return;}
+  var unit=SINGLE_PROD_EMPRESA_UNIT, label=unit==='M2'?'m²':unit==='M3'?'m³':'UN';
+  var color=unit==='M2'?'#2563EB':unit==='M3'?'#D97706':'#7C3AED';
+  var byEmp={};
+  (day.ativos||[]).forEach(function(p){
+    if(!temAtividade(p.prod))return;
+    parseProducaoUnidades(p.prod).forEach(function(u){
+      if(u.unidade===unit)byEmp[p.empresa]=(byEmp[p.empresa]||0)+u.valor;
+    });
+  });
+  var keys=Object.keys(byEmp).filter(function(k){return byEmp[k]>0}).sort(function(a,b){return byEmp[b]-byEmp[a]});
+  if(!keys.length){box.innerHTML='<div class="prod-empresa-empty">Nenhuma produção em '+label+' registrada neste dia.</div>';meta.textContent=day.date+' · 0 empresas';return;}
+  var max=byEmp[keys[0]]||1,total=keys.reduce(function(s,k){return s+byEmp[k]},0);
+  var rows=keys.map(function(k){
+    var w=(byEmp[k]/max*100).toFixed(1);
+    return '<div class="prod-empresa-row"><span class="prod-empresa-name" title="'+esc(k)+'">'+esc(k)+'</span><div class="prod-empresa-track"><div class="prod-empresa-fill" style="width:'+w+'%;background:'+color+'"></div></div><span class="prod-empresa-val">'+fmtNum(byEmp[k])+' '+label+'</span></div>';
+  }).join('');
+  box.innerHTML=rows;
+  meta.textContent=day.date+' · '+keys.length+' empresa(s) · '+fmtNum(total)+' '+label;
+}
+
 function renderAllForDate(){
   var day=getSelectedDay();
   G('sub-date').textContent=day?('Dados de '+day.date):'Sem dados';
   renderKPIs(day);
   if(day){populateFilters(day);renderBars('emp-bars','emp-meta',day.byEmp,COLORS,day.byEmpAtiv,'day');renderBars('func-bars','func-meta',day.byFunc,COLORS,day.byFuncAtiv,'func');renderBars('pav-bars','pav-meta',day.byPav,PAV_CORES,null,'pav');renderBars('reg-bars','reg-meta',day.byRegiao,COLORS,null,'reg')}
   else{['emp-bars','func-bars','pav-bars','reg-bars'].forEach(function(id){G(id).innerHTML=''});['emp-meta','func-meta','pav-meta','reg-meta'].forEach(function(id){G(id).textContent=''})}
-  renderChart(PARSED.days,day);renderTable();renderHist(PARSED.days);
+  renderChart(PARSED.days,day);renderProducaoEmpresaDia(day);renderTable();renderHist(PARSED.days);
   G('upd-ts').textContent='atualizado '+fmtNow();
 }
 
