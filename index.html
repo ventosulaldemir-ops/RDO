@@ -938,6 +938,32 @@ function temAtividade(v){if(!v||!v.trim())return false;var n=norm(v);if(!n)retur
 /* Efetivo real de um dia = pessoas com atividade lancada (excluindo ferias e faltosos) */
 function comAtividadeCount(day){return day.ativos.filter(function(p){return !!p.atividade}).length}
 
+/* ═══════ DIAS SEM ATIVIDADE (streak de faltas consecutivas) ═══════
+   Conta, a partir do dia informado (idxDia) e voltando no tempo (indices
+   maiores em PARSED.days = datas mais antigas), quantos dias consecutivos
+   a mesma pessoa (nome+empresa) aparece na planilha SEM atividade lançada.
+   A contagem para quando: a pessoa nao aparece naquele dia (sem registro),
+   entrou de ferias/afastamento, ou teve atividade lançada naquele dia. */
+function diasSemAtividade(pessoa,idxDia){
+  if(!PARSED||!PARSED.days||!PARSED.days.length)return 0;
+  var days=PARSED.days;
+  var key=norm(pessoa.nome)+'|'+norm(pessoa.empresa);
+  var count=0;
+  for(var i=idxDia;i<days.length;i++){
+    var day=days[i];
+    var found=null;
+    for(var j=0;j<day.all.length;j++){
+      var q=day.all[j];
+      if((norm(q.nome)+'|'+norm(q.empresa))===key){found=q;break}
+    }
+    if(!found)break;
+    if(found.ferias)break;
+    if(found.atividade)break;
+    count++;
+  }
+  return count;
+}
+
 
 /* ═══════ PRODUÇÃO MENSAL — KPI ÚNICO, DETALHE COMPLETO AO CLICAR ═══════ */
 var JORNADA_HORAS=8;
@@ -1771,7 +1797,11 @@ function executePrint(){
   });
   if(semAtiv.length){
     h+='<tr style="background:#FEE2E2"><td colspan="8" style="font-family:JetBrains Mono;font-size:9px;font-weight:700;color:#B91C1C;text-transform:uppercase;padding:6px 10px">🚫 '+semAtiv.length+' FALTOSO(S)</td></tr>';
-    semAtiv.forEach(function(p){h+='<tr style="background:#FFF5F5"><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;color:#B91C1C">'+esc(p.nome)+'</td><td style="color:#991B1B">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td style="color:#94A3B8;font-style:italic">'+esc(p.atividadeRaw||'\u2014')+'</td><td style="color:#94A3B8">\u2014</td><td>'+esc(p.pav||'\u2014')+'</td><td>'+esc(p.regiao||'\u2014')+'</td></tr>';});
+    semAtiv.forEach(function(p){
+      var dsa=diasSemAtividade(p,SELECTED_DATE_IDX);
+      var faltCel=(dsa>1?('<b>'+dsa+'d</b> sem atividade'):'')+(p.atividadeRaw?((dsa>1?' \u00b7 ':'')+esc(p.atividadeRaw)):(dsa>1?'':'\u2014'));
+      h+='<tr style="background:#FFF5F5"><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;color:#B91C1C">'+esc(p.nome)+'</td><td style="color:#991B1B">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td style="color:#94A3B8;font-style:italic">'+faltCel+'</td><td style="color:#94A3B8">\u2014</td><td>'+esc(p.pav||'\u2014')+'</td><td>'+esc(p.regiao||'\u2014')+'</td></tr>';
+    });
   }
   if(ferias.length){
     h+='<tr style="background:#FEF3C7"><td colspan="7" style="font-family:JetBrains Mono;font-size:9px;font-weight:700;color:#92400E;text-transform:uppercase;padding:6px 10px">🌴 '+ferias.length+' FÉRIAS / AUSENTE(S)</td></tr>';
@@ -2287,6 +2317,8 @@ function openPeopleModal(tipo){
     }
   }else{ /* faltosos */
     var faltososList=day.ativos.filter(function(p){return !p.atividade});
+    faltososList=faltososList.map(function(p){p._dsa=diasSemAtividade(p,SELECTED_DATE_IDX);return p;})
+      .sort(function(a,b){return b._dsa-a._dsa||(a.nome||'').localeCompare(b.nome||'','pt-BR')});
     hdr.style.background='#991B1B';
     title.textContent='🚫 Faltosos / Sem Atividade';
     sub.textContent=day.date+' · '+faltososList.length+' pessoa(s) excluída(s) do efetivo';
@@ -2298,14 +2330,18 @@ function openPeopleModal(tipo){
         '<th style="text-align:left;padding:8px 10px;background:#FEE2E2;color:#991B1B;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Nome</th>'+
         '<th style="text-align:left;padding:8px 10px;background:#FEE2E2;color:#991B1B;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Função</th>'+
         '<th style="text-align:left;padding:8px 10px;background:#FEE2E2;color:#991B1B;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Empresa</th>'+
+        '<th style="text-align:left;padding:8px 10px;background:#FEE2E2;color:#991B1B;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em" title="Dias consecutivos, contando o dia selecionado, sem atividade lançada">Dias sem vir</th>'+
         '<th style="text-align:left;padding:8px 10px;background:#FEE2E2;color:#991B1B;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Reg. Atividade</th>'+
         '</tr></thead><tbody>'+
         faltososList.map(function(p,i){
           var bg=i%2===0?'#fff':'#FFF5F5';
+          var dsa=p._dsa;
+          var dsaCls=dsa>=5?'badge-red':dsa>=3?'badge-amber':'badge-gray';
           return '<tr style="background:'+bg+'">'+
             '<td data-label="Nome" style="padding:8px 10px;font-weight:600;color:#B91C1C;border-bottom:1px solid #FEE2E2">'+esc(p.nome)+'</td>'+
             '<td data-label="Função" style="padding:8px 10px;color:#991B1B;border-bottom:1px solid #FEE2E2">'+esc(p.funcao)+'</td>'+
             '<td data-label="Empresa" style="padding:8px 10px;border-bottom:1px solid #FEE2E2"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
+            '<td data-label="Dias sem vir" style="padding:8px 10px;border-bottom:1px solid #FEE2E2"><span class="badge '+dsaCls+'" title="Contando a partir do dia selecionado, voltando no historico">'+dsa+' dia'+(dsa===1?'':'s')+'</span></td>'+
             '<td data-label="Reg. Atividade" style="padding:8px 10px;border-bottom:1px solid #FEE2E2;color:var(--ink3);font-size:11px;font-style:italic">'+esc(p.atividadeRaw||'—')+'</td>'+
           '</tr>';
         }).join('')+
@@ -2489,11 +2525,13 @@ function renderTable(){
   if(faltosos.length){
     h+='<tr style="background:#FEE2E2"><td colspan="6" style="padding:8px 12px;font-family:\'JetBrains Mono\';font-size:10px;color:#B91C1C;font-weight:700;letter-spacing:.04em;text-transform:uppercase">🚫 '+faltosos.length+' FALTOSO(S) — sem atividade (excluidos do efetivo real)</td></tr>';
     faltosos.forEach(function(p){
+      var dsa=diasSemAtividade(p,SELECTED_DATE_IDX);
+      var dsaBadge=dsa>1?(' <span class="badge '+(dsa>=5?'badge-red':'badge-amber')+'" title="Dias consecutivos sem atividade, contando o dia selecionado">'+dsa+'d sem vir</span>'):'';
       h+='<tr style="background:#FFF5F5">'+
         '<td data-label="Nome" style="font-weight:600;white-space:nowrap;color:#B91C1C">'+esc(p.nome)+'</td>'+
         '<td data-label="Funcao" style="color:#991B1B">'+esc(p.funcao)+'</td>'+
         '<td data-label="Empresa"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
-        '<td data-label="Atividade"><span class="badge badge-red">FALTOSO</span>'+(p.atividadeRaw?'<span style="color:var(--ink3);font-size:10px;font-style:italic;margin-left:6px">'+esc(p.atividadeRaw)+'</span>':'')+'</td>'+
+        '<td data-label="Atividade"><span class="badge badge-red">FALTOSO</span>'+dsaBadge+(p.atividadeRaw?'<span style="color:var(--ink3);font-size:10px;font-style:italic;margin-left:6px">'+esc(p.atividadeRaw)+'</span>':'')+'</td>'+
         '<td data-label="Pav.">'+pavBadge(p.pav)+'</td>'+
         '<td data-label="Local" style="color:var(--ink2);font-size:11px">'+esc(p.regiao||'—')+'</td>'+
       '</tr>';
