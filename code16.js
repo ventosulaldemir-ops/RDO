@@ -31,8 +31,19 @@ function alignSingleView(){
 window.addEventListener('resize',function(){setTimeout(function(){alignSingleView();injectProdEmpresaPanel()},30)});
 
 
-var KW_VAZIO=['nao encontrado','não encontrado','n/a','na','nenhum','nenhuma','sem atividade','sem lancamento','sem lançamento','sem serviço','sem frente de servico','sem frente de serviço','sem frente','indefinido','—','--','-'];
-function temAtividade(v){if(!v||!v.trim())return false;var n=norm(v);if(!n)return false;for(var i=0;i<KW_VAZIO.length;i++){if(n===KW_VAZIO[i]||n.indexOf(KW_VAZIO[i])===0)return false}return true}
+var KW_VAZIO=['nao encontrado','não encontrado','n/a','nenhum','nenhuma','sem atividade','sem lancamento','sem lançamento','sem serviço','sem frente de servico','sem frente de serviço','sem frente','indefinido','—','--'];
+/* Palavras que precisam ser match EXATO (evita falso positivo com palavras curtas) */
+var KW_VAZIO_EXATO=['na','n/a','-','—','--'];
+function temAtividade(v){
+  if(!v||!v.trim())return false;
+  var n=norm(v);
+  if(!n)return false;
+  /* match exato para palavras muito curtas */
+  for(var j=0;j<KW_VAZIO_EXATO.length;j++){if(n===KW_VAZIO_EXATO[j])return false}
+  /* match exato OU começa-com para frases */
+  for(var i=0;i<KW_VAZIO.length;i++){if(n===KW_VAZIO[i]||n.indexOf(KW_VAZIO[i])===0)return false}
+  return true;
+}
 
 /* Efetivo real de um dia = pessoas com atividade lancada (excluindo ferias e faltosos) */
 function comAtividadeCount(day){return day.ativos.filter(function(p){return !!p.atividade}).length}
@@ -510,6 +521,25 @@ function selectCurrentMonth(offset){
 function getRangeDays(){if(!PARSED)return[];return PARSED.days.filter(function(d){return RANGE_SELECTED.has(d.date)})}
 
 function computeRangeAgg(days){
+  /* Mapa de faltas históricas: conta DIAS sem atividade (deduplicado por pessoa+dia) */
+  var faltasHistoricas={};
+  if(PARSED){
+    PARSED.days.forEach(function(day){
+      /* Conjunto de pessoas que faltaram NESTE dia (deduplicado) */
+      var faltaramHoje=new Set();
+      day.ativos.forEach(function(p){
+        if(!p.atividade){
+          var k=norm(p.nome)+'|'+norm(p.empresa);
+          faltaramHoje.add(k);
+        }
+      });
+      /* Incrementa apenas uma vez por pessoa por dia */
+      faltaramHoje.forEach(function(k){
+        faltasHistoricas[k]=(faltasHistoricas[k]||0)+1;
+      });
+    });
+  }
+
   var map={};
   days.forEach(function(day){
     day.all.forEach(function(p){
@@ -524,7 +554,11 @@ function computeRangeAgg(days){
       if(p.prod||p.atividade)e.producoes.push({data:p.data,prod:p.prod,atividade:p.atividade||p.atividadeRaw,pav:p.pav});
     });
   });
-  return Object.keys(map).map(function(k){return map[k]});
+  return Object.keys(map).map(function(k){
+    var e=map[k];
+    e.diasFaltouTotal=faltasHistoricas[k]||0;
+    return e;
+  });
 }
 
 function populateRangeFilters(agg){
@@ -668,7 +702,7 @@ function renderRangeTable(){
   meta.textContent=days.length+' dia(s) selecionados · '+agg.length+' pessoa(s)';
   var sk=rangeSortKey,sd=rangeSortDir;
   function th(label,key){return '<th onclick="setRangeSort(\''+key+'\')" class="'+(sk===key?(sd>0?'asc':'desc'):'')+'">'+label+'</th>'}
-  var h='<table class="t"><thead><tr>'+th('Nome','nome')+th('Empresa','empresa')+th('Funcao','funcao')+th('Dias presente','diasPresente')+th('Dias c/ ativ.','diasAtivo')+th('Dias s/ ativ.','diasSem')+th('Dias s/ producao','diasSemProd')+th('Dias ferias','diasFerias')+'<th>Pavimentos</th><th>Producao / Atividades por dia</th></tr></thead><tbody>';
+  var h='<table class="t"><thead><tr>'+th('Nome','nome')+th('Empresa','empresa')+th('Funcao','funcao')+th('Dias presente','diasPresente')+th('Dias c/ ativ.','diasAtivo')+th('Dias s/ ativ.','diasSem')+th('Dias s/ producao','diasSemProd')+th('Dias ferias','diasFerias')+th('Faltas históricas','diasFaltouTotal')+'<th>Pavimentos</th><th>Producao / Atividades por dia</th></tr></thead><tbody>';
   agg.forEach(function(p){
     var pavList=Object.keys(p.pavs).sort().map(function(pv){return pavBadge(pv)}).join(' ')||'<span class="badge badge-pav-none">—</span>';
     var prodHtml=p.producoes.length?('<div class="prod-list">'+p.producoes.slice().sort(function(a,b){return(a.data||'').localeCompare(b.data||'')}).map(function(pr){return '<div><span class="pd">'+esc(pr.data)+'</span>'+esc(pr.prod?pr.prod:(pr.atividade||'—'))+(pr.pav?' <span style="color:var(--ink3)">['+esc(pr.pav)+']</span>':'')+'</div>'}).join('')+'</div>'):'<span style="color:var(--ink3)">sem lancamentos</span>';
@@ -681,6 +715,7 @@ function renderRangeTable(){
       '<td data-label="Dias s/ ativ." class="nr" style="color:var(--red)">'+p.diasSem+'</td>'+
       '<td data-label="Dias s/ producao" class="nr" style="color:'+(p.diasSemProd?'var(--red)':'var(--ink3)')+';font-weight:'+(p.diasSemProd?'700':'400')+'">'+(p.diasSemProd?'⚠ ':'')+p.diasSemProd+'</td>'+
       '<td data-label="Dias ferias" class="nr" style="color:var(--amber)">'+p.diasFerias+'</td>'+
+      '<td data-label="Faltas históricas" class="nr" style="color:'+(p.diasFaltouTotal>0?'var(--red)':'var(--ink3)')+';font-weight:'+(p.diasFaltouTotal>0?'700':'400')+'" title="Total de dias sem atividade em toda a planilha">'+(p.diasFaltouTotal>0?'⚠ ':'')+p.diasFaltouTotal+'</td>'+
       '<td data-label="Pavimentos">'+pavList+'</td>'+
       '<td data-label="Producao / Atividades" style="max-width:320px">'+prodHtml+'</td>'+
     '</tr>';
@@ -1393,6 +1428,22 @@ function openPeopleModal(tipo){
     }
   }else{ /* faltosos */
     var faltososList=day.ativos.filter(function(p){return !p.atividade});
+    /* Contar faltas históricas de toda a planilha por pessoa — deduplicado por dia */
+    var faltasHist={};
+    if(PARSED){
+      PARSED.days.forEach(function(d){
+        var faltaramNesteDia=new Set();
+        d.ativos.forEach(function(p){
+          if(!p.atividade){
+            var k=norm(p.nome)+'|'+norm(p.empresa);
+            faltaramNesteDia.add(k);
+          }
+        });
+        faltaramNesteDia.forEach(function(k){
+          faltasHist[k]=(faltasHist[k]||0)+1;
+        });
+      });
+    }
     hdr.style.background='#991B1B';
     title.textContent='🚫 Faltosos / Sem Atividade';
     sub.textContent=day.date+' · '+faltososList.length+' pessoa(s) excluída(s) do efetivo';
@@ -1405,14 +1456,19 @@ function openPeopleModal(tipo){
         '<th style="text-align:left;padding:8px 10px;background:#FEE2E2;color:#991B1B;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Função</th>'+
         '<th style="text-align:left;padding:8px 10px;background:#FEE2E2;color:#991B1B;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Empresa</th>'+
         '<th style="text-align:left;padding:8px 10px;background:#FEE2E2;color:#991B1B;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Reg. Atividade</th>'+
+        '<th style="text-align:right;padding:8px 10px;background:#FEE2E2;color:#991B1B;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Total faltas</th>'+
         '</tr></thead><tbody>'+
         faltososList.map(function(p,i){
           var bg=i%2===0?'#fff':'#FFF5F5';
+          var k=norm(p.nome)+'|'+norm(p.empresa);
+          var total=faltasHist[k]||0;
+          var totalCell='<span style="font-family:JetBrains Mono;font-weight:700;color:'+(total>=5?'#991B1B':total>=3?'#D97706':'#475569')+'">'+total+'x</span>';
           return '<tr style="background:'+bg+'">'+
             '<td data-label="Nome" style="padding:8px 10px;font-weight:600;color:#B91C1C;border-bottom:1px solid #FEE2E2">'+esc(p.nome)+'</td>'+
             '<td data-label="Função" style="padding:8px 10px;color:#991B1B;border-bottom:1px solid #FEE2E2">'+esc(p.funcao)+'</td>'+
             '<td data-label="Empresa" style="padding:8px 10px;border-bottom:1px solid #FEE2E2"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
             '<td data-label="Reg. Atividade" style="padding:8px 10px;border-bottom:1px solid #FEE2E2;color:var(--ink3);font-size:11px;font-style:italic">'+esc(p.atividadeRaw||'—')+'</td>'+
+            '<td data-label="Total faltas" style="padding:8px 10px;border-bottom:1px solid #FEE2E2;text-align:right">'+totalCell+'</td>'+
           '</tr>';
         }).join('')+
         '</tbody></table>';
