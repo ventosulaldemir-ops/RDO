@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>RDO - Relatorio Diario de Obra</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="code16.css?v=21">
+
+<style id="prod-modal-style">
+  #prod-month-modal-overlay .modal-card{max-width:1100px;width:min(1100px,calc(100vw - 24px));max-height:90vh;border-radius:10px}
+  #prod-month-modal-overlay .modal-h{background:#0891B2;padding:15px 18px;min-height:64px;align-items:center}
+  #prod-month-modal-overlay .modal-h h4{font-size:16px;line-height:1.2}
+  #prod-month-modal-overlay .modal-h-actions{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+  #prod-month-modal-overlay .modal-print-btn{font-family:'JetBrains Mono';font-size:9px;font-weight:700;background:#fff;color:#0E7490;border:0;border-radius:3px;padding:7px 10px;cursor:pointer;min-height:30px}
+  #prod-month-modal-overlay .modal-print-btn:hover{background:#ECFEFF}
+  #prod-month-modal-overlay .modal-b{padding:12px 14px}
+  .pm-prod-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:12px}
+  .pm-prod-stat{padding:9px 10px;background:var(--paper);border:1px solid #E5EAF0;border-radius:4px;min-width:0}
+  .pm-prod-stat .p-l{font-family:'JetBrains Mono';font-size:8px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink3);margin-bottom:3px}
+  .pm-prod-stat .p-v{font-family:'Space Grotesk';font-size:18px;font-weight:700;color:var(--navy);line-height:1.1}
+  .pm-prod-stat .p-f{font-size:8px;color:var(--ink2);margin-top:3px;line-height:1.3}
+  .pm-prod-filters{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+  .pm-prod-filters input,.pm-prod-filters select{font-family:'Inter';font-size:12px;padding:7px 10px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:3px;min-height:34px;flex:1;min-width:150px}
+  .pm-prod-break{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;background:#E0F7FA;border:1px solid #BCE8EE;border-bottom:0;color:#0E7490;font-family:'JetBrains Mono';font-size:9px}
+  .pm-prod-table-wrap{overflow:auto;max-height:48vh;-webkit-overflow-scrolling:touch;border:1px solid #BCE8EE;border-top:0}
+  .pm-prod-table{width:100%;border-collapse:collapse;font-size:11px;min-width:980px}
+  .pm-prod-table th{position:sticky;top:0;background:#E0F7FA;color:#0E7490;font-family:'JetBrains Mono';font-size:8px;text-transform:uppercase;letter-spacing:.04em;text-align:left;padding:8px 9px;z-index:2}
+  .pm-prod-table td{padding:8px 9px;border-bottom:1px solid #EAF4F6;vertical-align:top}
+  .pm-prod-table tr:hover td{background:#F8FAFC}
+  .pm-prod-table .unit-val{font-family:'JetBrains Mono';font-weight:700;white-space:nowrap}
+  .pm-prod-table .prod-launch{font-weight:600;color:#0E7490;max-width:220px}
+  .pm-prod-empty{text-align:center;color:var(--ink3);font-size:12px;padding:24px}
+  @media(max-width:900px){
+    .pm-prod-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+  @media(max-width:640px){
+    #prod-month-modal-overlay{padding:8px}
+    #prod-month-modal-overlay .modal-card{width:100%;max-width:none!important;max-height:calc(100vh - 16px)}
+    #prod-month-modal-overlay .modal-h{padding:12px 14px;min-height:58px}
+    #prod-month-modal-overlay .modal-h h4{font-size:14px}
+    #prod-month-modal-overlay .modal-h-actions{gap:4px}
+    #prod-month-modal-overlay .modal-print-btn{font-size:8px;padding:6px 8px}
+    #prod-month-modal-overlay .modal-b{padding:10px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+    .pm-prod-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;flex-shrink:0}
+    .pm-prod-stat{padding:8px}
+    .pm-prod-stat .p-v{font-size:16px}
+    .pm-prod-filters{flex-direction:column;flex-shrink:0}
+    .pm-prod-filters input,.pm-prod-filters select{width:100%;min-width:0}
+    .pm-prod-table-wrap{max-height:none;flex:1;min-height:0}
+    .pm-prod-table{min-width:0;border-collapse:separate;border-spacing:0 6px;font-size:11px}
+    .pm-prod-table thead{display:none}
+    .pm-prod-table tbody{display:block;width:100%}
+    .pm-prod-table tr{display:block;width:100%;border:1px solid var(--line);border-radius:7px;background:#fff;margin-bottom:7px;overflow:hidden}
+    .pm-prod-table td{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;width:100%;padding:7px 9px!important;border-bottom:1px solid #EEF2F6;line-height:1.35;overflow-wrap:anywhere}
+    .pm-prod-table td:last-child{border-bottom:none}
+    .pm-prod-table td::before{content:attr(data-label);flex:0 0 88px;text-align:left;font-family:'JetBrains Mono';font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#94A3B8;padding-top:1px}
+    .pm-prod-table td > *{max-width:calc(100% - 98px);overflow-wrap:anywhere}
+  }
+  @page{size:A4 landscape;margin:10mm 9mm}
+  @media print{
+    body.monthly-prod-print{background:#fff!important;color:#111827!important}
+    body.monthly-prod-print .topbar,body.monthly-prod-print .container,body.monthly-prod-print footer{display:none!important}
+    body.monthly-prod-print .print-header{display:block!important;width:100%!important;padding:0 0 6px!important;margin:0 0 8px!important;border-bottom:2px solid #1F3557!important}
+    body.monthly-prod-print .print-header h1{margin:0!important;font-family:'Space Grotesk',Arial,sans-serif!important;font-size:16px!important;line-height:1.15!important;font-weight:700!important;color:#1F3557!important}
+    body.monthly-prod-print .print-header p{margin:3px 0 0!important;font-family:'JetBrains Mono',monospace!important;font-size:7.5px!important;line-height:1.25!important;color:#475569!important}
+    body.monthly-prod-print #print-db-section{display:block!important;width:100%!important;margin:0!important;padding:0!important}
+    body.monthly-prod-print .monthly-print-report{width:100%!important;font-family:Arial,sans-serif!important}
+    body.monthly-prod-print .monthly-print-report .mpr-summary{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:6px!important;margin:0 0 9px!important}
+    body.monthly-prod-print .monthly-print-report .mpr-group{border:1px solid #CBD5E1!important;border-radius:4px!important;overflow:hidden!important;break-inside:avoid!important}
+    body.monthly-prod-print .monthly-print-report .mpr-group-title{padding:4px 6px!important;background:#1F3557!important;color:#fff!important;font-size:8px!important;font-weight:700!important;letter-spacing:.04em!important;text-transform:uppercase!important}
+    body.monthly-prod-print .monthly-print-report .mpr-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important}
+    body.monthly-prod-print .monthly-print-report .mpr-stat{padding:5px 6px!important;border-right:1px solid #E2E8F0!important;border-bottom:1px solid #E2E8F0!important;min-height:42px!important}
+    body.monthly-prod-print .monthly-print-report .mpr-stat:nth-child(2n){border-right:0!important}
+    body.monthly-prod-print .monthly-print-report .mpr-stat:nth-last-child(-n+2){border-bottom:0!important}
+    body.monthly-prod-print .monthly-print-report .mpr-label{font-size:6.5px!important;color:#64748B!important;font-weight:700!important;text-transform:uppercase!important;letter-spacing:.03em!important}
+    body.monthly-prod-print .monthly-print-report .mpr-val{font-size:11px!important;line-height:1.1!important;font-weight:700!important;color:#0F172A!important;margin-top:2px!important}
+    body.monthly-prod-print .monthly-print-report .mpr-fact{font-size:5.8px!important;color:#94A3B8!important;margin-top:2px!important}
+    body.monthly-prod-print .monthly-print-report .mpr-section-title{font-size:8px!important;font-weight:700!important;color:#1F3557!important;margin:5px 0 4px!important}
+    body.monthly-prod-print .monthly-print-report table{width:100%!important;border-collapse:collapse!important;table-layout:fixed!important;font-size:6.3px!important}
+    body.monthly-prod-print .monthly-print-report thead{display:table-header-group!important}
+    body.monthly-prod-print .monthly-print-report tr{break-inside:avoid!important;page-break-inside:avoid!important}
+    body.monthly-prod-print .monthly-print-report th{background:#2A3F5F!important;color:#fff!important;font-size:5.8px!important;font-weight:700!important;padding:3px 3px!important;text-align:left!important;line-height:1.1!important}
+    body.monthly-prod-print .monthly-print-report td{font-size:6.1px!important;padding:3px 3px!important;line-height:1.15!important;vertical-align:top!important;border-bottom:1px solid #E2E8F0!important;overflow-wrap:anywhere!important}
+    body.monthly-prod-print .monthly-print-report tbody tr:nth-child(even) td{background:#F8FAFC!important}
+    body.monthly-prod-print .monthly-print-report table{font-size:7px!important}
+    body.monthly-prod-print .monthly-print-report th{font-size:6.4px!important;padding:4px 4px!important}
+    body.monthly-prod-print .monthly-print-report td{font-size:6.8px!important;padding:4px 4px!important;line-height:1.2!important}
+    body.monthly-prod-print .monthly-print-report th:nth-child(1),body.monthly-prod-print .monthly-print-report td:nth-child(1){width:2.5%!important}
+    body.monthly-prod-print .monthly-print-report th:nth-child(2),body.monthly-prod-print .monthly-print-report td:nth-child(2){width:7%!important;white-space:nowrap!important}
+    body.monthly-prod-print .monthly-print-report th:nth-child(3),body.monthly-prod-print .monthly-print-report td:nth-child(3){width:10%!important}
+    body.monthly-prod-print .monthly-print-report th:nth-child(4),body.monthly-prod-print .monthly-print-report td:nth-child(4){width:7%!important}
+    body.monthly-prod-print .monthly-print-report th:nth-child(5),body.monthly-prod-print .monthly-print-report td:nth-child(5){width:8%!important}
+    body.monthly-prod-print .monthly-print-report th:nth-child(6),body.monthly-prod-print .monthly-print-report td:nth-child(6){width:5%!important}
+    body.monthly-prod-print .monthly-print-report th:nth-child(7),body.monthly-prod-print .monthly-print-report td:nth-child(7){width:10%!important}
+    body.monthly-prod-print .monthly-print-report th:nth-child(8),body.monthly-prod-print .monthly-print-report td:nth-child(8){width:30%!important}
+    body.monthly-prod-print .monthly-print-report th:nth-child(9),body.monthly-prod-print .monthly-print-report td:nth-child(9){width:6%!important;text-align:right!important}
+    body.monthly-prod-print .monthly-print-report th:nth-child(10),body.monthly-prod-print .monthly-print-report td:nth-child(10){width:6%!important;text-align:right!important}
+    body.monthly-prod-print .monthly-print-report th:nth-child(11),body.monthly-prod-print .monthly-print-report td:nth-child(11){width:8%!important;text-align:right!important}
+    body.monthly-prod-print .monthly-print-report .mpr-emp-table th:nth-child(1),body.monthly-prod-print .monthly-print-report .mpr-emp-table td:nth-child(1){width:5%!important;text-align:center!important}
+    body.monthly-prod-print .monthly-print-report .mpr-emp-table th:nth-child(2),body.monthly-prod-print .monthly-print-report .mpr-emp-table td:nth-child(2){width:30%!important}
+    body.monthly-prod-print .monthly-print-report .mpr-emp-table th:nth-child(3),body.monthly-prod-print .monthly-print-report .mpr-emp-table td:nth-child(3){width:17%!important;text-align:right!important}
+    body.monthly-prod-print .monthly-print-report .mpr-emp-table th:nth-child(4),body.monthly-prod-print .monthly-print-report .mpr-emp-table td:nth-child(4){width:17%!important;text-align:right!important}
+    body.monthly-prod-print .monthly-print-report .mpr-emp-table th:nth-child(5),body.monthly-prod-print .monthly-print-report .mpr-emp-table td:nth-child(5){width:14%!important;text-align:right!important}
+    body.monthly-prod-print .monthly-print-report .mpr-emp-table th:nth-child(6),body.monthly-prod-print .monthly-print-report .mpr-emp-table td:nth-child(6){width:17%!important;text-align:right!important}
+    body.monthly-prod-print .monthly-print-report .mpr-emp-table td:nth-child(3),body.monthly-prod-print .monthly-print-report .mpr-emp-table td:nth-child(4),body.monthly-prod-print .monthly-print-report .mpr-emp-table td:nth-child(5){color:#334155!important}
+    body.monthly-prod-print .monthly-print-report td:nth-child(3){font-weight:600!important}
+    body.monthly-prod-print .monthly-print-report td:nth-child(8){color:#334155!important}
+    body.monthly-prod-print .monthly-print-report .mpr-summary{gap:8px!important;margin-bottom:10px!important}
+    body.monthly-prod-print .monthly-print-report .mpr-group-title{padding:5px 7px!important;font-size:8.5px!important}
+    body.monthly-prod-print .monthly-print-report .mpr-stat{padding:6px 7px!important;min-height:44px!important}
+    body.monthly-prod-print .monthly-print-report .mpr-val{font-size:11.5px!important}
+    body.monthly-prod-print .monthly-print-report .mpr-section-title{font-size:9px!important;margin:7px 0 5px!important}
+    body.monthly-prod-print .monthly-print-report tr:nth-child(even) td{background:#F8FAFC!important}
+  }</style>
+
+<style id="range-print-style">
+@media print{
+  @page{size:A4 landscape;margin:9mm 9mm 10mm 9mm}
+  body.range-print{background:#fff!important;color:#111827!important}
+  body.range-print .topbar,body.range-print .container,body.range-print footer,body.range-print .modal-overlay{display:none!important}
+  body.range-print .print-header{display:block!important;width:100%!important;padding:0 0 6px!important;margin:0 0 8px!important;border-bottom:2px solid #1F3557!important}
+  body.range-print .print-header h1{margin:0!important;font-family:'Space Grotesk',Arial,sans-serif!important;font-size:16px!important;line-height:1.2!important;color:#1F3557!important}
+  body.range-print .print-header p{margin:3px 0 0!important;font-family:'JetBrains Mono',monospace!important;font-size:7.5px!important;line-height:1.3!important;color:#475569!important}
+  body.range-print #print-db-section{display:block!important;width:100%!important;margin:0!important;padding:0!important}
+  body.range-print .range-print{font-family:Arial,sans-serif!important;width:100%!important}
+  body.range-print .range-print-title{font-family:'Space Grotesk',Arial,sans-serif!important;font-size:11px!important;font-weight:700!important;color:#1F3557!important;margin:0 0 4px!important}
+  body.range-print .range-print-total-grid{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:6px!important;margin-bottom:8px!important}
+  body.range-print .range-print-total{border:1px solid #CBD5E1!important;background:#F8FAFC!important;padding:6px 8px!important;border-radius:4px!important}
+  body.range-print .range-print-total span{display:block!important;font-size:6.5px!important;text-transform:uppercase!important;font-weight:700!important;color:#64748B!important}
+  body.range-print .range-print-total b{display:block!important;font-size:11px!important;color:#0F172A!important;margin-top:2px!important}
+  body.range-print .range-print-section-title{font-family:'Space Grotesk',Arial,sans-serif!important;font-size:9px!important;font-weight:700!important;color:#1F3557!important;margin:7px 0 4px!important}
+  body.range-print .range-print-table,body.range-print .range-print-summary-table{width:100%!important;border-collapse:collapse!important;table-layout:fixed!important}
+  body.range-print .range-print-table{font-size:6.5px!important}
+  body.range-print .range-print-summary-table{font-size:7px!important}
+  body.range-print .range-print-table th,body.range-print .range-print-summary-table th{background:#2A3F5F!important;color:#fff!important;font-size:5.8px!important;font-weight:700!important;padding:4px!important;text-align:left!important}
+  body.range-print .range-print-table td,body.range-print .range-print-summary-table td{padding:3px 4px!important;border-bottom:1px solid #E2E8F0!important;vertical-align:top!important;line-height:1.15!important;overflow-wrap:anywhere!important}
+  body.range-print .range-print-table tbody tr:nth-child(even) td,body.range-print .range-print-summary-table tbody tr:nth-child(even) td{background:#F8FAFC!important}
+  body.range-print .range-print-table th:nth-child(1),body.range-print .range-print-table td:nth-child(1){width:7%!important;white-space:nowrap!important}
+  body.range-print .range-print-table th:nth-child(2),body.range-print .range-print-table td:nth-child(2){width:11%!important}
+  body.range-print .range-print-table th:nth-child(3),body.range-print .range-print-table td:nth-child(3){width:9%!important}
+  body.range-print .range-print-table th:nth-child(4),body.range-print .range-print-table td:nth-child(4){width:9%!important}
+  body.range-print .range-print-table th:nth-child(5),body.range-print .range-print-table td:nth-child(5){width:7%!important}
+  body.range-print .range-print-table th:nth-child(6),body.range-print .range-print-table td:nth-child(6){width:12%!important}
+  body.range-print .range-print-table th:nth-child(7),body.range-print .range-print-table td:nth-child(7){width:31%!important}
+  body.range-print .range-print-table th:nth-child(8),body.range-print .range-print-table td:nth-child(8){width:14%!important}
+  body.range-print .range-print-summary-table th:nth-child(1),body.range-print .range-print-summary-table td:nth-child(1){width:40%!important}
+  body.range-print .range-print-summary-table th:nth-child(2),body.range-print .range-print-summary-table td:nth-child(2){width:20%!important;text-align:right!important}
+  body.range-print .range-print-summary-table th:nth-child(3),body.range-print .range-print-summary-table td:nth-child(3){width:20%!important;text-align:right!important}
+  body.range-print .range-print-summary-table th:nth-child(4),body.range-print .range-print-summary-table td:nth-child(4){width:20%!important;text-align:right!important}
+}
+
+/* ═══ Impressão: seção PPC (compartilhada pelos relatórios de dia e período) ═══ */
+@media print{
+  body.custom-print #print-db-section .ppc-print-block,body.range-print #print-db-section .ppc-print-block{margin-top:6px!important;page-break-inside:auto!important}
+  body.custom-print #print-db-section .ppc-print-title,body.range-print #print-db-section .ppc-print-title{font-family:'Space Grotesk',Arial,sans-serif!important;font-size:9.5px!important;font-weight:700!important;color:#1F3557!important;margin:0 0 4px!important}
+  body.custom-print #print-db-section .ppc-print-sum,body.range-print #print-db-section .ppc-print-sum{display:grid!important;grid-template-columns:repeat(5,1fr)!important;gap:5px!important;margin:0 0 4px!important}
+  body.custom-print #print-db-section .ppc-print-sum>div,body.range-print #print-db-section .ppc-print-sum>div{border:1px solid #CBD5E1!important;background:#F8FAFC!important;padding:4px 6px!important;border-radius:3px!important}
+  body.custom-print #print-db-section .ppc-print-sum span,body.range-print #print-db-section .ppc-print-sum span{display:block!important;font-size:6px!important;font-weight:700!important;text-transform:uppercase!important;color:#64748B!important}
+  body.custom-print #print-db-section .ppc-print-sum b,body.range-print #print-db-section .ppc-print-sum b{display:block!important;font-size:10px!important;color:#0F172A!important;margin-top:1px!important}
+  body.custom-print #print-db-section .ppc-print-causas,body.range-print #print-db-section .ppc-print-causas{font-size:7px!important;line-height:1.3!important;color:#475569!important;margin:0 0 4px!important}
+  body.custom-print #print-db-section .ppc-print-table,body.range-print #print-db-section .ppc-print-table{width:100%!important;border-collapse:collapse!important;table-layout:fixed!important;font-size:7px!important}
+  body.custom-print #print-db-section .ppc-print-table th,body.range-print #print-db-section .ppc-print-table th{background:#2A3F5F!important;color:#fff!important;font-family:'JetBrains Mono',monospace!important;font-size:6px!important;font-weight:700!important;padding:4px 5px!important;text-align:left!important}
+  body.custom-print #print-db-section .ppc-print-table td,body.range-print #print-db-section .ppc-print-table td{padding:3px 4px!important;border-bottom:1px solid #E2E8F0!important;vertical-align:top!important;line-height:1.2!important;overflow-wrap:anywhere!important;color:#1E293B!important;background:#fff!important}
+  body.custom-print #print-db-section .ppc-print-table tbody tr:nth-child(even) td,body.range-print #print-db-section .ppc-print-table tbody tr:nth-child(even) td{background:#F8FAFC!important}
+}
+</style>
+</head>
+<body>
+<div class="print-header" id="print-header"></div>
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <div class="logo">RDO</div>
+      <div><h1>Relatorio Diario de Obra</h1><small id="sub-info">Carregando...</small></div>
+    </div>
+    <div class="actions">
+      <span class="chip chip-warn" id="chip"><span class="livedot" style="display:none" id="livedot"></span><span id="chip-txt">carregando</span></span>
+      <span style="font-family:'JetBrains Mono';font-size:9px;color:#8BADC4" id="clk">--:--</span>
+      <span style="font-family:'JetBrains Mono';font-size:8px;color:#4A6580;white-space:nowrap" title="Proximo auto-refresh em">↻ <span id="auto-countdown">--:--</span></span>
+      <button class="btn btn-a" id="btn-reload" onclick="doLoad()" aria-label="Atualizar"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 11-2.6-6.4M21 3v6h-6"/></svg><span class="btn-label">Atualizar</span></button>
+      <button class="btn btn-bl" id="btn-print" onclick="doPrint()" aria-label="Imprimir"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg><span class="btn-label">Imprimir</span></button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div id="err-box"></div>
+
+  <div class="sec-h">
+    <div><h2><span class="tag-rdo">rdo</span>Efetivo &amp; Atividades</h2><p id="sub-date">--</p></div>
+    <div style="font-family:'JetBrains Mono';font-size:9px;color:var(--ink3)" id="upd-ts">--</div>
+  </div>
+
+  <div class="mode-tabs">
+    <button class="mode-tab on" id="tab-single" onclick="setViewMode('single')">Dia unico</button>
+    <button class="mode-tab" id="tab-range" onclick="setViewMode('range')">Periodo (varios dias)</button>
+  </div>
+
+  <div class="date-bar" id="date-bar">
+    <label for="fdate">Data:</label>
+    <div class="date-nav">
+      <button id="btn-prev" onclick="navDate(1)" title="Dia anterior">&#8249;</button>
+      <button id="btn-next" onclick="navDate(-1)" title="Proximo dia">&#8250;</button>
+    </div>
+    <div class="date-dd-wrap" id="fdate-wrap">
+      <button type="button" class="date-dd-btn" id="fdate-btn" onclick="toggleDateDropdown(event)">Carregando...</button>
+      <div class="date-dd-panel" id="fdate-panel" style="display:none"></div>
+    </div>
+    <span class="date-badge" id="date-count-badge"></span>
+  </div>
+
+  <div class="cd" id="range-card" style="display:none">
+    <div class="cd-h"><h3>Selecionar periodo / dias</h3><span class="mt" id="range-meta"></span></div>
+    <div class="range-box">
+      <div class="range-tools">
+        <button class="btn btn-bl" onclick="selectAllRangeDates()">Selecionar todos</button>
+        <button class="btn btn-a" onclick="clearRangeDates()">Limpar selecao</button>
+        <button class="btn btn-gr" onclick="selectLastNDates(7)">Ultimos 7 dias</button>
+        <button class="btn btn-gr" onclick="selectLastNDates(30)">Ultimos 30 dias</button>
+        <button class="btn btn-gr" onclick="selectCurrentMonth(0)">Este mes</button>
+        <button class="btn btn-gr" onclick="selectCurrentMonth(-1)">Mes passado</button>
+      </div>
+      <div class="date-chips" id="range-chips"></div>
+      <div class="range-summary" id="range-summary"></div>
+    </div>
+  </div>
+
+  <div class="kr" id="kpis"></div>
+
+  <div class="kr" id="kpis2" style="display:none"></div>
+
+  <div class="gg" id="range-extra" style="display:none">
+    <div>
+      <div class="cd">
+        <div class="cd-h"><h3>Efetivo por dia no periodo</h3><span class="mt" id="rchart-meta"></span></div>
+        <div class="chart-wrap" id="rchart-box"><div class="em">Sem dados</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="cd">
+        <div class="cd-h"><h3>Empresa em destaque</h3><span class="mt" id="rtop-emp-meta" title="Clique em uma empresa para ver os cargos"></span></div>
+        <div style="padding:12px 14px" id="rtop-emp-bars"></div>
+      </div>
+      <div class="cd">
+        <div class="cd-h"><h3>Serviços por empresa</h3><span class="mt" id="rsrv-meta"></span></div>
+        <div style="padding:12px 14px" id="rsrv-bars"></div>
+      </div>
+
+      <div class="cd">
+        <div class="cd-h"><h3>Funcao em destaque</h3><span class="mt" id="rtop-func-meta"></span></div>
+        <div style="padding:12px 14px" id="rtop-func-bars"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="gg" id="single-view">
+    <div>
+      <div class="cd">
+        <div class="cd-h"><h3>Efetivo por dia</h3><span class="mt" id="chart-meta"></span></div>
+        <div class="chart-wrap" id="chart-box"><div class="em">Carregando...</div></div>
+      </div>
+      <div class="cd">
+        <div class="cd-h"><h3>Equipe do dia</h3><span class="mt" id="tbl-meta"></span></div>
+        <div class="cd-t">
+          <input type="text" id="fq" placeholder="Buscar nome, atividade, local..." oninput="renderTable()">
+          <select id="femp" onchange="renderTable()"><option value="">Todas empresas</option></select>
+          <select id="ffunc" onchange="renderTable()"><option value="">Todas funcoes</option></select>
+          <select id="fpav" onchange="renderTable()"><option value="">Todos pavimentos</option></select>
+          <select id="fstatus" onchange="renderTable()">
+            <option value="ativo">Com atividade (padrão)</option>
+            <option value="sem">⚠ Sem atividade</option>
+            <option value="ferias">🌴 De ferias</option>
+            <option value="todos">Mostrar tudo junto</option>
+          </select>
+          <select id="fprod" onchange="renderTable()">
+            <option value="">Producao: todas</option>
+            <option value="com">Com producao</option>
+            <option value="sem">⚠ Sem producao</option>
+          </select>
+          <select id="faz" onchange="renderTable()">
+            <option value="">Ordem: padrão</option>
+            <option value="az">A → Z (nome)</option>
+            <option value="za">Z → A (nome)</option>
+          </select>
+        </div>
+        <div class="cd-b" id="tbl-box"></div>
+      </div>
+    </div>
+    <div>
+      <div class="cd">
+        <div class="cd-h"><h3>Por empresa</h3><span class="mt" id="emp-meta" title="Clique em uma empresa para ver os cargos"></span></div>
+        <div style="padding:12px 14px" id="emp-bars"></div>
+      </div>
+      <div id="prod-emp-home">
+      <div class="cd" id="single-prod-empresa-card">
+        <div class="cd-h"><h3>Produção por empresa</h3><span class="mt" id="single-prod-empresa-meta"></span></div>
+        <div class="prod-empresa-tools">
+          <button class="prod-unit-tab on" id="single-prod-tab-m2" onclick="setSingleProdEmpresaUnit('M2')">m²</button>
+          <button class="prod-unit-tab" id="single-prod-tab-m3" onclick="setSingleProdEmpresaUnit('M3')">m³</button>
+          <button class="prod-unit-tab" id="single-prod-tab-un" onclick="setSingleProdEmpresaUnit('UN')">UN</button>
+        </div>
+        <div id="single-prod-empresa-box" class="prod-empresa-box"></div>
+      </div>
+      </div>
+      <div class="cd">
+        <div class="cd-h"><h3>Por funcao</h3><span class="mt" id="func-meta"></span></div>
+        <div style="padding:12px 14px" id="func-bars"></div>
+      </div>
+      <div class="cd">
+        <div class="cd-h"><h3>Por pavimento</h3><span class="mt" id="pav-meta" title="Clique em um pavimento para ver as funções"></span></div>
+        <div style="padding:12px 14px" id="pav-bars"></div>
+      </div>
+      <div class="cd">
+        <div class="cd-h"><h3>Por local</h3><span class="mt" id="reg-meta"></span></div>
+        <div style="padding:12px 14px" id="reg-bars"></div>
+      </div>
+      <div class="cd">
+        <div class="cd-h"><h3>Serviços por empresa</h3><span class="mt" id="srv-meta"></span></div>
+        <div style="padding:12px 14px" id="srv-bars"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="cd" id="range-view" style="display:none">
+    <div class="cd-h"><h3>Producao por pessoa no periodo selecionado</h3><span class="mt" id="range-tbl-meta"></span></div>
+    <div class="cd-t">
+      <input type="text" id="rq" placeholder="Buscar nome, empresa, funcao..." oninput="renderRangeTable()">
+      <select id="remp" onchange="renderRangeTable()"><option value="">Todas empresas</option></select>
+      <select id="rfunc" onchange="renderRangeTable()"><option value="">Todas funcoes</option></select>
+      <select id="rpav" onchange="renderRangeTable()"><option value="">Todos pavimentos</option></select>
+    </div>
+    <div class="cd-b" id="range-tbl-box"></div>
+  </div>
+
+  <div class="cd" id="hist-card">
+    <div class="cd-h"><h3>Historico por data</h3><span class="mt" id="hist-meta"></span></div>
+    <div class="cd-b" id="hist-box"></div>
+  </div>
+</div>
+<div id="print-db-section" style="display:none"></div>
+<footer style="max-width:1280px;margin:0 auto;padding:12px 14px;font-size:9px;color:var(--ink3);font-family:'JetBrains Mono';border-top:1px solid var(--line)">RDO - Painel de Mao de Obra</footer>
+<div id="toast"></div>
+
+
+<div id="prod-month-modal-overlay" class="modal-overlay" onclick="if(event.target===this)closeMonthlyProdModal()">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-h">
+      <div><h4 id="prod-month-modal-title">📐 Produção Total</h4><div class="mt2" id="prod-month-modal-sub">—</div></div>
+      <div class="modal-h-actions">
+        <button class="modal-print-btn" onclick="printMonthlyProdModal()" aria-label="Imprimir produção do período">🖨 Imprimir</button>
+        <button class="modal-close" onclick="closeMonthlyProdModal()" aria-label="Fechar">&times;</button>
+      </div>
+    </div>
+    <div class="modal-b">
+      <div class="pm-prod-summary" id="prod-month-modal-summary"></div>
+      <div id="pm-emp-summary"></div>
+      <div class="pm-prod-filters">
+        <input type="text" id="pm-prod-q" placeholder="Buscar nome, empresa, função, atividade..." oninput="renderMonthlyProdModal()">
+        <select id="pm-prod-emp" onchange="renderMonthlyProdModal()"><option value="">Todas as empresas</option></select>
+        <select id="pm-prod-func" onchange="renderMonthlyProdModal()"><option value="">Todas as funções</option></select>
+        <select id="pm-prod-pav" onchange="renderMonthlyProdModal()"><option value="">Todos os pavimentos</option></select>
+      </div>
+      <div class="pm-prod-break"><span>Lançamentos de produção do período</span><strong id="pm-prod-results">0 registro(s)</strong></div>
+      <div class="pm-prod-table-wrap" id="prod-month-modal-body"></div>
+    </div>
+  </div>
+</div>
+
+<div id="hoje-modal-overlay" class="modal-overlay" onclick="if(event.target===this)closeHojeModal()">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-h">
+      <div><h4 id="hoje-modal-title">👥 Quem Chegou Hoje</h4><div class="mt2" id="hoje-modal-sub">—</div></div>
+      <button class="modal-close" onclick="closeHojeModal()" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="modal-b">
+      <div class="hj-summary" id="hoje-modal-summary"></div>
+      <div class="hj-filter">
+        <input type="text" id="hj-q" placeholder="Buscar nome, função, empresa..." oninput="renderHojeModal()">
+        <select id="hj-func" onchange="renderHojeModal()"><option value="">Todas as funções</option></select>
+        <select id="hj-emp" onchange="renderHojeModal()"><option value="">Todas as empresas</option></select>
+        <select id="hj-pav" onchange="renderHojeModal()"><option value="">Todos os pavimentos</option></select>
+        <select id="hj-status" onchange="renderHojeModal()">
+          <option value="">Todos</option>
+          <option value="ativo">Com atividade</option>
+          <option value="ferias">Férias / Ausente</option>
+        </select>
+      </div>
+      <div class="hj-table-wrap" id="hoje-modal-body"></div>
+    </div>
+  </div>
+</div>
+
+<div id="unicos-modal-overlay" class="modal-overlay" onclick="if(event.target===this)closeUnicosModal()">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-h">
+      <div><h4 id="unicos-modal-title">🔄 Presença Única</h4><div class="mt2" id="unicos-modal-sub">—</div></div>
+      <button class="modal-close" onclick="closeUnicosModal()" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="modal-b" id="unicos-modal-body"></div>
+  </div>
+</div>
+
+<div id="print-modal-overlay" class="modal-overlay" onclick="if(event.target===this)closePrintModal()">
+  <div class="modal-card" style="max-width:500px" role="dialog" aria-modal="true">
+    <div class="modal-h" style="background:var(--blue)">
+      <div><h4>🖨️ Configurar Impressão</h4><div class="mt2" id="pm-sub">—</div></div>
+      <button class="modal-close" onclick="closePrintModal()" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="modal-b">
+      <div class="pm-section">Empresa <span class="pm-selall" onclick="pmToggleAll('pm-emps',true)">todos</span> <span class="pm-selall" onclick="pmToggleAll('pm-emps',false)">nenhum</span></div>
+      <div class="pm-checklist" id="pm-emps"></div>
+      <div class="pm-section" style="margin-top:4px">Função <span class="pm-selall" onclick="pmToggleAll('pm-funcs',true)">todos</span> <span class="pm-selall" onclick="pmToggleAll('pm-funcs',false)">nenhum</span></div>
+      <div class="pm-checklist" id="pm-funcs"></div>
+      <div class="pm-section" style="margin-top:4px">Pavimento <span class="pm-selall" onclick="pmToggleAll('pm-pavs',true)">todos</span> <span class="pm-selall" onclick="pmToggleAll('pm-pavs',false)">nenhum</span></div>
+      <div class="pm-checklist" id="pm-pavs"></div>
+      <div class="pm-section" style="margin-top:4px">Incluir na impressão</div>
+      <div class="pm-checklist">
+        <label class="pm-chip-label on" id="pm-lbl-faltosos"><input type="checkbox" id="pm-faltosos" checked onchange="this.closest('label').className='pm-chip-label'+(this.checked?' on':'');updatePrintPreview()"> 🚫 Faltosos</label>
+        <label class="pm-chip-label on" id="pm-lbl-ferias"><input type="checkbox" id="pm-ferias" checked onchange="this.closest('label').className='pm-chip-label'+(this.checked?' on':'');updatePrintPreview()"> 🌴 Férias</label>
+      </div>
+      <div class="pm-preview" id="pm-preview">—</div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn btn-bl" style="flex:1;justify-content:center;font-size:11px" onclick="executePrint()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
+          Imprimir
+        </button>
+        <button class="btn" style="background:var(--paper);color:var(--ink2);border:1px solid var(--line)" onclick="closePrintModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="emp-modal-overlay" class="modal-overlay" onclick="if(event.target===this)closeEmpModal()">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-h">
+      <div><h4 id="emp-modal-title">—</h4><div class="mt2" id="emp-modal-sub"></div></div>
+      <button class="modal-close" onclick="closeEmpModal()" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="modal-b" id="emp-modal-body"></div>
+  </div>
+</div>
+
+<div id="ppc-modal-overlay" class="modal-overlay" onclick="if(event.target===this)closePPCModal()">
+  <div class="modal-card" style="max-width:760px" role="dialog" aria-modal="true">
+    <div class="modal-h">
+      <div><h4 id="ppc-modal-title">PPC — Planejamento a Curto Prazo</h4><div class="mt2" id="ppc-modal-sub"></div></div>
+      <button class="modal-close" onclick="closePPCModal()" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="modal-b" id="ppc-modal-body"></div>
+  </div>
+</div>
+
+<div id="people-modal-overlay" class="modal-overlay" onclick="if(event.target===this)closePeopleModal()">
+  <div class="modal-card" style="max-width:520px" role="dialog" aria-modal="true">
+    <div class="modal-h" id="people-modal-hdr">
+      <div><h4 id="people-modal-title">—</h4><div class="mt2" id="people-modal-sub"></div></div>
+      <button class="modal-close" onclick="closePeopleModal()" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="modal-b" id="people-modal-body"></div>
+  </div>
+</div>
+
+
+<script src="code16.js?v=21"></script>
+</body>
+</html>
