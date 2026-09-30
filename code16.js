@@ -359,7 +359,8 @@ function detectarDoTexto(texto){
 /* ═══════ AUSENCIAS (ferias / afastado) — tiram do efetivo ═══════ */
 var KW_MOTIVOS=[
   {tag:'FERIAS',kws:['ferias','férias','de ferias','em ferias','feria']},
-  {tag:'AFASTADO',kws:['afastado','afastada','atestado','licenca','licença','atestado medico']}
+  {tag:'AFASTADO',kws:['afastado','afastada','atestado','licenca','licença','atestado medico']},
+  {tag:'JUSTIFICADO',kws:['justificado','justificada','falta justificada','falta justif','dispensado','dispensada','abonado','abonada','declaracao','declaração','declaracao medica']}
 ];
 /* Varre a linha inteira coluna por coluna — o motivo (ex.: "atestado medico")
    pode estar em Motivo/Observacao/Situacao, não só na coluna Status. */
@@ -521,24 +522,7 @@ function selectCurrentMonth(offset){
 function getRangeDays(){if(!PARSED)return[];return PARSED.days.filter(function(d){return RANGE_SELECTED.has(d.date)})}
 
 function computeRangeAgg(days){
-  /* Mapa de faltas históricas: conta DIAS sem atividade (deduplicado por pessoa+dia) */
-  var faltasHistoricas={};
-  if(PARSED){
-    PARSED.days.forEach(function(day){
-      /* Conjunto de pessoas que faltaram NESTE dia (deduplicado) */
-      var faltaramHoje=new Set();
-      day.ativos.forEach(function(p){
-        if(!p.atividade){
-          var k=norm(p.nome)+'|'+norm(p.empresa);
-          faltaramHoje.add(k);
-        }
-      });
-      /* Incrementa apenas uma vez por pessoa por dia */
-      faltaramHoje.forEach(function(k){
-        faltasHistoricas[k]=(faltasHistoricas[k]||0)+1;
-      });
-    });
-  }
+  /* Regra: falta vale só no dia — sem contagem histórica. */
 
   var map={};
   days.forEach(function(day){
@@ -556,7 +540,6 @@ function computeRangeAgg(days){
   });
   return Object.keys(map).map(function(k){
     var e=map[k];
-    e.diasFaltouTotal=faltasHistoricas[k]||0;
     return e;
   });
 }
@@ -702,7 +685,7 @@ function renderRangeTable(){
   meta.textContent=days.length+' dia(s) selecionados · '+agg.length+' pessoa(s)';
   var sk=rangeSortKey,sd=rangeSortDir;
   function th(label,key){return '<th onclick="setRangeSort(\''+key+'\')" class="'+(sk===key?(sd>0?'asc':'desc'):'')+'">'+label+'</th>'}
-  var h='<table class="t"><thead><tr>'+th('Nome','nome')+th('Empresa','empresa')+th('Funcao','funcao')+th('Dias presente','diasPresente')+th('Dias c/ ativ.','diasAtivo')+th('Dias s/ ativ.','diasSem')+th('Dias s/ producao','diasSemProd')+th('Dias ferias','diasFerias')+th('Faltas históricas','diasFaltouTotal')+'<th>Pavimentos</th><th>Producao / Atividades por dia</th></tr></thead><tbody>';
+  var h='<table class="t"><thead><tr>'+th('Nome','nome')+th('Empresa','empresa')+th('Funcao','funcao')+th('Dias presente','diasPresente')+th('Dias c/ ativ.','diasAtivo')+th('Dias s/ ativ.','diasSem')+th('Dias s/ producao','diasSemProd')+th('Dias ferias','diasFerias')+'<th>Pavimentos</th><th>Producao / Atividades por dia</th></tr></thead><tbody>';
   agg.forEach(function(p){
     var pavList=Object.keys(p.pavs).sort().map(function(pv){return pavBadge(pv)}).join(' ')||'<span class="badge badge-pav-none">—</span>';
     var prodHtml=p.producoes.length?('<div class="prod-list">'+p.producoes.slice().sort(function(a,b){return(a.data||'').localeCompare(b.data||'')}).map(function(pr){return '<div><span class="pd">'+esc(pr.data)+'</span>'+esc(pr.prod?pr.prod:(pr.atividade||'—'))+(pr.pav?' <span style="color:var(--ink3)">['+esc(pr.pav)+']</span>':'')+'</div>'}).join('')+'</div>'):'<span style="color:var(--ink3)">sem lancamentos</span>';
@@ -715,7 +698,6 @@ function renderRangeTable(){
       '<td data-label="Dias s/ ativ." class="nr" style="color:var(--red)">'+p.diasSem+'</td>'+
       '<td data-label="Dias s/ producao" class="nr" style="color:'+(p.diasSemProd?'var(--red)':'var(--ink3)')+';font-weight:'+(p.diasSemProd?'700':'400')+'">'+(p.diasSemProd?'⚠ ':'')+p.diasSemProd+'</td>'+
       '<td data-label="Dias ferias" class="nr" style="color:var(--amber)">'+p.diasFerias+'</td>'+
-      '<td data-label="Faltas históricas" class="nr" style="color:'+(p.diasFaltouTotal>0?'var(--red)':'var(--ink3)')+';font-weight:'+(p.diasFaltouTotal>0?'700':'400')+'" title="Total de dias sem atividade em toda a planilha">'+(p.diasFaltouTotal>0?'⚠ ':'')+p.diasFaltouTotal+'</td>'+
       '<td data-label="Pavimentos">'+pavList+'</td>'+
       '<td data-label="Producao / Atividades" style="max-width:320px">'+prodHtml+'</td>'+
     '</tr>';
@@ -1428,22 +1410,7 @@ function openPeopleModal(tipo){
     }
   }else{ /* faltosos */
     var faltososList=day.ativos.filter(function(p){return !p.atividade});
-    /* Contar faltas históricas de toda a planilha por pessoa — deduplicado por dia */
-    var faltasHist={};
-    if(PARSED){
-      PARSED.days.forEach(function(d){
-        var faltaramNesteDia=new Set();
-        d.ativos.forEach(function(p){
-          if(!p.atividade){
-            var k=norm(p.nome)+'|'+norm(p.empresa);
-            faltaramNesteDia.add(k);
-          }
-        });
-        faltaramNesteDia.forEach(function(k){
-          faltasHist[k]=(faltasHist[k]||0)+1;
-        });
-      });
-    }
+    /* Regra: falta vale só no dia — sem contagem histórica. */
     hdr.style.background='#991B1B';
     title.textContent='🚫 Faltosos / Sem Atividade';
     sub.textContent=day.date+' · '+faltososList.length+' pessoa(s) excluída(s) do efetivo';
@@ -1456,19 +1423,14 @@ function openPeopleModal(tipo){
         '<th style="text-align:left;padding:8px 10px;background:#FEE2E2;color:#991B1B;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Função</th>'+
         '<th style="text-align:left;padding:8px 10px;background:#FEE2E2;color:#991B1B;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Empresa</th>'+
         '<th style="text-align:left;padding:8px 10px;background:#FEE2E2;color:#991B1B;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Reg. Atividade</th>'+
-        '<th style="text-align:right;padding:8px 10px;background:#FEE2E2;color:#991B1B;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Total faltas</th>'+
         '</tr></thead><tbody>'+
         faltososList.map(function(p,i){
           var bg=i%2===0?'#fff':'#FFF5F5';
-          var k=norm(p.nome)+'|'+norm(p.empresa);
-          var total=faltasHist[k]||0;
-          var totalCell='<span style="font-family:JetBrains Mono;font-weight:700;color:'+(total>=5?'#991B1B':total>=3?'#D97706':'#475569')+'">'+total+'x</span>';
           return '<tr style="background:'+bg+'">'+
             '<td data-label="Nome" style="padding:8px 10px;font-weight:600;color:#B91C1C;border-bottom:1px solid #FEE2E2">'+esc(p.nome)+'</td>'+
             '<td data-label="Função" style="padding:8px 10px;color:#991B1B;border-bottom:1px solid #FEE2E2">'+esc(p.funcao)+'</td>'+
             '<td data-label="Empresa" style="padding:8px 10px;border-bottom:1px solid #FEE2E2"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
             '<td data-label="Reg. Atividade" style="padding:8px 10px;border-bottom:1px solid #FEE2E2;color:var(--ink3);font-size:11px;font-style:italic">'+esc(p.atividadeRaw||'—')+'</td>'+
-            '<td data-label="Total faltas" style="padding:8px 10px;border-bottom:1px solid #FEE2E2;text-align:right">'+totalCell+'</td>'+
           '</tr>';
         }).join('')+
         '</tbody></table>';
@@ -1827,40 +1789,50 @@ function ppcStats(w){
   return{total:t,done:d,open:t-d,pct:t?Math.round(d/t*100):0,avg:t?Math.round(sum/t):0};
 }
 function ppcColor(p){return p>=80?'var(--green)':p>=60?'var(--amber)':'var(--red)'}
+/* Semana virtual "Todo o periodo": soma as tarefas de todas as abas (semana de origem em __wi) */
+function ppcAllWeek(){
+  var t=[];
+  PPC_WEEKS.forEach(function(w,wi){w.tasks.forEach(function(x){var c={};for(var k in x)c[k]=x[k];c.__wi=wi;t.push(c)})});
+  if(!t.length)return null;
+  var a=PPC_WEEKS[0].label.split(' a ')[0],b=PPC_WEEKS[PPC_WEEKS.length-1].label.split(' a ')[1];
+  return{title:'__ALL__',label:a+' a '+b,start:PPC_WEEKS[0].start,end:PPC_WEEKS[PPC_WEEKS.length-1].end,tasks:t,obra:PPC_OBRA};
+}
+function ppcIsAll(){return PPC_WEEKS.length>0&&PPC_SEL>=PPC_WEEKS.length}
+function ppcCurWeek(){if(ppcIsAll())return ppcAllWeek()||PPC_WEEKS[PPC_WEEKS.length-1];return PPC_WEEKS[PPC_SEL]||PPC_WEEKS[PPC_WEEKS.length-1]}
 
 /* Agrupa tarefas iguais entre as semanas: início, há quantos dias rola e término.
    Regra combinada: EXEC 100% na semana mais recente = serviço terminou;
    dias exatos só quando as colunas S/T/Q estiverem marcadas. */
 function ppcServices(){
   if(!PPC_WEEKS.length)return[];
-  var latestWi=PPC_WEEKS.length-1,curW=PPC_WEEKS[latestWi];
-  var selWi=(PPC_SEL>=0&&PPC_SEL<PPC_WEEKS.length)?PPC_SEL:latestWi;
+  var latestWi=PPC_WEEKS.length-1,curW=PPC_WEEKS[latestWi],all=ppcIsAll();
+  var selWi=all?PPC_SEL:((PPC_SEL>=0&&PPC_SEL<PPC_WEEKS.length)?PPC_SEL:latestWi);
   var hoje=new Date();hoje.setHours(0,0,0,0);
   var map={};
   PPC_WEEKS.forEach(function(w,wi){
     w.tasks.forEach(function(t){
       var k=norm(t.nome);if(!k)return;
-      if(!map[k])map[k]={nome:t.nome,equipe:t.equipe,resp:t.resp,hist:[],marksByWi:{}};
+      if(!map[k])map[k]={nome:t.nome,equipe:t.equipe,resp:t.resp,hist:[],marksByWi:{},causes:[]};
       var s=map[k];
       s.hist.push({wi:wi,label:w.label,start:w.start,pct:t.pct});
-      s.marksByWi[wi]=t.dias||[];
+      s.marksByWi[wi]=t.dias||[];if(t.causa)s.causes.push({wi:wi,txt:t.causa});
       s.equipe=t.equipe||s.equipe;s.resp=t.resp||s.resp;s.causa=t.causa||s.causa;
     });
   });
   var out=Object.keys(map).map(function(k){
     var s=map[k],first=s.hist[0];
-    var selOcc=null;s.hist.forEach(function(x){if(x.wi===selWi)selOcc=x});
+    var selOcc=null;if(all)selOcc=s.hist[s.hist.length-1]||null;else s.hist.forEach(function(x){if(x.wi===selWi)selOcc=x});
     if(!selOcc)return null;              /* lista = apenas os serviços da semana selecionada */
     var inicio=first.start!=null?new Date(first.start):null;
     var dias=inicio?Math.max(1,Math.round((hoje-inicio)/86400000)+1):null;
-    var isCur=selWi===latestWi;
+    var isCur=all?true:selWi===latestWi;
     var status=selOcc.pct>=100?'concluido':(isCur?'andamento':'parado');
-    var marks=s.marksByWi[selWi]||[];
+    var marks=s.marksByWi[all?latestWi:selWi]||[];
     var fimDia=null;
     if(status==='concluido'&&isCur&&marks.length){fimDia=new Date(curW.start+marks[marks.length-1].d*86400000)}
     /* Dias marcados na grade S/T/Q (ex.: "PREVISTO" na segunda) = dias planejados do serviço */
     var previstos=(isCur&&status!=='concluido')?marks.map(function(m){return new Date(curW.start+m.d*86400000)}).sort(function(a,b){return a-b}):[];
-    return{nome:s.nome,equipe:s.equipe,resp:s.resp,causa:s.causa,hist:s.hist,inicio:inicio,dias:dias,status:status,lastPct:selOcc.pct,isCur:isCur,fimDia:fimDia,previstos:previstos};
+    return{nome:s.nome,equipe:s.equipe,resp:s.resp,causa:s.causa,causas:(s.causes||[]).filter(function(c){return all||c.wi===selWi}),hist:s.hist,inicio:inicio,dias:dias,status:status,lastPct:selOcc.pct,isCur:isCur,fimDia:fimDia,previstos:previstos};
   }).filter(Boolean);
   var peso={andamento:0,concluido:1,parado:2};
   out.sort(function(a,b){return peso[a.status]-peso[b.status]||(b.dias||0)-(a.dias||0)||a.nome.localeCompare(b.nome,'pt-BR')});
@@ -1891,9 +1863,10 @@ function loadPPC(){
     PPC_WEEKS=weeks;
     PPC_OBRA=weeks.length?weeks[0].obra:'';
     var keep=-1;
+    if(PPC_SEL_TITLE==='__ALL__')keep=weeks.length;
     weeks.forEach(function(w,i){if(w.title===PPC_SEL_TITLE)keep=i});
     PPC_SEL=keep>=0?keep:weeks.length-1;      /* padrão: semana mais recente */
-    if(PPC_SEL>=0)PPC_SEL_TITLE=weeks[PPC_SEL].title;
+    if(PPC_SEL>=0&&PPC_SEL<weeks.length)PPC_SEL_TITLE=weeks[PPC_SEL].title;
     PPC_STATE=weeks.length?'ok':'empty';
     injectPPCCard();
     if(G('ppc-modal-overlay')&&G('ppc-modal-overlay').classList.contains('on'))renderPPCModal();
@@ -1913,19 +1886,19 @@ function renderPPCBars(){
       el.innerHTML='<div class="em">'+(PPC_STATE==='loading'?'Carregando…':PPC_STATE==='err'?'Erro ao ler a planilha de serviços':'Sem serviços na planilha')+'</div>';
       meta.textContent='';return;
     }
-    var w=PPC_WEEKS[PPC_SEL],tot={},ok={};
+    var w=ppcCurWeek();if(!w)return;var tot={},ok={};
     w.tasks.forEach(function(t){
       var k=ppcTitle(t.resp||t.equipe||'Sem empresa');
       tot[k]=(tot[k]||0)+1;if(t.pct>=100)ok[k]=(ok[k]||0)+1;
     });
     renderBars(ids[0],ids[1],tot,COLORS,ok,'srv');
-    meta.textContent='Semana '+w.label+' · concluídos/planejados';
+    meta.textContent=(ppcIsAll()?'Período todo ':'Semana ')+w.label+' · concluídos/planejados';
   });
 }
 /* Clique na empresa em "Serviços por empresa": lista os serviços dela na semana selecionada */
 function openSrvModal(key){
   if(PPC_STATE!=='ok'||!PPC_WEEKS.length)return;
-  var w=PPC_WEEKS[PPC_SEL];if(!w)return;
+  var w=ppcCurWeek();if(!w)return;
   var nomes={};
   w.tasks.forEach(function(t){
     if(ppcTitle(t.resp||t.equipe||'Sem empresa')===key)nomes[norm(t.nome)]=1;
@@ -1937,7 +1910,7 @@ function openSrvModal(key){
   var hdr=G('emp-modal-overlay').querySelector('.modal-h');
   hdr.style.background='#7C3AED';
   G('emp-modal-title').textContent='🎯 Serviços — '+key;
-  G('emp-modal-sub').textContent='Semana '+w.label+' · '+lista.length+' serviço(s) · '+feitos+' concluído(s)';
+  G('emp-modal-sub').textContent=(ppcIsAll()?'Período ':'Semana ')+w.label+' · '+lista.length+' serviço(s) · '+feitos+' concluído(s)';
   var h='<div class="local-summary">'+
     '<div class="local-stat"><b>'+lista.length+'</b><span>Planejados</span></div>'+
     '<div class="local-stat"><b style="color:var(--green)">'+feitos+'</b><span>Concluídos</span></div>'+
@@ -1972,8 +1945,8 @@ function injectPPCCard(){
   var old=G('ppc-kpi');if(old&&old.parentNode)old.parentNode.removeChild(old);
   var v='—',f='carregando…',c='#7C3AED';
   if(PPC_STATE==='ok'){
-    var w=PPC_WEEKS[PPC_SEL],st=ppcStats(w);
-    v=st.pct+'%';f=st.done+' de '+st.total+' tarefas · '+w.label+' — clique para ver';c=ppcColor(st.pct);
+    var w=ppcCurWeek(),st=ppcStats(w);
+    v=st.pct+'%';f=st.done+' de '+st.total+' tarefas · '+(ppcIsAll()?'todo o período ('+w.label+')':w.label)+' — clique para ver';c=ppcColor(st.pct);
   }else if(PPC_STATE==='empty'){f='sem tarefas na planilha';}
   else if(PPC_STATE==='err'){f='erro ao carregar — clique para detalhes';c='var(--red)';}
   el.insertAdjacentHTML('beforeend','<div id="ppc-kpi" class="kp kp-click" style="--kc:'+c+'" onclick="openPPCModal()" role="button" tabindex="0" title="PPC — Planejamento a Curto Prazo"><div class="ki">🎯</div><div class="kl">PPC semanal</div><div class="kv">'+v+'</div><div class="kf">'+esc(f)+'</div></div>');
@@ -2082,18 +2055,22 @@ function injectProdEmpresaPanel(){
   renderRangeKPIs=function(days,agg){_rk(days,agg);injectPPCCard();injectProdEmpresaPanel()};
 })();
 
-function ppcSelectWeek(i){PPC_SEL=i;PPC_SEL_TITLE=PPC_WEEKS[i].title;renderPPCModal();injectPPCCard()}
+function ppcSelectWeek(i){
+  if(i>=PPC_WEEKS.length){PPC_SEL=PPC_WEEKS.length;PPC_SEL_TITLE='__ALL__'}
+  else{PPC_SEL=i;PPC_SEL_TITLE=PPC_WEEKS[i].title}
+  renderPPCModal();injectPPCCard();
+}
 function openPPCModal(){G('ppc-modal-overlay').classList.add('on');renderPPCModal()}
 function closePPCModal(){var el=G('ppc-modal-overlay');if(el)el.classList.remove('on')}
 
 /* Bloco PPC para os relatórios impressos (dia e período). Retorna '' se não houver dados. */
 function ppcPrintHTML(){
   if(PPC_STATE!=='ok'||!PPC_WEEKS.length)return '';
-  var w=PPC_WEEKS[PPC_SEL],st=ppcStats(w);
+  var w=ppcCurWeek(),st=ppcStats(w);
   if(!w.tasks.length)return '';
   var corPPC=st.pct>=80?'#16A34A':st.pct>=60?'#D97706':'#DC2626';
   var h='<div class="ppc-print-block">';
-  h+='<div class="ppc-print-title">\uD83C\uDFAF PPC \u2014 Planejamento a Curto Prazo \u00b7 Semana '+esc(w.label)+(PPC_OBRA?' \u00b7 '+esc(PPC_OBRA):'')+'</div>';
+  h+='<div class="ppc-print-title">\uD83C\uDFAF PPC \u2014 Planejamento a Curto Prazo \u00b7 '+(ppcIsAll()?'Período ':'Semana ')+esc(w.label)+(PPC_OBRA?' \u00b7 '+esc(PPC_OBRA):'')+'</div>';
   h+='<div class="ppc-print-sum">'+
     '<div><span>PPC</span><b style="color:'+corPPC+'">'+st.pct+'%</b></div>'+
     '<div><span>Planejadas</span><b>'+st.total+'</b></div>'+
@@ -2122,13 +2099,14 @@ function renderPPCModal(){
     body.innerHTML='<div class="em">'+(PPC_STATE==='loading'?'Carregando planilha…':PPC_STATE==='err'?'Não foi possível ler a planilha ('+esc(PPC_ERR)+').<br>Verifique se ela está compartilhada como "qualquer pessoa com o link" e clique em Atualizar.':'Nenhuma tarefa encontrada nas abas da planilha.')+'</div>';
     return;
   }
-  var w=PPC_WEEKS[PPC_SEL],st=ppcStats(w);
-  sub.textContent=(PPC_OBRA?PPC_OBRA+' · ':'')+'Semana '+w.label;
+  var all=ppcIsAll(),w=ppcCurWeek(),st=ppcStats(w);
+  sub.textContent=(PPC_OBRA?PPC_OBRA+' · ':'')+(all?'Período todo · ':'Semana ')+w.label;
   var h='<div class="ppc-chips">'+PPC_WEEKS.map(function(x,i){
     return '<button class="ppc-chip'+(i===PPC_SEL?' sel':'')+'" onclick="ppcSelectWeek('+i+')">'+esc(x.label)+' · '+ppcStats(x).pct+'%</button>';
-  }).join('')+'</div>';
+  }).join('')+'<button class="ppc-chip'+(all?' sel':'')+'" onclick="ppcSelectWeek('+PPC_WEEKS.length+')" title="Todas as semanas somadas">📅 Todo o período</button></div>';
   if(PPC_WEEKS.length>1){
-    h+='<div class="ppc-trend">'+PPC_WEEKS.map(function(x,i){var stx=ppcStats(x);return '<div class="ppc-trend-col'+(i===PPC_SEL?' sel':'')+'" onclick="ppcSelectWeek('+i+')" title="'+esc(x.label)+' \u00b7 '+stx.pct+'%"><i style="height:'+Math.max(stx.pct,4)+'%;background:'+ppcColor(stx.pct)+'"></i><span>'+stx.pct+'%</span></div>'}).join('')+'</div>';
+    var wA=ppcAllWeek(),stA=wA?ppcStats(wA):{pct:0};
+    h+='<div class="ppc-trend">'+PPC_WEEKS.map(function(x,i){var stx=ppcStats(x);return '<div class="ppc-trend-col'+(i===PPC_SEL?' sel':'')+'" onclick="ppcSelectWeek('+i+')" title="'+esc(x.label)+' \u00b7 '+stx.pct+'%"><i style="height:'+Math.max(stx.pct,4)+'%;background:'+ppcColor(stx.pct)+'"></i><span>'+stx.pct+'%</span></div>'}).join('')+'<div class="ppc-trend-col all'+(all?' sel':'')+'" onclick="ppcSelectWeek('+PPC_WEEKS.length+')" title="Todo o período \u00b7 '+stA.pct+'%"><i style="height:'+Math.max(stA.pct,4)+'%;background:'+ppcColor(stA.pct)+'"></i><span>'+stA.pct+'%</span></div></div>';
   }
   h+='<div class="ppc-sum">'
     +'<div><div class="l">PPC</div><div class="v" style="color:'+ppcColor(st.pct)+'">'+st.pct+'%</div></div>'
@@ -2141,15 +2119,30 @@ function renderPPCModal(){
   var keys=Object.keys(cz).sort(function(a,b){return cz[b]-cz[a]});
   if(keys.length){
     var mx=cz[keys[0]];
-    h+='<div class="ppc-h">Causas registradas</div>'+keys.map(function(k){
+    h+='<div class="ppc-h">'+(all?'Causas registradas no período':'Causas registradas')+'</div>'+keys.map(function(k){
       return '<div class="ppc-cz"><span>'+esc(k)+'</span><div class="ppc-bar"><i style="width:'+Math.round(cz[k]/mx*100)+'%"></i></div><b>'+cz[k]+'</b></div>';
     }).join('');
   }
   /* Acompanamento por serviço: início, dias rolando e término (100% = terminou) */
   var srvs=ppcServices(),curW=PPC_WEEKS[PPC_WEEKS.length-1];
   var hojeTs=(function(){var h=new Date();h.setHours(0,0,0,0);return h.getTime()})();
-  var selW=PPC_WEEKS[PPC_SEL]||curW;
-  h+='<div class="ppc-h">Serviços da semana '+esc(selW.label)+' — há quantos dias rolam</div>';
+  /* Faltas de TODO o periodo: comparacao previsto x executado —
+     toda tarefa planejada em qualquer semana que nao chegou a 100%. Falta e falta, sem codigo de cores. */
+  if(all){
+    var fts=[];
+    PPC_WEEKS.forEach(function(wk,wi){wk.tasks.forEach(function(t){if(t.pct<100)fts.push({wi:wi,t:t})})});
+    h+='<div class="ppc-h">Faltas do período todo — '+fts.length+' ocorrência(s)</div>';
+    h+='<div style="font-size:11px;color:var(--ink2);margin:-2px 0 8px">tudo que ficou planejado e não chegou a 100% (previsto × executado)</div>';
+    if(!fts.length)h+='<div class="em">Nenhuma falta registrada no período.</div>';
+    fts.forEach(function(f){
+      var t=f.t,wk=PPC_WEEKS[f.wi];
+      h+='<div class="ppc-row"><span class="ppc-dot" style="background:var(--red)"></span><div><div class="n">'+esc(t.nome)+'</div>'+
+        '<div class="m">'+esc(['Semana '+wk.label,t.equipe,t.resp].filter(Boolean).join(' · '))+'</div>'+
+        (t.causa?'<span class="ppc-tag">'+esc(t.causa)+'</span>':'')+'</div>'+
+        '<div class="p" style="color:var(--red)">'+Math.round(t.pct)+'%</div></div>';
+    });
+  }
+  h+='<div class="ppc-h">'+(all?'Todos os serviços do período ('+srvs.length+') — situação mais recente':'Serviços da semana '+esc((PPC_WEEKS[PPC_SEL]||curW).label)+' — há quantos dias rolam')+'</div>';
   if(!srvs.length){h+='<div class="em">Nenhum serviço encontrado nas abas da planilha.</div>'}
   srvs.forEach(function(s){
     var ok=s.status==='concluido',and=s.status==='andamento';
@@ -2167,7 +2160,8 @@ function renderPPCModal(){
     else if(!and)meta+=(meta?' \u00b7 ':'')+'n\u00e3o conclu\u00edda nesta semana';
     var hist=s.hist.map(function(x){return x.label.split(' a ')[0]+': '+x.pct+'%'}).join(' \u00b7 ');
     h+='<div class="ppc-row"><span class="ppc-dot" style="background:'+dot+'"></span><div><div class="n">'+esc(s.nome)+'</div><div class="m">'+esc([s.equipe,s.resp].filter(Boolean).join(' \u00b7 '))+'</div>'+
-      '<div class="ppc-srv-meta">'+meta+'</div>'+(hist?'<div class="ppc-srv-hist">'+esc(hist)+'</div>':'')+(s.causa?'<span class="ppc-tag">'+esc(s.causa)+'</span>':'')+'</div>'+
+      '<div class="ppc-srv-meta">'+meta+'</div>'+(hist?'<div class="ppc-srv-hist">'+esc(hist)+'</div>':'')+'</div>'+
+      ((s.causas&&s.causas.length)?'<div style="margin-top:4px">'+s.causas.map(function(c){return '<span class="ppc-tag'+(all?' ppc-tag-wk':'')+'">'+(all?'<i>'+esc(PPC_WEEKS[c.wi].label.split(' a ')[0])+'</i>':'')+esc(c.txt)+'</span>'}).join('')+'</div>':'')+
       '<div class="p" style="color:'+dot+'">'+Math.round(s.lastPct)+'%</div></div>';
   });
   body.innerHTML=h;
