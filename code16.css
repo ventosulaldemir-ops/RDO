@@ -527,3 +527,5 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 .ppc-bar i{display:block;height:100%;background:var(--amber)}
 .ppc-cz{display:flex;align-items:center;gap:8px;font-size:11px;margin:5px 0}
 .ppc-cz span:first-child{width:130px;flex:none}
+.ppc-trend-col.all{margin-left:10px;padding-left:10px;border-left:1px dashed var(--line)}
+.ppc-tag-wk i{font-style:normal;font-family:'JetBrains Mono';font-size:8px;margin-right:4px;opacity:.7}
