@@ -170,6 +170,111 @@ function openProducaoEmpresaModal(){
   body.innerHTML=html;
   G('emp-modal-overlay').classList.add('on');
 }
+/* ═══ Modal: produção por FUNÇÃO (dia e período) ═══ */
+function openProdFuncDiaModal(funcKey){
+  var day=getSelectedDay();
+  if(!day||!funcKey)return;
+  var lista=(day.ativos||[]).filter(function(p){return (p.funcao||'(sem função)')===funcKey&&temAtividade(p.prod)});
+  var hdr=G('emp-modal-overlay').querySelector('.modal-h');
+  hdr.style.background='#D97706';
+  G('emp-modal-title').textContent='⚒️ Produção — '+funcKey;
+  G('emp-modal-sub').textContent=day.date+' · '+lista.length+' pessoa(s) com produção lançada';
+  var body=G('emp-modal-body');
+  if(!lista.length){
+    body.innerHTML='<div class="modal-empty">Nenhuma produção lançada nesta função neste dia.</div>';
+  }else{
+    var t={M2:0,M3:0,UN:0};
+    lista.forEach(function(p){parseProducaoUnidades(p.prod).forEach(function(u){t[u.unidade]+=u.valor})});
+    var html='<div class="local-summary">'+
+      '<div class="local-stat"><b>'+fmtNum(t.M2)+'</b><span>Total m²</span></div>'+
+      '<div class="local-stat"><b>'+t.M3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+'</b><span>Total m³</span></div>'+
+      '<div class="local-stat"><b>'+fmtNum(t.UN)+'</b><span>Total UN</span></div>'+
+    '</div>';
+    var th='text-align:left;padding:8px 10px;background:#FEF3C7;color:#92400E;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em';
+    var td='padding:8px 10px;border-bottom:1px solid #FDE8C8';
+    html+='<table class="people-modal-table" style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>'+
+      '<th style="'+th+'">Nome</th><th style="'+th+'">Empresa</th><th style="'+th+'">Pav.</th><th style="'+th+'">Atividade</th><th style="'+th+'">Produção</th></tr></thead><tbody>';
+    lista.sort(function(a,b){return(a.nome||'').localeCompare(b.nome||'','pt-BR')}).forEach(function(p,i){
+      var us=parseProducaoUnidades(p.prod);
+      var txt=us.length?us.map(function(u){return fmtNum(u.valor)+' '+(u.unidade==='M2'?'m²':u.unidade==='M3'?'m³':'un')}).join(' + '):'—';
+      html+='<tr style="background:'+(i%2===0?'#fff':'#F8FAFC')+'">'+
+        '<td style="'+td+';font-weight:600">'+esc(p.nome)+'</td>'+
+        '<td style="'+td+'"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
+        '<td style="'+td+'">'+pavBadge(p.pav)+'</td>'+
+        '<td style="'+td+';color:var(--ink2)">'+esc(p.atividade||'—')+'</td>'+
+        '<td style="'+td+'"><div style="font-weight:700;color:#B45309">'+txt+'</div><div style="font-size:10px;color:var(--ink3)">'+esc(p.prod)+'</div></td>'+
+      '</tr>';
+    });
+    html+='</tbody></table>';
+    body.innerHTML=html;
+  }
+  G('emp-modal-overlay').classList.add('on');
+}
+
+function openProducaoFuncModal(){
+  if(!PARSED)return;
+  var days=getRangeDays();
+  if(!days.length){toast('Selecione um ou mais dias no periodo','warn');return}
+  var byFunc={};
+  days.forEach(function(day){
+    (day.ativos||[]).forEach(function(p){
+      if(!temAtividade(p.prod))return;
+      var us=parseProducaoUnidades(p.prod);
+      if(!us.length)return;
+      var k=p.funcao||'(sem função)';
+      if(!byFunc[k])byFunc[k]={M2:0,M3:0,UN:0,lan:0,pessoas:{}};
+      byFunc[k].lan+=us.length;
+      byFunc[k].pessoas[p.nome]=1;
+      us.forEach(function(u){byFunc[k][u.unidade]+=u.valor});
+    });
+  });
+  var keys=Object.keys(byFunc).filter(function(k){return byFunc[k].M2>0||byFunc[k].M3>0||byFunc[k].UN>0}).sort(function(a,b){return byFunc[b].M2-byFunc[a].M2||byFunc[b].M3-byFunc[a].M3||byFunc[b].UN-byFunc[a].UN||a.localeCompare(b,'pt-BR')});
+  var hdr=G('emp-modal-overlay').querySelector('.modal-h');
+  hdr.style.background='#D97706';
+  G('emp-modal-title').textContent='⚒️ Produção por Função';
+  G('emp-modal-sub').textContent=days.length+' dia(s) selecionados · '+keys.length+' função(ões) com produção';
+  var body=G('emp-modal-body');
+  if(!keys.length){
+    body.innerHTML='<div class="modal-empty">Nenhuma produção lançada no período selecionado.</div>';
+    G('emp-modal-overlay').classList.add('on');
+    return;
+  }
+  var tM2=0,tM3=0,tUN=0,tLan=0;
+  keys.forEach(function(k){tM2+=byFunc[k].M2;tM3+=byFunc[k].M3;tUN+=byFunc[k].UN;tLan+=byFunc[k].lan});
+  var html='<div class="local-summary">'+
+    '<div class="local-stat"><b>'+fmtNum(tM2)+'</b><span>Total m²</span></div>'+
+    '<div class="local-stat"><b>'+tM3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+'</b><span>Total m³</span></div>'+
+    '<div class="local-stat"><b>'+fmtNum(tUN)+'</b><span>Total UN</span></div>'+
+  '</div>';
+  var th='text-align:left;padding:8px 10px;background:#FEF3C7;color:#92400E;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em';
+  var td='padding:8px 10px;border-bottom:1px solid #FDE8C8';
+  html+='<table class="people-modal-table" style="width:100%;border-collapse:collapse;font-size:12px">'+
+    '<thead><tr><th style="'+th+'">#</th><th style="'+th+'">Função</th><th style="'+th+'">Pessoas</th>'+
+    '<th style="'+th+';text-align:right">m²</th><th style="'+th+';text-align:right">m³</th><th style="'+th+';text-align:right">UN</th><th style="'+th+';text-align:right">Lançamentos</th></tr></thead><tbody>';
+  keys.forEach(function(k,i){
+    var v=byFunc[k],np=Object.keys(v.pessoas).length;
+    html+='<tr style="background:'+(i%2===0?'#fff':'#F8FAFC')+'">'+
+      '<td style="'+td+';color:var(--ink3)">'+(i+1)+'</td>'+
+      '<td style="'+td+';font-weight:600">'+esc(k)+'</td>'+
+      '<td style="'+td+'">'+np+'</td>'+
+      '<td style="'+td+';text-align:right;font-weight:700;color:#2563EB">'+(v.M2>0?fmtNum(v.M2):'—')+'</td>'+
+      '<td style="'+td+';text-align:right;font-weight:700;color:#D97706">'+(v.M3>0?v.M3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3}):'—')+'</td>'+
+      '<td style="'+td+';text-align:right;font-weight:700;color:#7C3AED">'+(v.UN>0?fmtNum(v.UN):'—')+'</td>'+
+      '<td style="'+td+';text-align:right;color:var(--ink2)">'+v.lan+'</td>'+
+    '</tr>';
+  });
+  html+='<tr style="background:#FDE8C8;font-weight:700">'+
+    '<td colspan="3" style="padding:8px 10px;color:#92400E;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em">Total</td>'+
+    '<td style="padding:8px 10px;text-align:right;color:#92400E">'+fmtNum(tM2)+'</td>'+
+    '<td style="padding:8px 10px;text-align:right;color:#92400E">'+tM3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+'</td>'+
+    '<td style="padding:8px 10px;text-align:right;color:#92400E">'+fmtNum(tUN)+'</td>'+
+    '<td style="padding:8px 10px;text-align:right;color:#92400E">'+tLan+'</td>'+
+  '</tr>';
+  html+='</tbody></table>';
+  body.innerHTML=html;
+  G('emp-modal-overlay').classList.add('on');
+}
+
 function monthlyProdMatches(r,q,emp,func,pav){
   if(emp&&r.empresa!==emp)return false;if(func&&r.funcao!==func)return false;if(pav&&r.pav!==pav)return false;
   if(q){var txt=norm([r.date,r.nome,r.empresa,r.funcao,r.pav,r.local,r.atividade,r.prod].join(' '));if(txt.indexOf(q)===-1)return false;}
@@ -573,7 +678,8 @@ function renderRangeKPIs(days,agg){
     {i:'🌴',l:'Dias de ferias',v:totalFerias,f:'no periodo',c:'var(--amber)'},
     {i:'🏢',l:'Empresas',v:empresas,f:'envolvidas',c:'var(--navy)'},
     {i:'📐',l:'Produção do período',v:fmtNum(prodPeriodo.m2)+' m²',f:(prodPeriodo.m3>0||prodPeriodo.un>0?'m² · m³ · UN — clique para ver':'m² — clique para ver'),c:'#0891B2',click:'openProducaoPeriodoModal()'},
-    {i:'🏗️',l:'Produção por empresa',v:uniq(getMonthlyProdRows(days).filter(function(r){return r.empresa;}).map(function(r){return r.empresa;})).length,f:'empresas com produção — clique para ver',c:'#7C3AED',click:'openProducaoEmpresaModal()'}
+    {i:'🏗️',l:'Produção por empresa',v:uniq(getMonthlyProdRows(days).filter(function(r){return r.empresa;}).map(function(r){return r.empresa;})).length,f:'empresas com produção — clique para ver',c:'#7C3AED',click:'openProducaoEmpresaModal()'},
+    {i:'⚒️',l:'Produção por função',v:uniq(getMonthlyProdRows(days).filter(function(r){return r.funcao&&r.funcao!=='—';}).map(function(r){return r.funcao;})).length,f:'funções com produção — clique para ver',c:'#D97706',click:'openProducaoFuncModal()'}
   ].map(function(k){var clickAttr=k.click?(' onclick="'+k.click+'" role="button" tabindex="0" title="Clique para ver a produção do periodo"'):'';var cls='kp'+(k.click?' kp-click':'');return '<div class="'+cls+'" style="--kc:'+k.c+'"'+clickAttr+'><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div></div>'}).join('');
 }
 
@@ -1705,13 +1811,47 @@ function renderProducaoEmpresaDia(day){
   meta.textContent=day.date+' · '+keys.length+' empresa(s) · '+fmtNum(total)+' '+label;
 }
 
+var SINGLE_PROD_FUNC_UNIT='M2';
+function setSingleProdFuncUnit(unit){
+  SINGLE_PROD_FUNC_UNIT=unit||'M2';
+  ['m2','m3','un'].forEach(function(k){var b=G('single-prod-func-tab-'+k);if(b)b.classList.toggle('on',SINGLE_PROD_FUNC_UNIT===k.toUpperCase())});
+  renderProducaoFuncDia(getSelectedDay());
+}
+
+/* Produção agrupada por FUNÇÃO (pintor, eletricista, pedreiro...) no dia selecionado */
+function renderProducaoFuncDia(day){
+  var box=G('single-prod-func-box'),meta=G('single-prod-func-meta');
+  if(!box||!meta)return;
+  if(!day){box.innerHTML='<div class="prod-empresa-empty">Selecione um dia para ver a produção por função.</div>';meta.textContent='';return;}
+  var unit=SINGLE_PROD_FUNC_UNIT,label=unit==='M2'?'m²':unit==='M3'?'m³':'UN';
+  var byFunc={};
+  (day.ativos||[]).forEach(function(p){
+    if(!temAtividade(p.prod))return;
+    var fn=p.funcao||'(sem função)';
+    parseProducaoUnidades(p.prod).forEach(function(u){
+      if(u.unidade===unit)byFunc[fn]=(byFunc[fn]||0)+u.valor;
+    });
+  });
+  var keys=Object.keys(byFunc).filter(function(k){return byFunc[k]>0}).sort(function(a,b){return byFunc[b]-byFunc[a]});
+  if(!keys.length){box.innerHTML='<div class="prod-empresa-empty">Nenhuma produção em '+label+' registrada neste dia.</div>';meta.textContent=day.date+' · 0 funções';return;}
+  var max=byFunc[keys[0]]||1,total=keys.reduce(function(s,k){return s+byFunc[k]},0);
+  box.innerHTML=keys.map(function(k,i){
+    var w=(byFunc[k]/max*100).toFixed(1);
+    return '<div class="prod-empresa-row" data-func-key="'+esc(k)+'" title="'+esc(k)+' — clique para ver quem produziu" style="cursor:pointer"><span class="prod-empresa-name">'+esc(k)+'</span><div class="prod-empresa-track"><div class="prod-empresa-fill" style="width:'+w+'%;background:'+COLORS[i%COLORS.length]+'"></div></div><span class="prod-empresa-val">'+fmtNum(byFunc[k])+' '+label+'</span></div>';
+  }).join('');
+  Array.prototype.forEach.call(box.querySelectorAll('[data-func-key]'),function(row){
+    row.addEventListener('click',function(){openProdFuncDiaModal(row.getAttribute('data-func-key'))});
+  });
+  meta.textContent=day.date+' · '+keys.length+' função(ões) · '+fmtNum(total)+' '+label;
+}
+
 function renderAllForDate(){
   var day=getSelectedDay();
   G('sub-date').textContent=day?('Dados de '+day.date):'Sem dados';
   renderKPIs(day);
   if(day){populateFilters(day);renderBars('emp-bars','emp-meta',day.byEmp,COLORS,day.byEmpAtiv,'day');renderBars('func-bars','func-meta',day.byFunc,COLORS,day.byFuncAtiv,'func');renderBars('pav-bars','pav-meta',day.byPav,PAV_CORES,null,'pav');renderBars('reg-bars','reg-meta',day.byRegiao,COLORS,null,'reg')}
   else{['emp-bars','func-bars','pav-bars','reg-bars'].forEach(function(id){G(id).innerHTML=''});['emp-meta','func-meta','pav-meta','reg-meta'].forEach(function(id){G(id).textContent=''})}
-  renderChart(PARSED.days,day);renderProducaoEmpresaDia(day);renderTable();renderHist(PARSED.days);
+  renderChart(PARSED.days,day);renderProducaoEmpresaDia(day);renderProducaoFuncDia(day);renderTable();renderHist(PARSED.days);
   G('upd-ts').textContent='atualizado '+fmtNow();
 }
 
