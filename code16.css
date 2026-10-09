@@ -529,3 +529,15 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 .ppc-cz span:first-child{width:130px;flex:none}
 .ppc-trend-col.all{margin-left:10px;padding-left:10px;border-left:1px dashed var(--line)}
 .ppc-tag-wk i{font-style:normal;font-family:'JetBrains Mono';font-size:8px;margin-right:4px;opacity:.7}
+
+/* ═══ Filtro discreto de empresas nos gráficos ═══ */
+.chart-filter{position:relative;display:inline-flex;align-items:center;margin-left:8px;flex:0 0 auto}
+.chart-filter-btn{font-family:'JetBrains Mono';font-size:9px;font-weight:400;color:var(--ink3);background:transparent;border:1px dashed var(--line);border-radius:3px;padding:2px 6px;cursor:pointer;line-height:1.5;white-space:nowrap;transition:all .12s}
+.chart-filter-btn:hover{color:var(--navy);border-color:var(--navy);border-style:solid}
+.chart-filter-btn.on{color:var(--blue);border-color:var(--blue);border-style:solid;font-weight:700}
+.chart-filter-pop{position:fixed;z-index:120;background:var(--w);border:1px solid var(--line);border-radius:4px;box-shadow:0 8px 22px rgba(11,29,51,.16);padding:8px;min-width:184px;max-width:230px;max-height:252px;overflow:auto;display:none}
+.chart-filter-pop .cfa{font-family:'JetBrains Mono';font-size:9px;color:var(--ink3);margin:0 0 6px;padding-bottom:5px;border-bottom:1px dashed var(--line)}
+.chart-filter-pop .cfa span{cursor:pointer;text-decoration:underline}
+.chart-filter-pop .cfa span:hover{color:var(--navy)}
+.chart-filter-pop .pm-chip-label{display:flex;font-size:10px;padding:4px 8px;border-radius:3px;margin-bottom:3px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:640px){.chart-filter{margin-left:6px}.chart-filter-pop{max-width:200px}}
