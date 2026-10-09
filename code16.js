@@ -492,10 +492,30 @@ function regiaoPavKey(p){
 /* ═══════ PARSE ═══════ */
 function parseData(raw){
   if(!raw||raw.length<2)return null;
-  var hd=raw[0];
+  /* Localiza a linha de cabeçalho REAL: a planilha às vezes ganha linhas extras
+     no topo (ex.: linha "Coluna 1, Coluna 2..." inserida por engano) e o
+     cabeçalho verdadeiro desce — o painel não pode parar por causa disso. */
+  var hIdx=0;
+  for(var hi=0;hi<Math.min(raw.length,10);hi++){
+    var hTry=raw[hi]||[];
+    if(findCol(hTry,['funcionario','lider','nome'])>-1){hIdx=hi;break}
+  }
+  var hd=raw[hIdx]||[];
   var ci={nome:findCol(hd,['funcionario','lider','nome']),empresa:findCol(hd,['empresa']),funcao:findCol(hd,['funcao','função']),atividade:findCol(hd,['servico','serviço','atividade']),regiao:findCol(hd,['local','regiao','região','area','área']),pav:findCol(hd,['pav']),data:findCol(hd,['data inicio','data']),prod:findCol(hd,['prod'])};
+  if(ci.data<0){
+    /* a célula "DATA" do cabeçalho virou uma data de verdade (ou sumiu):
+       acha a coluna de data pelo conteúdo das linhas */
+    for(var c=0;c<9;c++){
+      var okD=0,chkD=0;
+      for(var rr=hIdx+1;rr<Math.min(raw.length,hIdx+40);rr++){
+        var val=(((raw[rr]||[])[c])||'').trim();if(!val)continue;chkD++;
+        if(/^\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{4}$/.test(val))okD++;
+      }
+      if(chkD&&okD/chkD>0.6){ci.data=c;break}
+    }
+  }
   var people=[];
-  for(var r=1;r<raw.length;r++){
+  for(var r=hIdx+1;r<raw.length;r++){
     var row=raw[r];var nome=(ci.nome>-1?row[ci.nome]||'':'').trim();
     if(!nome||nome.length<2)continue;if(norm(nome).indexOf('total')>-1)continue;
     var motivo=motivoAusencia(row);var vac=!!motivo;
