@@ -1546,11 +1546,20 @@ function openPeopleModal(tipo){
 }
 function closePeopleModal(){G('people-modal-overlay').classList.remove('on')}
 
+/* ═══ Filtro discreto de empresas nos gráficos "Efetivo por dia" ═══ */
+var CHART_FILTER={};  /* boxId -> null (todas) ou array de empresas selecionadas */
+var CHART_CTX={};     /* boxId -> últimos dados do render (para re-renderizar) */
+function countEfetivoDia(d,sel){
+  if(!sel)return comAtividadeCount(d);
+  return(d.ativos||[]).filter(function(p){return!!p.atividade&&sel.indexOf(p.empresa)>-1}).length;
+}
 function renderChart(days,selectedDay,boxId,metaId){
   boxId=boxId||'chart-box';metaId=metaId||'chart-meta';
   var el=G(boxId),meta=G(metaId);
   if(!days||!days.length){el.innerHTML='<div class="em">Sem dados</div>';return}
-  meta.textContent=days.length+' dia(s)';
+  var empsGraf=uniq(days.reduce(function(a,d){return a.concat((d.ativos||[]).map(function(p){return p.empresa}).filter(Boolean))},[]));
+  var selEmp=CHART_FILTER[boxId]||null;
+  meta.textContent=days.length+' dia(s)'+(selEmp&&selEmp.length<empsGraf.length?' \u00b7 '+selEmp.filter(function(v){return empsGraf.indexOf(v)>-1}).length+'/'+empsGraf.length+' empresas':'');
 
   var isMobile=window.innerWidth<=640;
   var n=days.length;
@@ -1558,7 +1567,7 @@ function renderChart(days,selectedDay,boxId,metaId){
   var H=isMobile?130:220;
   var pL=isMobile?28:36, pR=isMobile?6:10, pT=isMobile?20:28, pB=isMobile?26:38;
 
-  var vals  =days.map(function(d){return comAtividadeCount(d)}).reverse();
+  var vals  =days.map(function(d){return countEfetivoDia(d,selEmp)}).reverse();
   var labels=days.map(function(d){return d.date}).reverse();
   var selIdx=-1;
   if(selectedDay){for(var si=0;si<n;si++){if(labels[si]===selectedDay.date){selIdx=si;break}}}
@@ -1631,7 +1640,78 @@ function renderChart(days,selectedDay,boxId,metaId){
 
   svg+='</svg>';
   el.innerHTML=svg;
+  buildChartFilter(boxId,metaId,days,selectedDay,empsGraf);
 }
+
+/* UI do filtro: um botãozinho discreto no cabeçalho do gráfico que abre uma
+   lista simples de empresas (mesmos chips da impressão). Sempre recalcula o
+   gráfico pelo nº de colaboradores COM ATIVIDADE das empresas marcadas. */
+function buildChartFilter(boxId,metaId,days,selectedDay,emps){
+  CHART_CTX[boxId]={days:days,selectedDay:selectedDay,metaId:metaId,emps:emps};
+  var host=G(metaId);if(!host||!host.parentNode)return;
+  var sel=CHART_FILTER[boxId];
+  var wrap=G('chart-filter-'+boxId);
+  if(!wrap){
+    wrap=document.createElement('span');
+    wrap.id='chart-filter-'+boxId;
+    wrap.className='chart-filter';
+    wrap.innerHTML='<button type="button" class="chart-filter-btn" onclick="toggleChartFilter(\''+boxId+'\')"></button>'+
+                   '<div class="chart-filter-pop" id="chart-filter-pop-'+boxId+'"></div>';
+    host.parentNode.appendChild(wrap);
+  }
+  if(emps.length<2){wrap.style.display='none';return}  /* 1 empresa só: não polui o cabeçalho */
+  wrap.style.display='';
+  var btn=wrap.querySelector('.chart-filter-btn');
+  var nSel=sel?sel.filter(function(v){return emps.indexOf(v)>-1}).length:emps.length;
+  var ativo=!!sel&&nSel<emps.length;
+  btn.className='chart-filter-btn'+(ativo?' on':'');
+  btn.title=ativo?('Filtrar empresas — mostrando: '+sel.filter(function(v){return emps.indexOf(v)>-1}).join(', ')):'Filtrar empresas no gráfico';
+  btn.innerHTML='\ud83d\udce2'+(ativo?' '+nSel:' <span style="opacity:.65">empresas</span>')+' ▾';
+  var pop=G('chart-filter-pop-'+boxId);
+  pop.innerHTML='<div class="cfa"><span onclick="chartFilterAll(\''+boxId+'\',true)">todas</span> \u00b7 <span onclick="chartFilterAll(\''+boxId+'\',false)">nenhuma</span></div>'+
+    emps.map(function(v){
+      var ck=!sel||sel.indexOf(v)>-1;
+      return '<label class="pm-chip-label'+(ck?' on':'')+'" title="'+esc(v)+'"><input type="checkbox" value="'+esc(v)+'"'+(ck?' checked':'')+' onchange="chartFilterToggle(\''+boxId+'\',this)">'+esc(v)+'</label>';
+    }).join('');
+}
+function _chartPopPlace(boxId){
+  var w=G('chart-filter-'+boxId),pop=G('chart-filter-pop-'+boxId);
+  if(!w||!pop)return;
+  var r=w.querySelector('.chart-filter-btn').getBoundingClientRect();
+  pop.style.display='block';
+  var pw=pop.offsetWidth||200;
+  pop.style.left=Math.max(8,Math.min(window.innerWidth-pw-8,r.right-pw))+'px';
+  pop.style.top=(r.bottom+4)+'px';
+}
+function toggleChartFilter(boxId){
+  var pop=G('chart-filter-pop-'+boxId);if(!pop)return;
+  var abrir=pop.style.display!=='block';
+  document.querySelectorAll('.chart-filter-pop').forEach(function(p){p.style.display='none'});
+  if(abrir)_chartPopPlace(boxId);
+}
+function chartFilterAll(boxId,state){
+  var pop=G('chart-filter-pop-'+boxId);if(!pop)return;
+  pop.querySelectorAll('input').forEach(function(cb){cb.checked=state;cb.closest('label').className='pm-chip-label'+(state?' on':'')});
+  chartFilterApply(boxId);
+}
+function chartFilterToggle(boxId,cb){
+  if(cb&&cb.closest('label'))cb.closest('label').className='pm-chip-label'+(cb.checked?' on':'');
+  chartFilterApply(boxId);
+}
+function chartFilterApply(boxId){
+  var pop=G('chart-filter-pop-'+boxId),ctx=CHART_CTX[boxId];
+  if(!ctx)return;
+  var emps=ctx.emps||[],sel=[];
+  if(pop)pop.querySelectorAll('input').forEach(function(cb){if(cb.checked)sel.push(cb.value)});
+  CHART_FILTER[boxId]=(sel.length>=emps.length)?null:sel;
+  renderChart(ctx.days,ctx.selectedDay,boxId,ctx.metaId);
+  _chartPopPlace(boxId);
+}
+/* fecha os popovers ao clicar fora */
+document.addEventListener('click',function(e){
+  if(e.target&&e.target.closest&&e.target.closest('.chart-filter'))return;
+  document.querySelectorAll('.chart-filter-pop').forEach(function(p){p.style.display='none'});
+});
 
 function getFilteredPeople(day){
   if(!day)return{active:[],ferias:[]};
@@ -2091,19 +2171,30 @@ function injectPPCCard(){
   else if(PPC_STATE==='err'){f='erro ao carregar — clique para detalhes';c='var(--red)';}
   el.insertAdjacentHTML('beforeend','<div id="ppc-kpi" class="kp kp-click" style="--kc:'+c+'" onclick="openPPCModal()" role="button" tabindex="0" title="PPC — Planejamento a Curto Prazo"><div class="ki">🎯</div><div class="kl">PPC semanal</div><div class="kv">'+v+'</div><div class="kf">'+esc(f)+'</div></div>');
 }
-/* KPI de produtividade: m², m³ e UN por pessoa (pessoas com atividade no dia). Clicável -> detalhe por empresa */
+/* KPI de produtividade: cada unidade é dividida pelos COLABORADORES QUE LANÇARAM AQUela unidade no dia
+   (mesma regra dos "pontos" do indicador mensal). Dividir tudo pelo efetivo total distorce o número:
+   ex.: só 1 pessoa lançou UN hoje -> 7 un ÷ 1 = 7,0 un/pessoa (e não 7 ÷ 52 = 0,13).
+   Clicável -> detalhe por empresa */
 function fmt3(v){return v.toLocaleString('pt-BR',{maximumFractionDigits:3})}
 function effCalc(d){
   var pess=d.ativos.filter(function(p){return !!p.atividade}).length;
-  var t=computeProducaoDia(d).totals;
-  return{pess:pess,M2:t.M2||0,M3:t.M3||0,UN:t.UN||0,
-    r2:pess?(t.M2||0)/pess:0,r3:pess?(t.M3||0)/pess:0,rU:pess?(t.UN||0)/pess:0};
+  var agg=computeProducaoDia(d),t=agg.totals;
+  var p2=0,p3=0,pu=0;
+  agg.producers.forEach(function(pr){
+    var comM2=false,comM3=false,comUN=false;
+    pr.parsed.forEach(function(u){if(u.unidade==='M2')comM2=true;else if(u.unidade==='M3')comM3=true;else comUN=true});
+    if(comM2)p2++;if(comM3)p3++;if(comUN)pu++;
+  });
+  return{pess:pess,p2:p2,p3:p3,pu:pu,M2:t.M2||0,M3:t.M3||0,UN:t.UN||0,
+    r2:p2?(t.M2||0)/p2:0,r3:p3?(t.M3||0)/p3:0,rU:pu?(t.UN||0)/pu:0};
 }
-/* média dos demais dias, considerando só os dias em que aquela unidade teve produção */
+/* Média MENSAL: só os demais dias do mesmo mês/ano do dia selecionado em que aquela unidade teve produção */
 function effMedias(day){
+  var ref=parseDateBR(day&&day.date);
   var acc={r2:[0,0],r3:[0,0],rU:[0,0]};
   (PARSED&&PARSED.days||[]).forEach(function(d){
     if(d===day)return;
+    if(ref){var pd=parseDateBR(d.date);if(!pd||pd.m!==ref.m||pd.y!==ref.y)return}
     var c=effCalc(d);if(!c.pess)return;
     ['r2','r3','rU'].forEach(function(k){if(c[k]>0){acc[k][0]+=c[k];acc[k][1]++}});
   });
@@ -2120,10 +2211,10 @@ function injectEffCard(day){
   if(!day||el.classList.contains('kpi-auto'))return;
   var c=effCalc(day),m=effMedias(day);
   function chip(v,un,f){return '<span class="ke'+(v>0?'':' z')+'"><b>'+f(v)+'</b> '+un+'/pessoa</span>'}
-  var f=c.pess?fmtNum(c.M2)+' m² · '+fmt3(c.M3)+' m³ · '+fmtNum(c.UN)+' un ÷ '+c.pess+' pessoas':'sem pessoas com atividade';
-  el.insertAdjacentHTML('beforeend','<div id="eff-kpi" class="kp kp-click" style="--kc:#0891B2" onclick="openEffModal()" role="button" tabindex="0" title="Produtividade por pessoa — clique para ver por empresa">'+
+  var f=c.pess?fmtNum(c.M2)+' m² ÷ '+c.p2+' · '+fmt3(c.M3)+' m³ ÷ '+c.p3+' · '+fmtNum(c.UN)+' un ÷ '+c.pu+' · '+c.pess+' com atividade':'sem pessoas com atividade';
+  el.insertAdjacentHTML('beforeend','<div id="eff-kpi" class="kp kp-click" style="--kc:#0891B2" onclick="openEffModal()" role="button" tabindex="0" title="Produção ÷ colaboradores que lançaram cada unidade — clique para ver por empresa">'+
     '<div class="ki">⚡</div><div class="kl">Produtividade</div>'+
-    '<div class="kv">'+fmtNum(c.r2)+' m²/pessoa'+effBadge(c.r2,m.r2)+'</div>'+
+    '<div class="kv">'+fmtNum(c.r2)+' m²/pessoa'+effBadge(c.r2,m.r2,'vs média do mês')+'</div>'+
     '<div class="kes">'+chip(c.r3,'m³',fmt3)+chip(c.rU,'un',fmtNum)+'</div>'+
     '<div class="kf">'+esc(f)+'</div></div>');
 }
@@ -2134,42 +2225,44 @@ function openEffModal(){
   var hdr=G('emp-modal-overlay').querySelector('.modal-h');
   hdr.style.background='#0891B2';
   G('emp-modal-title').textContent='⚡ Produtividade por pessoa';
-  G('emp-modal-sub').textContent=day.date+' · '+c.pess+' pessoa(s) com atividade';
+  G('emp-modal-sub').textContent=day.date+' · '+c.pess+' com atividade · com produção: m² '+c.p2+' · m³ '+c.p3+' · un '+c.pu;
   var body=G('emp-modal-body');
   if(!c.pess){body.innerHTML='<div class="modal-empty">Nenhuma pessoa com atividade neste dia.</div>';G('emp-modal-overlay').classList.add('on');return}
   /* por empresa */
   var by={};
   day.ativos.forEach(function(p){
     if(!p.atividade)return;
-    var e=by[p.empresa]||(by[p.empresa]={n:p.empresa,pess:0,M2:0,M3:0,UN:0});e.pess++;
+    var e=by[p.empresa]||(by[p.empresa]={n:p.empresa,pess:0,p2:0,p3:0,pu:0,M2:0,M3:0,UN:0});e.pess++;
   });
   computeProducaoDia(day).producers.forEach(function(pr){
     var e=by[pr.p.empresa];if(!e)return;
-    pr.parsed.forEach(function(u){e[u.unidade]+=u.valor});
+    var comM2=false,comM3=false,comUN=false;
+    pr.parsed.forEach(function(u){e[u.unidade]+=u.valor;if(u.unidade==='M2')comM2=true;else if(u.unidade==='M3')comM3=true;else comUN=true});
+    if(comM2)e.p2++;if(comM3)e.p3++;if(comUN)e.pu++;
   });
   var rows=Object.keys(by).map(function(k){return by[k]}).sort(function(a,b){return b.M2-a.M2||b.pess-a.pess});
-  function stat(v,l,med,f,un){return '<div class="local-stat"><b>'+f(v)+'</b><span>'+l+'</span>'+(med>0?'<span style="display:block;margin-top:3px;text-transform:none">média '+f(med)+' '+un+'</span>':'')+'</div>'}
+  function stat(v,l,med,f,un){return '<div class="local-stat"><b>'+f(v)+'</b><span>'+l+'</span>'+(med>0?'<span style="display:block;margin-top:3px;text-transform:none">média do mês '+f(med)+' '+un+'</span>':'')+'</div>'}
   var h='<div class="local-summary">'+
-    stat(c.r2,'m² / pessoa',m.r2,fmtNum,'m²')+stat(c.r3,'m³ / pessoa',m.r3,fmt3,'m³')+stat(c.rU,'un / pessoa',m.rU,fmtNum,'un')+'</div>';
+    stat(c.r2,'m² / colaborador',m.r2,fmtNum,'m²')+stat(c.r3,'m³ / colaborador',m.r3,fmt3,'m³')+stat(c.rU,'un / colaborador',m.rU,fmtNum,'un')+'</div>';
   var th='padding:8px 10px;background:#E0F7FA;color:#0E7490;font-family:JetBrains Mono;font-size:9px;text-transform:uppercase;letter-spacing:.04em;text-align:right';
   var td='padding:8px 10px;border-bottom:1px solid #E0F7FA;text-align:right';
   function r(v,f){return v>0?f(v):'—'}
   h+='<table class="people-modal-table" style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>'+
     '<th style="'+th+';text-align:left">Empresa</th><th style="'+th+'">Pessoas</th>'+
-    '<th style="'+th+'">m²</th><th style="'+th+'">m²/pess.</th><th style="'+th+'">m³</th><th style="'+th+'">m³/pess.</th><th style="'+th+'">UN</th><th style="'+th+'">UN/pess.</th></tr></thead><tbody>'+
+    '<th style="'+th+'">m²</th><th style="'+th+'">m²/colab.</th><th style="'+th+'">m³</th><th style="'+th+'">m³/colab.</th><th style="'+th+'">UN</th><th style="'+th+'">UN/colab.</th></tr></thead><tbody>'+
     rows.map(function(e,i){
       var bg=i%2===0?'#fff':'#F8FAFC';
       return '<tr style="background:'+bg+'"><td data-label="Empresa" style="'+td+';text-align:left"><span class="badge badge-gray">'+esc(e.n)+'</span></td>'+
         '<td data-label="Pessoas" style="'+td+'">'+e.pess+'</td>'+
-        '<td data-label="m²" style="'+td+'">'+r(e.M2,fmtNum)+'</td><td data-label="m²/pess." style="'+td+';font-weight:700;color:#0E7490">'+r(e.M2/e.pess,fmtNum)+'</td>'+
-        '<td data-label="m³" style="'+td+'">'+r(e.M3,fmt3)+'</td><td data-label="m³/pess." style="'+td+';font-weight:700;color:#D97706">'+r(e.M3/e.pess,fmt3)+'</td>'+
-        '<td data-label="UN" style="'+td+'">'+r(e.UN,fmtNum)+'</td><td data-label="UN/pess." style="'+td+';font-weight:700;color:#7C3AED">'+r(e.UN/e.pess,fmtNum)+'</td></tr>';
+        '<td data-label="m²" style="'+td+'">'+r(e.M2,fmtNum)+'</td><td data-label="m²/colab." style="'+td+';font-weight:700;color:#0E7490" title="'+e.p2+' colaborador(es) com m²">'+r(e.p2?e.M2/e.p2:0,fmtNum)+'</td>'+
+        '<td data-label="m³" style="'+td+'">'+r(e.M3,fmt3)+'</td><td data-label="m³/colab." style="'+td+';font-weight:700;color:#D97706" title="'+e.p3+' colaborador(es) com m³">'+r(e.p3?e.M3/e.p3:0,fmt3)+'</td>'+
+        '<td data-label="UN" style="'+td+'">'+r(e.UN,fmtNum)+'</td><td data-label="UN/colab." style="'+td+';font-weight:700;color:#7C3AED" title="'+e.pu+' colaborador(es) com UN">'+r(e.pu?e.UN/e.pu:0,fmtNum)+'</td></tr>';
     }).join('')+
     '<tr><td style="'+td+';text-align:left;font-weight:700;color:#0E7490">TOTAL</td><td style="'+td+';font-weight:700">'+c.pess+'</td>'+
     '<td style="'+td+';font-weight:700">'+fmtNum(c.M2)+'</td><td style="'+td+';font-weight:700">'+fmtNum(c.r2)+'</td>'+
     '<td style="'+td+';font-weight:700">'+fmt3(c.M3)+'</td><td style="'+td+';font-weight:700">'+fmt3(c.r3)+'</td>'+
     '<td style="'+td+';font-weight:700">'+fmtNum(c.UN)+'</td><td style="'+td+';font-weight:700">'+fmtNum(c.rU)+'</td></tr></tbody></table>'+
-    '<div style="margin-top:10px;font-size:10px;color:var(--ink3)">Divisor: pessoas com atividade no dia (faltosos e férias ficam de fora). A média compara com os demais dias em que aquela unidade teve produção.</div>';
+    '<div style="margin-top:10px;font-size:10px;color:var(--ink3)">Divisor: colaboradores que lançaram aquela unidade no dia (m²: '+c.p2+' · m³: '+c.p3+' · un: '+c.pu+'), mesma regra dos "pontos" do indicador mensal — faltosos e férias ficam de fora. A média é MENSAL: compara com os demais dias do mesmo mês em que a unidade teve produção.</div>';
   body.innerHTML=h;
   G('emp-modal-overlay').classList.add('on');
 }
