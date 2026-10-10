@@ -2260,7 +2260,7 @@ function openEffModal(){
     pr.parsed.forEach(function(u){e[u.unidade]+=u.valor;if(u.unidade==='M2')comM2=true;else if(u.unidade==='M3')comM3=true;else comUN=true});
     if(comM2)e.p2++;if(comM3)e.p3++;if(comUN)e.pu++;
   });
-  var rows=Object.keys(by).map(function(k){return by[k]}).sort(function(a,b){return b.M2-a.M2||b.pess-a.pess});
+  var rows=Object.keys(by).map(function(k){return by[k]}).sort(function(a,b){return b.M2-a.M2||b.pess-a.pess});/* Linha TOTAL soma as colunas de cima, inclusive as "/colab." — assim toda coluna fecha ao pé da tabela (ex.: 10,88 + 8,16 = 19,04). */var sumR2=0,sumR3=0,sumRU=0;rows.forEach(function(e){sumR2+=e.p2?e.M2/e.p2:0;sumR3+=e.p3?e.M3/e.p3:0;sumRU+=e.pu?e.UN/e.pu:0});
   function stat(v,l,med,f,un){return '<div class="local-stat"><b>'+f(v)+'</b><span>'+l+'</span>'+(med>0?'<span style="display:block;margin-top:3px;text-transform:none">média do mês '+f(med)+' '+un+'</span>':'')+'</div>'}
   var h='<div class="local-summary">'+
     stat(c.r2,'m² / colaborador',m.r2,fmtNum,'m²')+stat(c.r3,'m³ / colaborador',m.r3,fmt3,'m³')+stat(c.rU,'un / colaborador',m.rU,fmtNum,'un')+'</div>';
@@ -2279,10 +2279,10 @@ function openEffModal(){
         '<td data-label="UN" style="'+td+'">'+r(e.UN,fmtNum)+'</td><td data-label="UN/colab." style="'+td+';font-weight:700;color:#7C3AED" title="'+e.pu+' colaborador(es) com UN">'+r(e.pu?e.UN/e.pu:0,fmtNum)+'</td></tr>';
     }).join('')+
     '<tr><td style="'+td+';text-align:left;font-weight:700;color:#0E7490">TOTAL</td><td style="'+td+';font-weight:700">'+c.pess+'</td>'+
-    '<td style="'+td+';font-weight:700">'+fmtNum(c.M2)+'</td><td style="'+td+';font-weight:700">'+fmtNum(c.r2)+'</td>'+
-    '<td style="'+td+';font-weight:700">'+fmt3(c.M3)+'</td><td style="'+td+';font-weight:700">'+fmt3(c.r3)+'</td>'+
-    '<td style="'+td+';font-weight:700">'+fmtNum(c.UN)+'</td><td style="'+td+';font-weight:700">'+fmtNum(c.rU)+'</td></tr></tbody></table>'+
-    '<div style="margin-top:10px;font-size:10px;color:var(--ink3)">Divisor: colaboradores que lançaram aquela unidade no dia (m²: '+c.p2+' · m³: '+c.p3+' · un: '+c.pu+'), mesma regra dos "pontos" do indicador mensal — faltosos e férias ficam de fora. A média é MENSAL: compara com os demais dias do mesmo mês em que a unidade teve produção.</div>';
+    '<td style="'+td+';font-weight:700">'+fmtNum(c.M2)+'</td><td style="'+td+';font-weight:700">'+r(sumR2,fmtNum)+'</td>'+
+    '<td style="'+td+';font-weight:700">'+fmt3(c.M3)+'</td><td style="'+td+';font-weight:700">'+r(sumR3,fmt3)+'</td>'+
+    '<td style="'+td+';font-weight:700">'+fmtNum(c.UN)+'</td><td style="'+td+';font-weight:700">'+r(sumRU,fmtNum)+'</td></tr></tbody></table>'+
+    '<div style="margin-top:10px;font-size:10px;color:var(--ink3)">Em cada empresa, o valor "/colab." divide pelo nº de colaboradores daquele tipo que lançaram naquele dia (m²: '+c.p2+' · m³: '+c.p3+' · un: '+c.pu+' no dia todo). Na linha TOTAL as colunas somam os valores das empresas acima — é a soma da coluna, não um novo cálculo. Férias e faltosos ficam de fora. A média é MENSAL: compara com os demais dias do mesmo mês em que a unidade teve produção.</div>';
   body.innerHTML=h;
   G('emp-modal-overlay').classList.add('on');
 }
