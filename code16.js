@@ -1577,7 +1577,7 @@ function renderChart(days,selectedDay,boxId,metaId){
   boxId=boxId||'chart-box';metaId=metaId||'chart-meta';
   var el=G(boxId),meta=G(metaId);
   if(!days||!days.length){el.innerHTML='<div class="em">Sem dados</div>';return}
-  var empsGraf=uniq(days.reduce(function(a,d){return a.concat((d.ativos||[]).map(function(p){return p.empresa}).filter(Boolean))},[]));
+  var empsGraf=uniq(days.reduce(function(a,d){return a.concat((d.ativos||[]).map(function(p){return p.empresa}).filter(Boolean))},[])).filter(function(v){var n=norm(v);if(!n)return false;if(n.indexOf('pjloca')===0||n.indexOf('pj loca')===0||n==='pjlocacoes'||n==='pjlocacao'||n.indexOf('locacao')>-1&&n.indexOf('pj')>-1)return false;return true;});
   var selEmp=CHART_FILTER[boxId]||null;
   meta.textContent=days.length+' dia(s)'+(selEmp&&selEmp.length<empsGraf.length?' \u00b7 '+selEmp.filter(function(v){return empsGraf.indexOf(v)>-1}).length+'/'+empsGraf.length+' empresas':'');
 
