@@ -187,7 +187,7 @@
     </label>
     <div style="display:flex;gap:8px;justify-content:flex-end">
       <button class="b" id="trello-cancel">Agora não</button>
-      <button class="b pr" id="trello-login" type="button">Já estou logado no Trello</button>
+      <button class="b pr" id="trello-login" type="button" onclick="(function(){var r=document.getElementById('trello-remember');if(r&&r.checked)localStorage.setItem('trello_remember','1');else localStorage.removeItem('trello_remember');var a=document.getElementById('trello-auth');if(a)a.style.display='none';try{if(typeof loadGitHub==='function')loadGitHub();if(typeof loadTrello==='function')loadTrello();}catch(e){}})()">Já estou logado no Trello</button>
     </div>
   </div>
 </div>
@@ -772,16 +772,7 @@ load();initPlan();
     return;
   }
   authBox.style.display = 'flex';
-  btnLogin.addEventListener('click', function(){
-    if(remember.checked){
-      localStorage.setItem('trello_remember','1');
-    } else {
-      localStorage.removeItem('trello_remember');
-    }
-    authBox.style.display = 'none';
-    startLoading();
-    showMsg('<div class="sp2"></div> Carregando dados do Trello...');
-  });
+  
   btnCancel.addEventListener('click', function(){
     authBox.style.display = 'none';
     startLoading();
