@@ -179,26 +179,15 @@
 <body>
 <div id="trello-auth" style="position:fixed;inset:0;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;z-index:2000;padding:20px">
   <div style="background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:24px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)">
-    <h2 style="font-family:'Instrument Serif',serif;font-size:1.4rem;margin-bottom:8px;color:var(--ac)">Login no Trello</h2>
-    <p style="font-size:.75rem;color:var(--t2);margin-bottom:18px;line-height:1.6">Para acessar o quadro privado, faça login no Trello. Você pode autorizar com token ou salvar suas credenciais localmente.</p>
-    <div style="margin-bottom:14px">
-      <label style="display:block;font-size:.7rem;color:var(--t3);margin-bottom:6px">Email do Trello</label>
-      <input type="email" id="trello-email" style="width:100%;padding:9px 12px;border-radius:6px;border:1px solid var(--bd);background:var(--bg);color:var(--t1);font-family:inherit;font-size:.78rem;outline:none" placeholder="seu@email.com">
-    </div>
-    <div style="margin-bottom:14px">
-      <label style="display:block;font-size:.7rem;color:var(--t3);margin-bottom:6px">Senha</label>
-      <input type="password" id="trello-pass" style="width:100%;padding:9px 12px;border-radius:6px;border:1px solid var(--bd);background:var(--bg);color:var(--t1);font-family:inherit;font-size:.78rem;outline:none" placeholder="••••••••">
-    </div>
-    <label style="display:flex;align-items:center;gap:8px;margin-bottom:16px;cursor:pointer;font-size:.72rem;color:var(--t2)">
+    <h2 style="font-family:'Instrument Serif',serif;font-size:1.4rem;margin-bottom:8px;color:var(--ac)">Acesso à Galeria Trello</h2>
+    <p style="font-size:.75rem;color:var(--t2);margin-bottom:18px;line-height:1.6">Para ver as fotos do quadro privado, você precisa estar logado no <a href="https://trello.com" target="_blank" style="color:var(--ac);text-decoration:underline">trello.com</a> neste navegador.</p>
+    <label style="display:flex;align-items:center;gap:8px;margin-bottom:18px;cursor:pointer;font-size:.72rem;color:var(--t2)">
       <input type="checkbox" id="trello-remember" checked>
-      Lembrar de mim
+      Lembrar de mim (não pedir novamente)
     </label>
     <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button class="b" id="trello-cancel">Cancelar</button>
-      <button class="b pr" id="trello-login">Entrar</button>
-    </div>
-    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--bd);font-size:.65rem;color:var(--t3);line-height:1.5">
-      Obs.: Para quadros privados, o Trello pode exigir autenticação via token em alguns navegadores. Esta é uma interface simplificada.
+      <button class="b" id="trello-cancel">Agora não</button>
+      <button class="b pr" id="trello-login">Já estou logado no Trello</button>
     </div>
   </div>
 </div>
@@ -769,8 +758,7 @@ load();initPlan();
 (function(){
   var authBox = document.getElementById('trello-auth');
   if(!authBox) return;
-  var email = document.getElementById('trello-email');
-  var pass = document.getElementById('trello-pass');
+  
   var remember = document.getElementById('trello-remember');
   var btnLogin = document.getElementById('trello-login');
   var btnCancel = document.getElementById('trello-cancel');
@@ -787,10 +775,8 @@ load();initPlan();
   btnLogin.addEventListener('click', function(){
     if(remember.checked){
       localStorage.setItem('trello_remember','1');
-      if(email.value) localStorage.setItem('trello_email', email.value);
     } else {
       localStorage.removeItem('trello_remember');
-      localStorage.removeItem('trello_email');
     }
     authBox.style.display = 'none';
     startLoading();
