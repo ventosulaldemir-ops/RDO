@@ -10,7 +10,6 @@ Hub central com mistura de painéis dentro da pasta DEC.
 ## Acesso rápido
 - [Hub DEC](index.html)
 - [Dashboard (teste)](test.html)
-- [Galeria Trello](galeria-trello.html)
+
 - [RDO Principal](../index.html)
 
-Galeria Trello contém abas Galeria e Planta (com zonas e uploads).
