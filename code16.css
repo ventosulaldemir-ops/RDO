@@ -541,3 +541,5 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 .chart-filter-pop .cfa span:hover{color:var(--navy)}
 .chart-filter-pop .pm-chip-label{display:flex;font-size:10px;padding:4px 8px;border-radius:3px;margin-bottom:3px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-width:640px){.chart-filter{margin-left:6px}.chart-filter-pop{max-width:200px}}
+
+@media(max-width:640px){#btn-reload{display:none}}
