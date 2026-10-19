@@ -28,8 +28,10 @@ input,select,button{-webkit-appearance:none;appearance:none}
 .topbar{background:var(--navy);color:#fff;padding:0 16px;box-shadow:0 2px 16px rgba(0,0,0,.2);position:sticky;top:0;z-index:100}
 .topbar-in{max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:var(--topbar-h);gap:8px}
 .logo{width:32px;height:32px;min-width:32px;background:var(--amber);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:700;font-size:11px;color:var(--navy);border-radius:4px}
-.brand{display:flex;align-items:center;gap:10px}
-.brand h1{font-family:'Space Grotesk';font-size:15px;font-weight:700;white-space:nowrap}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand>div{min-width:0;overflow:hidden}
+.brand h1{font-family:'Space Grotesk';font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .brand small{font-size:9px;color:#8BADC4;display:block;line-height:1.2}
 .actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .chip{font-family:'JetBrains Mono';font-size:9px;padding:3px 8px;border-radius:20px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}

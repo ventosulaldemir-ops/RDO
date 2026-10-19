@@ -8,6 +8,7 @@ input,select,button{-webkit-appearance:none;appearance:none}
 .topbar-in{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:52px;gap:8px}
 .logo{width:32px;height:32px;min-width:32px;background:var(--amber);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:700;font-size:11px;color:var(--navy);border-radius:3px}
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand>div{min-width:0;overflow:hidden}
 .brand h1{font-family:'Space Grotesk';font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .brand small{font-size:9px;color:#8BADC4;display:block;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
