@@ -407,12 +407,27 @@ function loadCommitDates(imgs){
 function applyDate(img){var best=img.commitDate||img.filenameDate;var now=Date.now();if(best){img.mk=monthKey(best);img.ml=MONTHS[best.getMonth()]+' '+best.getFullYear();img.date=best;img.isNew=(now-best.getTime())<NEW_DAYS*864e5}else{img.mk='unknown';img.ml='Sem data';img.date=null;img.isNew=false}}
 function cleanName(f){return f.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase()}).trim()}
 
+
+function fetchTrelloJSONP(url, cb){
+  var script = document.createElement('script');
+  var id = 'trellojsonp_' + Math.floor(Math.random()*1000000);
+  window[id] = function(data){
+    document.body.removeChild(script);
+    delete window[id];
+    cb(null, data);
+  };
+  script.src = url + (url.indexOf('?')===-1?'?':'&') + 'callback=' + id;
+  script.onerror = function(){ cb(new Error('JSONP failed')); document.body.removeChild(script); delete window[id]; };
+  document.body.appendChild(script);
+}
+
 function loadTrello(){
   showMsg('<div class="sp2"></div> Buscando fotos no Trello...');
+  var auth = (TRELLO_TOKEN?'&token='+TRELLO_TOKEN+'&key='+TRELLO_KEY:'');
   Promise.all([
-    fetch('https://api.trello.com/1/boards/'+TRELLO_BOARD+'?fields=name'+(TRELLO_TOKEN?'&token='+TRELLO_TOKEN+'&key='+TRELLO_KEY:'')).then(function(r){return r.json()}).catch(function(){return {name:'Quadro'}}),
-    fetch('https://api.trello.com/1/boards/'+TRELLO_BOARD+'/lists?fields=name'+(TRELLO_TOKEN?'&token='+TRELLO_TOKEN+'&key='+TRELLO_KEY:'')).then(function(r){return r.json()}).catch(function(){return []}),
-    fetch('https://api.trello.com/1/boards/'+TRELLO_BOARD+'/cards?attachments=true&fields=name,idList,labels,dateLastActivity'+(TRELLO_TOKEN?'&token='+TRELLO_TOKEN+'&key='+TRELLO_KEY:'')).then(function(r){return r.json()}).catch(function(){return []})
+    new Promise(function(resolve){ fetchTrelloJSONP('https://api.trello.com/1/boards/'+TRELLO_BOARD+'?fields=name'+auth, function(err,data){ resolve(err||!data?{name:'Quadro'}:data); }); }),
+    new Promise(function(resolve){ fetchTrelloJSONP('https://api.trello.com/1/boards/'+TRELLO_BOARD+'/lists?fields=name'+auth, function(err,data){ resolve(err||!data?[]:data); }); }),
+    new Promise(function(resolve){ fetchTrelloJSONP('https://api.trello.com/1/boards/'+TRELLO_BOARD+'/cards?attachments=true&fields=name,idList,labels,dateLastActivity'+auth, function(err,data){ resolve(err||!data?[]:data); }); })
   ]).then(function(r){
     var lists=r[1],cards=r[2];
     listsMap={};lists.forEach(function(l){listsMap[l.id]=l.name});

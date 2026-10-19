@@ -410,8 +410,10 @@ function cleanName(f){return f.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ').repl
 
 function trelloApi(path){
   if(!TRELLO_KEY||!TRELLO_TOKEN)throw new Error('Informe a chave e o token de API do Trello.');
-  var sep=path.indexOf('?')===-1?'?':'&';
-  return fetch('https://api.trello.com/1/'+path+sep+'key='+encodeURIComponent(TRELLO_KEY)+'&token='+encodeURIComponent(TRELLO_TOKEN)).then(function(r){
+  var url=new URL('https://api.trello.com/1/'+path);
+  url.searchParams.set('key',TRELLO_KEY);
+  url.searchParams.set('token',TRELLO_TOKEN);
+  return fetch(url.toString()).then(function(r){
     if(!r.ok)throw new Error('Trello respondeu HTTP '+r.status+'. Confira a chave, o token e o acesso de leitura.');
     return r.json();
   });
@@ -421,14 +423,28 @@ function withTrelloAuth(url){
   try{var u=new URL(url);if(u.hostname==='trello.com'||u.hostname==='www.trello.com'){u.searchParams.set('key',TRELLO_KEY);u.searchParams.set('token',TRELLO_TOKEN);return u.toString()}}catch(e){}
   return url;
 }
+
+function fetchTrelloJSONP(url, cb){
+  var script = document.createElement('script');
+  var id = 'trellojsonp_' + Math.floor(Math.random()*1000000);
+  window[id] = function(data){
+    document.body.removeChild(script);
+    delete window[id];
+    cb(null, data);
+  };
+  script.src = url + (url.indexOf('?')===-1?'?':'&') + 'callback=' + id;
+  script.onerror = function(){ cb(new Error('JSONP failed')); document.body.removeChild(script); delete window[id]; };
+  document.body.appendChild(script);
+}
+
 function loadTrello(){
-  if(!TRELLO_KEY||!TRELLO_TOKEN){showMsg('<b>Trello desconectado.</b> Informe uma chave e um token de leitura para carregar as fotos.',true);return}
   showMsg('<div class="sp2"></div> Buscando fotos no Trello...');
+  var auth = (TRELLO_TOKEN?'&token='+TRELLO_TOKEN+'&key='+TRELLO_KEY:'');
   Promise.all([
-    trelloApi('boards/'+TRELLO_BOARD+'?fields=name'+(TRELLO_TOKEN?'&token='+TRELLO_TOKEN+'&key='+TRELLO_KEY:'')),
-    trelloApi('boards/'+TRELLO_BOARD+'/lists?fields=name'+(TRELLO_TOKEN?'&token='+TRELLO_TOKEN+'&key='+TRELLO_KEY:'')),
-    trelloApi('boards/'+TRELLO_BOARD+'/cards?attachments=true&fields=name,idList,labels,dateLastActivity'+(TRELLO_TOKEN?'&token='+TRELLO_TOKEN+'&key='+TRELLO_KEY:''))
-  ]).then(function(r){
+    new Promise(function(resolve){ fetchTrelloJSONP('https://api.trello.com/1/boards/'+TRELLO_BOARD+'?fields=name'+auth, function(err,data){ resolve(err||!data?{name:'Quadro'}:data); }); }),
+    new Promise(function(resolve){ fetchTrelloJSONP('https://api.trello.com/1/boards/'+TRELLO_BOARD+'/lists?fields=name'+auth, function(err,data){ resolve(err||!data?[]:data); }); }),
+    new Promise(function(resolve){ fetchTrelloJSONP('https://api.trello.com/1/boards/'+TRELLO_BOARD+'/cards?attachments=true&fields=name,idList,labels,dateLastActivity'+auth, function(err,data){ resolve(err||!data?[]:data); }); })
+  ]).then(function(r){(function(r){
     var lists=r[1],cards=r[2];
     if(!Array.isArray(lists)||!Array.isArray(cards))throw new Error('O Trello retornou dados inesperados para este quadro.');
     listsMap={};lists.forEach(function(l){listsMap[l.id]=l.name});
@@ -443,7 +459,7 @@ function loadTrello(){
         var is=(a.mimeType&&a.mimeType.indexOf('image/')===0)||IMG_EXTS.test(cleanUrl)||(a.previews&&a.previews.length>0);
         if(!is)return;
         var previews=(a.previews||[]).filter(function(p){return p&&p.url}).sort(function(x,y){return((y.width||0)*(y.height||0))-((x.width||0)*(x.height||0))});
-        var u=previews.length?previews[0].url:withTrelloAuth(a.url);
+        var u=previews.length?withTrelloAuth(previews[0].url):withTrelloAuth(a.url);
         var ud=a.date?new Date(a.date):null;var fd=extractDateFromFilename(a.name||'');
         var best=ud||ad||fd;
         tp.push({name:c.name||'Sem título',url:u,full:withTrelloAuth(a.url),date:best,commitDate:ud,filenameDate:fd,mk:best?monthKey(best):'unknown',ml:best?MONTHS[best.getMonth()]+' '+best.getFullYear():'Sem data',list:ln,labels:labels,source:'trello',isNew:best&&(Date.now()-best.getTime())<NEW_DAYS*864e5});
