@@ -180,20 +180,19 @@
 <div id="trello-auth" style="position:fixed;inset:0;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;z-index:2000;padding:20px">
   <div style="background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:24px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)">
     <h2 style="font-family:'Instrument Serif',serif;font-size:1.4rem;margin-bottom:8px;color:var(--ac)">Acesso à Galeria Trello</h2>
-    <p style="font-size:.75rem;color:var(--t2);margin-bottom:18px;line-height:1.6">Para ver as fotos do quadro privado, você precisa estar logado no <a href="https://trello.com" target="_blank" style="color:var(--ac);text-decoration:underline">trello.com</a> neste navegador.</p>
-    <label style="display:flex;align-items:center;gap:8px;margin-bottom:18px;cursor:pointer;font-size:.72rem;color:var(--t2)">
-      <input type="checkbox" id="trello-remember" checked>
-      Lembrar de mim (não pedir novamente)
-    </label>
+    <p style="font-size:.75rem;color:var(--t2);margin-bottom:12px;line-height:1.6">A chave de API do aplicativo Trello já está configurada. Gere um token com escopo somente de leitura e validade de 1 dia: <a href="https://trello.com/1/authorize?expiration=30days&amp;scope=read&amp;response_type=token&amp;key=b4d29d47795adf42efde3a9e4cc2ceea" target="_blank" rel="noopener" style="color:var(--ac);text-decoration:underline">Gerar token de leitura no Trello</a>. Copie o token da página aberta e cole abaixo.</p>
+    <label for="trello-token" style="display:block;font-size:.7rem;color:var(--t2);margin:10px 0 4px">Token de leitura</label>
+    <input id="trello-token" type="password" autocomplete="off" spellcheck="false" style="width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--t1);font:inherit">
+    <p style="font-size:.65rem;color:var(--t3);margin:8px 0 14px;line-height:1.5">O token fica somente na memória desta aba e é enviado ao Trello para buscar o quadro. Não será gravado no arquivo nem no armazenamento do navegador.</p>
     <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button class="b" id="trello-cancel">Agora não</button>
-      <button class="b pr" id="trello-login" type="button" onclick="(function(){var r=document.getElementById('trello-remember');if(r&&r.checked)localStorage.setItem('trello_remember','1');else localStorage.removeItem('trello_remember');var a=document.getElementById('trello-auth');if(a)a.style.display='none';try{if(typeof loadGitHub==='function')loadGitHub();if(typeof loadTrello==='function')loadTrello();}catch(e){}})()">Já estou logado no Trello</button>
+      <button class="b" id="trello-cancel">Continuar sem Trello</button>
+      <button class="b pr" id="trello-login" type="button">Conectar</button>
     </div>
   </div>
 </div>
 
 <div style="background:#FEF3C7;color:#92400E;border-bottom:1px solid #FDE68A;padding:6px 10px;font-size:11px;text-align:center;font-family:Inter,system-ui,sans-serif">
-  É preciso estar logado no <a href="https://trello.com" target="_blank" style="color:#92400E;text-decoration:underline">Trello</a> com a conta para ver as fotos do quadro privado.
+  As fotos são carregadas diretamente do Trello. <button class="b" type="button" onclick="showTrelloAuth()" style="padding:3px 8px;margin-left:6px">Conectar Trello</button>
 </div>
 <div class="app">
   <div class="hd">
@@ -338,6 +337,7 @@
 <script>
 var GH_USER='ventosulaldemir-ops',GH_REPO='Fotos',GH_BRANCH='main',GH_FOLDER='';
 var TRELLO_BOARD='ssFBLFhj';
+var TRELLO_KEY='b4d29d47795adf42efde3a9e4cc2ceea',TRELLO_TOKEN='';
 var PLANTA_PADRAO='https://raw.githubusercontent.com/ventosulaldemir-ops/Fotos/main/inf.jpeg';
 var SS_MS=4000,NEW_DAYS=7;
 var MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -408,14 +408,29 @@ function loadCommitDates(imgs){
 function applyDate(img){var best=img.commitDate||img.filenameDate;var now=Date.now();if(best){img.mk=monthKey(best);img.ml=MONTHS[best.getMonth()]+' '+best.getFullYear();img.date=best;img.isNew=(now-best.getTime())<NEW_DAYS*864e5}else{img.mk='unknown';img.ml='Sem data';img.date=null;img.isNew=false}}
 function cleanName(f){return f.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase()}).trim()}
 
+function trelloApi(path){
+  if(!TRELLO_KEY||!TRELLO_TOKEN)throw new Error('Informe a chave e o token de API do Trello.');
+  var sep=path.indexOf('?')===-1?'?':'&';
+  return fetch('https://api.trello.com/1/'+path+sep+'key='+encodeURIComponent(TRELLO_KEY)+'&token='+encodeURIComponent(TRELLO_TOKEN)).then(function(r){
+    if(!r.ok)throw new Error('Trello respondeu HTTP '+r.status+'. Confira a chave, o token e o acesso de leitura.');
+    return r.json();
+  });
+}
+function withTrelloAuth(url){
+  if(!url)return url;
+  try{var u=new URL(url);if(u.hostname==='trello.com'||u.hostname==='www.trello.com'){u.searchParams.set('key',TRELLO_KEY);u.searchParams.set('token',TRELLO_TOKEN);return u.toString()}}catch(e){}
+  return url;
+}
 function loadTrello(){
+  if(!TRELLO_KEY||!TRELLO_TOKEN){showMsg('<b>Trello desconectado.</b> Informe uma chave e um token de leitura para carregar as fotos.',true);return}
   showMsg('<div class="sp2"></div> Buscando fotos no Trello...');
   Promise.all([
-    fetch('https://api.trello.com/1/boards/'+TRELLO_BOARD+'?fields=name').then(function(r){return r.json()}).catch(function(){return {name:'Quadro'}}),
-    fetch('https://api.trello.com/1/boards/'+TRELLO_BOARD+'/lists?fields=name').then(function(r){return r.json()}).catch(function(){return []}),
-    fetch('https://api.trello.com/1/boards/'+TRELLO_BOARD+'/cards?attachments=true&fields=name,idList,labels,dateLastActivity').then(function(r){return r.json()}).catch(function(){return []})
+    trelloApi('boards/'+TRELLO_BOARD+'?fields=name'+(TRELLO_TOKEN?'&token='+TRELLO_TOKEN+'&key='+TRELLO_KEY:'')),
+    trelloApi('boards/'+TRELLO_BOARD+'/lists?fields=name'+(TRELLO_TOKEN?'&token='+TRELLO_TOKEN+'&key='+TRELLO_KEY:'')),
+    trelloApi('boards/'+TRELLO_BOARD+'/cards?attachments=true&fields=name,idList,labels,dateLastActivity'+(TRELLO_TOKEN?'&token='+TRELLO_TOKEN+'&key='+TRELLO_KEY:''))
   ]).then(function(r){
     var lists=r[1],cards=r[2];
+    if(!Array.isArray(lists)||!Array.isArray(cards))throw new Error('O Trello retornou dados inesperados para este quadro.');
     listsMap={};lists.forEach(function(l){listsMap[l.id]=l.name});
     var tp=[];
     cards.forEach(function(c){
@@ -424,14 +439,20 @@ function loadTrello(){
       var labels=(c.labels||[]).map(function(l){return{name:l.name||l.color,color:LBL_COLORS[l.color]||l.color||'#666'}});
       var ad=c.dateLastActivity?new Date(c.dateLastActivity):null;
       c.attachments.forEach(function(a){
-        var is=(a.mimeType&&a.mimeType.indexOf('image/')===0)||IMG_EXTS.test(a.url)||(a.previews&&a.previews.length>0);
-        if(!is)return;var u=a.url;if(a.previews&&a.previews.length)u=a.previews[a.previews.length-1].url;
+        var cleanUrl=(a.url||'').split(/[?#]/)[0];
+        var is=(a.mimeType&&a.mimeType.indexOf('image/')===0)||IMG_EXTS.test(cleanUrl)||(a.previews&&a.previews.length>0);
+        if(!is)return;
+        var previews=(a.previews||[]).filter(function(p){return p&&p.url}).sort(function(x,y){return((y.width||0)*(y.height||0))-((x.width||0)*(x.height||0))});
+        var u=previews.length?previews[0].url:withTrelloAuth(a.url);
         var ud=a.date?new Date(a.date):null;var fd=extractDateFromFilename(a.name||'');
         var best=ud||ad||fd;
-        tp.push({name:c.name||'Sem título',url:u,full:a.url,date:best,commitDate:ud,filenameDate:fd,mk:best?monthKey(best):'unknown',ml:best?MONTHS[best.getMonth()]+' '+best.getFullYear():'Sem data',list:ln,labels:labels,source:'trello',isNew:best&&(Date.now()-best.getTime())<NEW_DAYS*864e5});
+        tp.push({name:c.name||'Sem título',url:u,full:withTrelloAuth(a.url),date:best,commitDate:ud,filenameDate:fd,mk:best?monthKey(best):'unknown',ml:best?MONTHS[best.getMonth()]+' '+best.getFullYear():'Sem data',list:ln,labels:labels,source:'trello',isNew:best&&(Date.now()-best.getTime())<NEW_DAYS*864e5});
       });
     });
-    all=all.concat(tp);finishLoad();
+    all=all.filter(function(p){return p.source!=='trello'}).concat(tp);
+    var noImages=!tp.length;
+    finishLoad();
+    if(noImages)showMsg('<b>Conexão concluída, mas não há imagens nos cartões abertos deste quadro.</b>');
   }).catch(function(e){showMsg('<b>Erro Trello:</b> '+esc(e.message),true)});
 }
 function finishLoad(){all.sort(function(a,b){return(b.date||0)-(a.date||0)});hideMsg();buildFilters();applyFilters();updateMeta()}
@@ -753,36 +774,29 @@ $('dateTo').addEventListener('change',applyFilters);
 $('dateSrc').addEventListener('change',function(){buildFilters();applyFilters()});
 
 load();initPlan();
-</script>
-// Trello auth
+// Conexão Trello: o token permanece somente na memória desta aba.
+function showTrelloAuth(){var box=document.getElementById('trello-auth');if(box)box.style.display='flex'}
 (function(){
-  var authBox = document.getElementById('trello-auth');
-  if(!authBox) return;
-  
-  var remember = document.getElementById('trello-remember');
-  var btnLogin = document.getElementById('trello-login');
-  var btnCancel = document.getElementById('trello-cancel');
-  var saved = localStorage.getItem('trello_remember');
-  function startLoading(){
-    try { loadGitHub(); loadTrello(); } catch(e){}
-  }
-  if(saved === '1'){
-    authBox.style.display = 'none';
-    startLoading();
-    return;
-  }
-  authBox.style.display = 'flex';
-  
-  btnCancel.addEventListener('click', function(){
-    authBox.style.display = 'none';
-    startLoading();
+  var authBox=document.getElementById('trello-auth');if(!authBox)return;
+  var btnLogin=document.getElementById('trello-login'),btnCancel=document.getElementById('trello-cancel');
+  var tokenInput=document.getElementById('trello-token');
+  function startGitHub(){try{loadGitHub()}catch(e){}}
+  btnLogin.addEventListener('click',function(){
+    var token=(tokenInput.value||'').trim();
+    if(!token){showMsg('<b>Cole o token de leitura do Trello.</b>',true);return}
+    TRELLO_TOKEN=token;
+    authBox.style.display='none';
+    startGitHub();loadTrello();
+    tokenInput.value='';
   });
-  document.addEventListener('keydown', function(e){
-    if(authBox.style.display !== 'none' && e.key === 'Enter'){
-      btnLogin.click();
-    }
-  });
+  btnCancel.addEventListener('click',function(){authBox.style.display='none';startGitHub()});
+  document.addEventListener('keydown',function(e){if(authBox.style.display!=='none'&&e.key==='Enter')btnLogin.click()});
+  authBox.style.display='flex';
 })();
-
+</script>
 </body>
 </html>
+
+
+
+
