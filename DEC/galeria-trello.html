@@ -323,8 +323,6 @@
 <script>
 var GH_USER='ventosulaldemir-ops',GH_REPO='Fotos',GH_BRANCH='main',GH_FOLDER='';
 var TRELLO_BOARD='ssFBLFhj';
-var TRELLO_KEY='';
-var TRELLO_TOKEN='';
 var PLANTA_PADRAO='https://raw.githubusercontent.com/ventosulaldemir-ops/Fotos/main/inf.jpeg';
 var SS_MS=4000,NEW_DAYS=7;
 var MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -398,9 +396,9 @@ function cleanName(f){return f.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ').repl
 function loadTrello(){
   showMsg('<div class="sp2"></div> Buscando fotos no Trello...');
   Promise.all([
-    fetch('https://api.trello.com/1/boards/'+TRELLO_BOARD+'?fields=name'+(TRELLO_KEY&&TRELLO_TOKEN?'&key='+TRELLO_KEY+'&token='+TRELLO_TOKEN:'')).then(function(r){return r.json()}).catch(function(){return {name:'Quadro'}}),
-    fetch('https://api.trello.com/1/boards/'+TRELLO_BOARD+'/lists?fields=name'+(TRELLO_KEY&&TRELLO_TOKEN?'&key='+TRELLO_KEY+'&token='+TRELLO_TOKEN:'')).then(function(r){return r.json()}).catch(function(){return []}),
-    fetch('https://api.trello.com/1/boards/'+TRELLO_BOARD+'/cards?attachments=true&fields=name,idList,labels,dateLastActivity'+(TRELLO_KEY&&TRELLO_TOKEN?'&key='+TRELLO_KEY+'&token='+TRELLO_TOKEN:'')).then(function(r){return r.json()}).catch(function(){return []})
+    fetch('https://api.trello.com/1/boards/'+TRELLO_BOARD+'?fields=name').then(function(r){return r.json()}).catch(function(){return {name:'Quadro'}}),
+    fetch('https://api.trello.com/1/boards/'+TRELLO_BOARD+'/lists?fields=name').then(function(r){return r.json()}).catch(function(){return []}),
+    fetch('https://api.trello.com/1/boards/'+TRELLO_BOARD+'/cards?attachments=true&fields=name,idList,labels,dateLastActivity').then(function(r){return r.json()}).catch(function(){return []})
   ]).then(function(r){
     var lists=r[1],cards=r[2];
     listsMap={};lists.forEach(function(l){listsMap[l.id]=l.name});
