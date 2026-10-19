@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>RDO - Relatorio Diario de Obra</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="code16.css?v=31">
+<link rel="stylesheet" href="code16.css?v=32">
 
 <style id="prod-modal-style">
   #prod-month-modal-overlay .modal-card{max-width:1100px;width:min(1100px,calc(100vw - 24px));max-height:90vh;border-radius:10px}
@@ -175,10 +175,10 @@
       <div><h1>Relatorio Diario de Obra</h1><small id="sub-info">Carregando...</small></div>
     </div>
     <div class="actions">
-      <a class="btn btn-a" href="DEC/index.html">Paineis DEC</a>
       <span class="chip chip-warn" id="chip"><span class="livedot" style="display:none" id="livedot"></span><span id="chip-txt">carregando</span></span>
       <span style="font-family:'JetBrains Mono';font-size:9px;color:#8BADC4" id="clk">--:--</span>
       <span style="font-family:'JetBrains Mono';font-size:8px;color:#4A6580;white-space:nowrap" title="Proximo auto-refresh em">↻ <span id="auto-countdown">--:--</span></span>
+      <a class="btn btn-a" href="DEC/index.html">Paineis</a>
       <button class="btn btn-a" id="btn-reload" onclick="doLoad()" aria-label="Atualizar"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 11-2.6-6.4M21 3v6h-6"/></svg><span class="btn-label">Atualizar</span></button>
       <button class="btn btn-bl" id="btn-print" onclick="doPrint()" aria-label="Imprimir"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg><span class="btn-label">Imprimir</span></button>
     </div>
@@ -473,6 +473,6 @@
 </div>
 
 
-<script src="code16.js?v=31"></script>
+<script src="code16.js?v=32"></script>
 </body>
 </html>
