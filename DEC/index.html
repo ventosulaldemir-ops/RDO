@@ -21,38 +21,41 @@
   @media (max-width: 640px) {
     .topbar-in {
       height: auto;
-      padding: 8px 12px;
-      flex-direction: column;
-      align-items: flex-start;
+      min-height: 52px;
+      padding: 8px 10px;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
       gap: 8px;
     }
     .brand {
-      width: 100%;
       min-width: 0;
+      flex: 1 1 auto;
     }
     .brand h1 {
-      font-size: 15px;
-      white-space: normal;
-      overflow: visible;
-      text-overflow: unset;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .brand small {
-      font-size: 9px;
-      white-space: normal;
-      overflow: visible;
-      text-overflow: unset;
+      font-size: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .actions {
-      width: 100%;
-      justify-content: flex-start;
+      flex: 0 0 auto;
+      width: auto;
+      justify-content: flex-end;
+      flex-wrap: nowrap;
       gap: 6px;
     }
     .actions .btn {
-      flex: 1 1 calc(50% - 6px);
-      min-width: 0;
-      justify-content: center;
+      flex: 0 0 auto;
+      white-space: nowrap;
       font-size: 9px;
-      padding: 6px 8px;
+      padding: 6px 9px;
       min-height: 32px;
     }
     .container {
@@ -88,10 +91,9 @@
     }
   }
   
-  @media (max-width: 380px) {
-    .actions .btn {
-      flex: 1 1 100%;
-    }
+  @media (max-width: 360px) {
+    .brand h1 { font-size: 13px; }
+    .actions .btn { font-size: 8px; padding: 6px 7px; }
   }
 </style>
 </head>
