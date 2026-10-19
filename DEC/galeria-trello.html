@@ -187,7 +187,7 @@
     </label>
     <div style="display:flex;gap:8px;justify-content:flex-end">
       <button class="b" id="trello-cancel">Agora não</button>
-      <button class="b pr" id="trello-login">Já estou logado no Trello</button>
+      <button class="b pr" id="trello-login" type="button">Já estou logado no Trello</button>
     </div>
   </div>
 </div>
@@ -763,15 +763,15 @@ load();initPlan();
   var btnLogin = document.getElementById('trello-login');
   var btnCancel = document.getElementById('trello-cancel');
   var saved = localStorage.getItem('trello_remember');
+  function startLoading(){
+    try { loadGitHub(); loadTrello(); } catch(e){}
+  }
   if(saved === '1'){
     authBox.style.display = 'none';
     startLoading();
     return;
   }
   authBox.style.display = 'flex';
-  function startLoading(){
-    try { loadGitHub(); loadTrello(); } catch(e){}
-  }
   btnLogin.addEventListener('click', function(){
     if(remember.checked){
       localStorage.setItem('trello_remember','1');
