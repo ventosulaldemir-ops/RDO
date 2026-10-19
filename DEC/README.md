@@ -1,15 +1,16 @@
 # Painéis DEC
 
-Hub central para acesso aos painéis da pasta DEC.
+Hub central com mistura de painéis dentro da pasta DEC.
 
-## Acesso
+## Arquivos
+- `index.html` - Hub
+- `test.html` - Dashboard (teste)
+- `galeria-trello.html` - Galeria Trello (cópia local)
 
-- [Paineis DEC](/DEC/index.html)
+## Acesso rápido
+- [Hub DEC](index.html)
+- [Dashboard (teste)](test.html)
+- [Galeria Trello](galeria-trello.html) - Login: `estagiovse@gmail.com` / `Ventosul123`
 - [RDO Principal](../index.html)
-- [Galeria Trello](../code%20(21).html) - Galeria com login: `estagiovse@gmail.com` / `Ventosul123`
-- [Dashboard](../test.html)
 
-## Estrutura
-
-- `index.html` - Hub de painéis
-- Galeria Trello inclui abas Galeria e Planta (com zonas e uploads de planta)
+Galeria Trello contém abas Galeria e Planta (com zonas e uploads). O banco pode mudar; é necessário fazer login com a conta indicada.

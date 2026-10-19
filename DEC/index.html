@@ -6,6 +6,15 @@
 <title>Painel Híbrido - DEC</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../code16.css?v=30">
+<style>
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:16px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 24px rgba(15,23,42,.06);padding:14px;text-decoration:none;color:inherit;display:flex;gap:12px;align-items:flex-start}
+  .card:hover{box-shadow:0 10px 30px rgba(15,23,42,.1)}
+  .icon{font-size:22px;line-height:1}
+  .txt h3{font-size:14px;margin:0 0 4px}
+  .txt p{font-size:12px;color:var(--ink2);margin:0 0 6px}
+  .muted{font-size:11px;color:var(--ink3)}
+</style>
 </head>
 <body>
 <div class="topbar">
@@ -13,42 +22,48 @@
     <div class="brand">
       <div class="logo">DEC</div>
       <div>
-        <h1>Painel DEC</h1>
-        <small>Híbrido RDO + Dashboard</small>
+        <h1>Painéis DEC</h1>
+        <small>Mistura de painéis dentro da pasta DEC</small>
       </div>
     </div>
     <div class="actions">
       <a class="btn btn-a" href="../index.html">Voltar ao RDO</a>
-      <a class="btn btn-a" href="../code (21).html" target="_blank" rel="noopener">Galeria Trello</a>
-      <a class="btn btn-a" href="../test.html" target="_blank" rel="noopener">Dashboard</a>
+      <a class="btn btn-a" href="galeria-trello.html" target="_blank" rel="noopener">Galeria Trello</a>
+      <a class="btn btn-a" href="test.html" target="_blank" rel="noopener">Dashboard</a>
     </div>
   </div>
 </div>
-<div class="container">
+<div class="container" style="max-width:1100px;margin:18px auto;padding:0 12px">
   <div class="sec-h">
     <div>
       <h2>Painéis Disponíveis</h2>
-      <p>Central de acesso aos painéis dentro da pasta DEC</p>
+      <p>Todos acessíveis a partir daqui. Galeria Trello precisa logar com estagiovse@gmail.com / Ventosul123</p>
     </div>
   </div>
-  <div class="kr">
-    <a class="kp" href="../index.html" style="text-decoration:none;color:inherit">
-      <div class="ki">📊</div>
-      <div class="kl">RDO</div>
-      <div class="kv">Relatório Diário</div>
-      <div class="kf">Principal - Equipe, Produção, PPC</div>
+  <div class="cards">
+    <a class="card" href="../index.html">
+      <div class="icon">📊</div>
+      <div class="txt">
+        <h3>RDO</h3>
+        <p>Relatório Diário de Obra</p>
+        <div class="muted">Principal - Equipe, Produção, PPC</div>
+      </div>
     </a>
-    <a class="kp" href="../test.html" target="_blank" style="text-decoration:none;color:inherit">
-      <div class="ki">📈</div>
-      <div class="kl">Dashboard</div>
-      <div class="kv">Avanço Geral</div>
-      <div class="kf">Civil x Elétrica/MEP</div>
+    <a class="card" href="test.html" target="_blank" rel="noopener">
+      <div class="icon">📈</div>
+      <div class="txt">
+        <h3>Dashboard (teste)</h3>
+        <p>Painel de avanço</p>
+        <div class="muted">Civil x Elétrica/MEP</div>
+      </div>
     </a>
-    <a class="kp" href="../code (21).html" target="_blank" style="text-decoration:none;color:inherit">
-      <div class="ki">🖼️</div>
-      <div class="kl">Galeria Trello</div>
-      <div class="kv">Fotos da Obra</div>
-      <div class="kf">Galeria, Planta, Login necessário (estagiovse@gmail.com / Ventosul123)</div>
+    <a class="card" href="galeria-trello.html" target="_blank" rel="noopener">
+      <div class="icon">🖼️</div>
+      <div class="txt">
+        <h3>Galeria Trello</h3>
+        <p>Fotos da obra com abas Galeria e Planta</p>
+        <div class="muted">Login: estagiovse@gmail.com / Ventosul123</div>
+      </div>
     </a>
   </div>
 </div>
