@@ -512,7 +512,29 @@ function parseData(raw){
     var cA=(hd[mc]||'').trim(),cB=(hdUp[mc]||'').trim();
     hdM[mc]=cA||cB;
   }
-  var ci={nome:findCol(hdM,['funcionario','lider','nome']),empresa:findCol(hdM,['empresa']),funcao:findCol(hdM,['funcao','função']),atividade:findCol(hdM,['servico','serviço','atividade']),atividadeT:findCol(hdM,['servico t','serviço t','servico tarde','serviço tarde']),regiao:findCol(hdM,['local','regiao','região','area','área']),pav:findCol(hdM,['pav']),data:findCol(hdM,['data inicio','data']),prod:findCol(hdM,['produtividade','producao','produção','prod']),prodT:findCol(hdM,['produtividade t','producao t','produção t','prod t'])};
+  /* Colunas por TURNO. O findCol casa por SUBSTRING, entao "PRODUTIVIDADE" tambem
+     casa com "PRODUTIVIDADE T": se o rotulo da manha faltar, trocar de linha ou
+     de lugar, as DUAS colunas apontam para a MESMA celula e a producao da tarde
+     sai identica a da manha — mesmo com a coluna T vazia. Regra aqui:
+     manha = rotulo SEM marcador de turno; tarde = rotulo COM marcador (T/tarde). */
+  function ehColTurno(n){return n.indexOf(' tarde')>-1||n.indexOf(' turno 2')>-1||/(^|[^a-z0-9])t([^a-z0-9]|$)/.test(n)}
+  function findColTurno(hd,kws,somenteTurno){
+    for(var i=0;i<hd.length;i++){
+      var n=norm(hd[i]);if(!n)continue;
+      var base=false;
+      for(var k=0;k<kws.length;k++){if(n.indexOf(norm(kws[k]))>-1){base=true;break}}
+      if(!base)continue;
+      if(ehColTurno(n)===!!somenteTurno)return i;
+    }
+    return -1;
+  }
+  var KWS_SRV=['servico','serviço','atividade'],KWS_PROD=['produtividade','producao','produção','prod'];
+  var ciAtvM=findColTurno(hdM,KWS_SRV,false),ciAtvT=findColTurno(hdM,KWS_SRV,true);
+  var ciProdM=findColTurno(hdM,KWS_PROD,false),ciProdT=findColTurno(hdM,KWS_PROD,true);
+  /* nunca duas colunas de turno diferentes podem apontar para a mesma celula */
+  if(ciAtvT===ciAtvM)ciAtvT=-1;
+  if(ciProdT===ciProdM)ciProdT=-1;
+  var ci={nome:findCol(hdM,['funcionario','lider','nome']),empresa:findCol(hdM,['empresa']),funcao:findCol(hdM,['funcao','função']),atividade:ciAtvM,atividadeT:ciAtvT,regiao:findCol(hdM,['local','regiao','região','area','área']),pav:findCol(hdM,['pav']),data:findCol(hdM,['data inicio','data']),prod:ciProdM,prodT:ciProdT};
   if(ci.data<0){
     /* a célula "DATA" do cabeçalho virou uma data de verdade (ou sumiu):
        acha a coluna de data pelo conteúdo das linhas */
