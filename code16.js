@@ -58,9 +58,11 @@ function getMonthlyProdRows(days){
     (day.ativos||[]).forEach(function(p){
       var parsed=parseProducaoUnidades(p.prod||'');
       if(!parsed.length)return;
-      var m2=0,un=0,m3=0;
+      var m2=0,un=0,m3=0,m2M=0,m2T=0;
       parsed.forEach(function(u){if(u.unidade==='M2')m2+=u.valor;else if(u.unidade==='UN')un+=u.valor;else if(u.unidade==='M3')m3+=u.valor;});
-      rows.push({date:day.date||p.data||'—',nome:p.nome||'—',empresa:p.empresa||'—',funcao:p.funcao||'—',pav:p.pav||'—',local:p.regiao||'—',atividade:p.atividade||p.atividadeRaw||'—',prod:p.prod||'—',m2:m2,un:un,m3:m3,ponto:m2>0,horas:JORNADA_HORAS});
+      parseProducaoUnidades(p.prodM||'').forEach(function(u){if(u.unidade==='M2')m2M+=u.valor});
+      parseProducaoUnidades(p.prodT||'').forEach(function(u){if(u.unidade==='M2')m2T+=u.valor});
+      rows.push({date:day.date||p.data||'—',nome:p.nome||'—',empresa:p.empresa||'—',funcao:p.funcao||'—',pav:p.pav||'—',local:p.regiao||'—',atividade:p.atividade||p.atividadeRaw||'—',prod:p.prod||'—',prodM:p.prodM||'',prodT:p.prodT||'',m2:m2,un:un,m3:m3,m2M:m2M,m2T:m2T,ponto:m2>0,horas:JORNADA_HORAS});
     });
   });
   return rows;
@@ -351,9 +353,10 @@ function printMonthlyProdModal(){
   var m=calcMonthlyProd(rows);
   var printTitle='Produção — Período selecionado';
   var empsPrint=prodPorEmpresa(rows);
-  var tP={M2:0,M3:0,UN:0,lan:0};
+  var tP={M2:0,M3:0,UN:0,lan:0,M2M:0,M2T:0};
   empsPrint.forEach(function(e){tP.M2+=e.M2;tP.M3+=e.M3;tP.UN+=e.UN;tP.lan+=e.lan});
-  G('print-header').innerHTML='<h1>RDO — '+esc(printTitle)+'</h1><p>'+rows.length+' lançamento(s) · '+empsPrint.length+' empresa(s) · '+m.pontosM2+' colaborador(es) m² · '+fmtNum(m.m2)+' m² · '+m.horasM2+' h m² · '+m.dias+' dia(s) · Impresso em '+fmtNow()+'</p>';
+  rows.forEach(function(r){tP.M2M+=r.m2M||0;tP.M2T+=r.m2T||0});
+  G('print-header').innerHTML='<h1>RDO — '+esc(printTitle)+'</h1><p>'+rows.length+' lançamento(s) · '+empsPrint.length+' empresa(s) · '+m.pontosM2+' colaborador(es) m² · '+fmtNum(m.m2)+' m² (manhã '+fmtNum(tP.M2M||0)+' m² · tarde '+(tP.M2T>0?fmtNum(tP.M2T)+' m²':'—')+') · '+m.horasM2+' h m² · '+m.dias+' dia(s) · Impresso em '+fmtNow()+'</p>';
   var h='<div class="monthly-print-report"><div class="mpr-summary">'+
     '<section class="mpr-group"><div class="mpr-group-title">M²</div><div class="mpr-grid">'+
     '<div class="mpr-stat"><div class="mpr-label">Produção do período</div><div class="mpr-val">'+fmtNum(m.m2)+' m²</div><div class="mpr-fact">soma dos lançamentos</div></div>'+
@@ -386,13 +389,13 @@ function printMonthlyProdModal(){
     h+='<tr><td colspan="2" style="text-align:left!important;font-weight:700">TOTAL</td><td style="font-weight:700">'+fmtNum(tP.M2)+'</td><td style="font-weight:700">'+tP.M3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+'</td><td style="font-weight:700">'+fmtNum(tP.UN)+'</td><td style="font-weight:700">'+tP.lan+'</td></tr>';
     h+='</tbody></table>';
   }
-  h+='<div class="mpr-section-title">Detalhamento da produção</div><table><thead><tr><th>#</th><th>Data</th><th>Nome</th><th>Empresa</th><th>Função</th><th>Pav.</th><th>Local</th><th>Atividade</th><th>M²</th><th>UN</th><th>M³</th></tr></thead><tbody>';
+  h+='<div class="mpr-section-title">Detalhamento da produção</div><table><thead><tr><th>#</th><th>Data</th><th>Nome</th><th>Empresa</th><th>Função</th><th>Pav.</th><th>Local</th><th>Atividade</th><th>Prod. Manhã</th><th>Prod. Tarde</th><th>M²</th><th>UN</th><th>M³</th></tr></thead><tbody>';
   rows.forEach(function(r,i){
     var m3txt=r.m3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3});
     h+='<tr><td>'+
-      (i+1)+'</td><td>'+esc(r.date)+'</td><td>'+esc(r.nome)+'</td><td>'+esc(r.empresa)+'</td><td>'+esc(r.funcao)+'</td><td>'+esc(r.pav)+'</td><td>'+esc(r.local)+'</td><td>'+esc(r.atividade)+'</td><td><b>'+fmtNum(r.m2)+' m²</b></td><td><b>'+fmtNum(r.un)+'</b></td><td><b>'+m3txt+' m³</b></td></tr>';
+      (i+1)+'</td><td>'+esc(r.date)+'</td><td>'+esc(r.nome)+'</td><td>'+esc(r.empresa)+'</td><td>'+esc(r.funcao)+'</td><td>'+esc(r.pav)+'</td><td>'+esc(r.local)+'</td><td>'+esc(r.atividade)+'</td><td><b>'+esc(r.prodM||'—')+'</b></td><td><b>'+esc(r.prodT||'—')+'</b></td><td><b>'+fmtNum(r.m2)+' m²</b></td><td><b>'+fmtNum(r.un)+'</b></td><td><b>'+m3txt+' m³</b></td></tr>';
   });
-  if(!rows.length)h+='<tr><td colspan="11" style="text-align:center;padding:14px">Nenhuma produção encontrada.</td></tr>';
+  if(!rows.length)h+='<tr><td colspan="13" style="text-align:center;padding:14px">Nenhuma produção encontrada.</td></tr>';
   h+='</tbody></table></div>';
   G('print-db-section').innerHTML=h;G('print-db-section').style.display='block';document.body.classList.add('monthly-prod-print');closeMonthlyProdModal();
   requestAnimationFrame(function(){window.print();setTimeout(function(){G('print-db-section').style.display='none';G('print-db-section').innerHTML='';document.body.classList.remove('monthly-prod-print');},700);});
@@ -534,7 +537,14 @@ function parseData(raw){
   /* nunca duas colunas de turno diferentes podem apontar para a mesma celula */
   if(ciAtvT===ciAtvM)ciAtvT=-1;
   if(ciProdT===ciProdM)ciProdT=-1;
-  var ci={nome:findCol(hdM,['funcionario','lider','nome']),empresa:findCol(hdM,['empresa']),funcao:findCol(hdM,['funcao','função']),atividade:ciAtvM,atividadeT:ciAtvT,regiao:findCol(hdM,['local','regiao','região','area','área']),pav:findCol(hdM,['pav']),data:findCol(hdM,['data inicio','data']),prod:ciProdM,prodT:ciProdT};
+  /* LOCAL e PAV tambem ganharam par de turno (LOCAL T / PAV T). Mesma regra:
+     manha = rotulo SEM marcador, tarde = rotulo COM marcador, nunca o mesmo indice. */
+  var KWS_LOCAL=['local','regiao','região','area','área'];
+  var ciLocM=findColTurno(hdM,KWS_LOCAL,false),ciLocT=findColTurno(hdM,KWS_LOCAL,true);
+  var ciPavM=findColTurno(hdM,['pav'],false),ciPavT=findColTurno(hdM,['pav'],true);
+  if(ciLocT===ciLocM)ciLocT=-1;
+  if(ciPavT===ciPavM)ciPavT=-1;
+  var ci={nome:findCol(hdM,['funcionario','lider','nome']),empresa:findCol(hdM,['empresa']),funcao:findCol(hdM,['funcao','função']),atividade:ciAtvM,atividadeT:ciAtvT,regiao:ciLocM,regiaoT:ciLocT,pav:ciPavM,pavT:ciPavT,data:findCol(hdM,['data inicio','data']),prod:ciProdM,prodT:ciProdT};
   if(ci.data<0){
     /* a célula "DATA" do cabeçalho virou uma data de verdade (ou sumiu):
        acha a coluna de data pelo conteúdo das linhas */
@@ -558,9 +568,16 @@ function parseData(raw){
     var atividadeTRaw=(ci.atividadeT>-1?row[ci.atividadeT]||'':'').trim();
     var prodM=(ci.prod>-1?row[ci.prod]||'':'').trim();
     var prodTRaw=(ci.prodT>-1?row[ci.prodT]||'':'').trim();
-    var pavNorm=normalizarPavimento((ci.pav>-1?row[ci.pav]||'':'').trim());
+    var regiaoM=(ci.regiao>-1?row[ci.regiao]||'':'').trim();
+    var regiaoT=(ci.regiaoT>-1?row[ci.regiaoT]||'':'').trim();
+    var pavMraw=(ci.pav>-1?row[ci.pav]||'':'').trim();
+    var pavTRaw=(ci.pavT>-1?row[ci.pavT]||'':'').trim();
+    /* Pav./Local: manha primeiro; se a manha nao tiver, cai no da tarde.
+       (Um unico valor por pessoa: assim os filtros e KPIs por pavimento continuam estaveis.) */
+    var pavNorm=normalizarPavimento(pavMraw)||normalizarPavimento(pavTRaw);
     if(!pavNorm&&atividadeRaw)pavNorm=detectarDoTexto(atividadeRaw);
     if(!pavNorm&&atividadeTRaw)pavNorm=detectarDoTexto(atividadeTRaw);
+    var regiaoComb=regiaoM||regiaoT;
     /* Replica producao/KPIs nos dois turnos: coluna normal = manha,
        coluna "T" = tarde. Junta os dois num unico campo (com rotulo) para
        que todos os KPIs e a producao considerem os dois turnos. */
@@ -580,7 +597,7 @@ function parseData(raw){
     }
     var atvComb=_turnoParts(atividadeRaw,atividadeTRaw);
     var prodComb=_prodParts(prodM,prodTRaw);
-    people.push({nome:nome,empresa:normalizarEmpresa((ci.empresa>-1?row[ci.empresa]||'':'').trim())||'—',funcao:normalizarFuncao((ci.funcao>-1?row[ci.funcao]||'':'').trim())||'—',atividade:atvComb,atividadeRaw:atividadeRaw||atividadeTRaw,regiao:(ci.regiao>-1?row[ci.regiao]||'':'').trim(),pav:pavNorm,prod:prodComb,ativM:atividadeRaw,ativT:atividadeTRaw,prodM:prodM,prodT:prodTRaw,data:(ci.data>-1?row[ci.data]||'':'').trim(),ferias:vac,motivo:motivo});
+    people.push({nome:nome,empresa:normalizarEmpresa((ci.empresa>-1?row[ci.empresa]||'':'').trim())||'—',funcao:normalizarFuncao((ci.funcao>-1?row[ci.funcao]||'':'').trim())||'—',atividade:atvComb,atividadeRaw:atividadeRaw||atividadeTRaw,regiao:regiaoComb,pav:pavNorm,regiaoM:regiaoM,regiaoT:regiaoT,prod:prodComb,ativM:atividadeRaw,ativT:atividadeTRaw,prodM:prodM,prodT:prodTRaw,data:(ci.data>-1?row[ci.data]||'':'').trim(),ferias:vac,motivo:motivo});
   }
   var byDate={};
   people.forEach(function(p){var d=p.data||'(sem data)';if(!byDate[d])byDate[d]={date:d,all:[],ativos:[],ferias:[],byEmp:{},byFunc:{},byPav:{},byRegiao:{}};byDate[d].all.push(p);if(p.ferias){byDate[d].ferias.push(p);return}byDate[d].ativos.push(p);byDate[d].byEmp[p.empresa]=(byDate[d].byEmp[p.empresa]||0)+1;byDate[d].byFunc[p.funcao]=(byDate[d].byFunc[p.funcao]||0)+1;if(!byDate[d].byEmpAtiv)byDate[d].byEmpAtiv={};if(!byDate[d].byFuncAtiv)byDate[d].byFuncAtiv={};if(p.atividade){byDate[d].byEmpAtiv[p.empresa]=(byDate[d].byEmpAtiv[p.empresa]||0)+1;byDate[d].byFuncAtiv[p.funcao]=(byDate[d].byFuncAtiv[p.funcao]||0)+1;}if(p.pav)byDate[d].byPav[p.pav]=(byDate[d].byPav[p.pav]||0)+1;if(p.regiao){var regKey=regiaoPavKey(p);byDate[d].byRegiao[regKey]=(byDate[d].byRegiao[regKey]||0)+1}});
@@ -984,15 +1001,21 @@ function executeRangePrint(){
       if(!match(p))return;
       var parsed=parseProducaoUnidades(p.prod||'');
       if(!parsed.length)return;
+      /* Totais por turno (coluna normal = manhã, coluna T = tarde) */
+      var m2M=0,m2T=0;
+      parseProducaoUnidades(p.prodM||'').forEach(function(u){if(u.unidade==='M2')m2M+=u.valor});
+      parseProducaoUnidades(p.prodT||'').forEach(function(u){if(u.unidade==='M2')m2T+=u.valor});
       parsed.forEach(function(u){
-        if(!summary[p.empresa])summary[p.empresa]={M2:0,M3:0,UN:0};
+        if(!summary[p.empresa])summary[p.empresa]={M2:0,M3:0,UN:0,M2M:0,M2T:0};
         summary[p.empresa][u.unidade]+=u.valor;
       });
-      launchRows.push({date:day.date,nome:p.nome,empresa:p.empresa,funcao:p.funcao,pav:p.pav||'—',local:p.regiao||'—',atividade:p.atividade||p.atividadeRaw||'—',prod:p.prod||'—'});
+      if(!summary[p.empresa])summary[p.empresa]={M2:0,M3:0,UN:0,M2M:0,M2T:0};
+      summary[p.empresa].M2M+=m2M;summary[p.empresa].M2T+=m2T;
+      launchRows.push({date:day.date,nome:p.nome,empresa:p.empresa,funcao:p.funcao,pav:p.pav||'—',local:p.regiao||'—',atividade:p.atividade||p.atividadeRaw||'—',prod:p.prod||'—',prodM:p.prodM||'',prodT:p.prodT||''});
     });
   });
   var companies=Object.keys(summary).filter(function(k){return summary[k].M2>0||summary[k].M3>0||summary[k].UN>0}).sort(function(a,b){return a.localeCompare(b,'pt-BR')});
-  var totals=companies.reduce(function(t,k){t.M2+=summary[k].M2;t.M3+=summary[k].M3;t.UN+=summary[k].UN;return t;},{M2:0,M3:0,UN:0});
+  var totals=companies.reduce(function(t,k){t.M2+=summary[k].M2;t.M3+=summary[k].M3;t.UN+=summary[k].UN;t.M2M+=summary[k].M2M||0;t.M2T+=summary[k].M2T||0;return t;},{M2:0,M3:0,UN:0,M2M:0,M2T:0});
   var titleParts=[days.length+' dia(s) selecionados'];
   if(empFilter)titleParts.push('Empreiteira: '+empFilter);
   if(funcFilter)titleParts.push('Função: '+funcFilter);
@@ -1005,27 +1028,29 @@ function executeRangePrint(){
   var h='<div class="range-print-report">';
   h+='<div class="range-print-title">Produção do período</div>';
   h+='<div class="range-print-total-grid">'+
-    '<div class="range-print-total"><span>M²</span><b>'+fmtNum(totals.M2)+' m²</b></div>'+
+    '<div class="range-print-total"><span>M² manhã</span><b>'+fmtNum(totals.M2M||0)+' m²</b></div>'+
+    '<div class="range-print-total"><span>M² tarde</span><b>'+(totals.M2T>0?fmtNum(totals.M2T)+' m²':'—')+'</b></div>'+
+    '<div class="range-print-total"><span>M² total</span><b>'+fmtNum(totals.M2)+' m²</b></div>'+
     '<div class="range-print-total"><span>M³</span><b>'+totals.M3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+' m³</b></div>'+
     '<div class="range-print-total"><span>UN</span><b>'+fmtNum(totals.UN)+' UN</b></div>'+
     '</div>';
 
   h+='<div class="range-print-section-title">Lançamentos de produção</div>';
-  h+='<table class="range-print-table"><thead><tr><th>Data</th><th>Nome</th><th>Empresa</th><th>Função</th><th>Pav.</th><th>Local</th><th>Atividade</th><th>Produção</th></tr></thead><tbody>';
+  h+='<table class="range-print-table"><thead><tr><th>Data</th><th>Nome</th><th>Empresa</th><th>Função</th><th>Pav.</th><th>Local</th><th>Atividade</th><th>Prod. Manhã</th><th>Prod. Tarde</th></tr></thead><tbody>';
   launchRows.sort(function(a,b){var da=parseDateBR(a.date),db=parseDateBR(b.date);var va=da?da.y*10000+da.m*100+da.d:0,vb=db?db.y*10000+db.m*100+db.d:0;return va-vb||a.empresa.localeCompare(b.empresa,'pt-BR')||a.nome.localeCompare(b.nome,'pt-BR')});
   launchRows.forEach(function(r){
-    h+='<tr><td>'+esc(r.date)+'</td><td><b>'+esc(r.nome)+'</b></td><td>'+esc(r.empresa)+'</td><td>'+esc(r.funcao)+'</td><td>'+esc(r.pav)+'</td><td>'+esc(r.local)+'</td><td>'+esc(r.atividade)+'</td><td><b>'+esc(r.prod)+'</b></td></tr>';
+    h+='<tr><td>'+esc(r.date)+'</td><td><b>'+esc(r.nome)+'</b></td><td>'+esc(r.empresa)+'</td><td>'+esc(r.funcao)+'</td><td>'+esc(r.pav)+'</td><td>'+esc(r.local)+'</td><td>'+esc(r.atividade)+'</td><td><b>'+esc(r.prodM||'—')+'</b></td><td><b>'+esc(r.prodT||'—')+'</b></td></tr>';
   });
-  if(!launchRows.length)h+='<tr><td colspan="8" style="text-align:center;padding:12px">Nenhum lançamento de produção encontrado.</td></tr>';
+  if(!launchRows.length)h+='<tr><td colspan="9" style="text-align:center;padding:12px">Nenhum lançamento de produção encontrado.</td></tr>';
   h+='</tbody></table>';
 
   h+='<div class="range-print-section-title">Resumo da produção por empreiteira</div>';
-  h+='<table class="range-print-summary-table"><thead><tr><th>Empreiteira</th><th>M²</th><th>M³</th><th>UN</th></tr></thead><tbody>';
+  h+='<table class="range-print-summary-table"><thead><tr><th>Empreiteira</th><th>M² manhã</th><th>M² tarde</th><th>M² total</th><th>M³</th><th>UN</th></tr></thead><tbody>';
   companies.forEach(function(k){
     var v=summary[k];
-    h+='<tr><td><b>'+esc(k)+'</b></td><td>'+fmtNum(v.M2)+' m²</td><td>'+v.M3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+' m³</td><td>'+fmtNum(v.UN)+' UN</td></tr>';
+    h+='<tr><td><b>'+esc(k)+'</b></td><td>'+fmtNum(v.M2M||0)+' m²</td><td>'+(v.M2T>0?fmtNum(v.M2T)+' m²':'—')+'</td><td>'+fmtNum(v.M2)+' m²</td><td>'+v.M3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+' m³</td><td>'+fmtNum(v.UN)+' UN</td></tr>';
   });
-  if(!companies.length)h+='<tr><td colspan="4" style="text-align:center;padding:10px">Nenhuma produção encontrada para os filtros selecionados.</td></tr>';
+  if(!companies.length)h+='<tr><td colspan="6" style="text-align:center;padding:10px">Nenhuma produção encontrada para os filtros selecionados.</td></tr>';
   h+='</tbody></table>';
 
   /* Seção PPC (2ª planilha) no PDF do período */
@@ -1063,23 +1088,26 @@ function executePrint(){
   if(funcs.length&&funcs.length<tF)fl.push('Fun\u00e7\u00e3o: '+funcs.join(', '));
   if(pavs.length&&pavs.length<tP)fl.push('Pav.: '+pavs.join(', '));
   var sf=fl.length?' \u00b7 '+fl.join(' / '):'';
+  /* Resumo por turno no cabeçalho: Manhã · Tarde · Dia (nunca o turno vazio herda o outro) */
+  var tpM=computeTurnoDia(day,'M'),tpT=computeTurnoDia(day,'T'),tpD=computeProducaoDia(day).totals;
+  var turnoResumo='Manhã: '+turnoValTxt(tpM.totals)+' \u00b7 Tarde: '+turnoValTxt(tpT.totals)+' \u00b7 Dia: '+fmtNum(tpD.M2||0)+' m²';
   G('print-header').innerHTML=
     '<h1>RDO \u2014 Relatorio Diario de Obra</h1>'+
-    '<p>Data: '+esc(day.date)+' \u00b7 Efetivo: '+ativos.length+' \u00b7 Faltosos: '+semAtiv.length+' \u00b7 F\u00e9rias: '+ferias.length+sf+' \u00b7 Impresso em '+fmtNow()+'</p>';
+    '<p>Data: '+esc(day.date)+' \u00b7 Efetivo: '+ativos.length+' \u00b7 Faltosos: '+semAtiv.length+' \u00b7 F\u00e9rias: '+ferias.length+sf+' \u00b7 '+esc(turnoResumo)+' \u00b7 Impresso em '+fmtNow()+'</p>';
   var h='<div class="cd"><div class="cd-h"><h3>Equipe do dia \u2014 '+esc(day.date)+'</h3>'+
     '<span class="mt">'+ativos.length+' ativo(s)'+(semAtiv.length?' \u00b7 '+semAtiv.length+' faltoso(s)':'')+(ferias.length?' \u00b7 '+ferias.length+' f\u00e9rias':'')+'</span></div>'+
-    '<table class="t"><thead><tr><th>#</th><th>Nome</th><th>Fun\u00e7\u00e3o</th><th>Empresa</th><th>Atividade / Servi\u00e7o</th><th>Produ\u00e7\u00e3o</th><th>Pav.</th><th>Local</th></tr></thead><tbody>';
+    '<table class="t"><thead><tr><th>#</th><th>Nome</th><th>Fun\u00e7\u00e3o</th><th>Empresa</th><th>Servi\u00e7o Manh\u00e3</th><th>Servi\u00e7o Tarde</th><th>Prod. Manh\u00e3</th><th>Prod. Tarde</th><th>Pav.</th><th>Local</th></tr></thead><tbody>';
   var num=1;
   ativos.forEach(function(p){
-    h+='<tr><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td><td style="color:#475569">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td style="white-space:normal">'+esc(p.atividade||'\u2014')+'</td><td style="white-space:normal;font-weight:600">'+esc(p.prod||'\u2014')+'</td><td>'+esc(p.pav||'\u2014')+'</td><td style="color:#475569">'+esc(p.regiao||'\u2014')+'</td></tr>';
+    h+='<tr><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td><td style="color:#475569">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td style="white-space:normal">'+esc(p.ativM||'\u2014')+'</td><td style="white-space:normal">'+esc(p.ativT||'\u2014')+'</td><td style="white-space:normal;font-weight:600">'+esc(p.prodM||'\u2014')+'</td><td style="white-space:normal;font-weight:600">'+esc(p.prodT||'\u2014')+'</td><td>'+esc(p.pav||'\u2014')+'</td><td style="color:#475569">'+esc(p.regiao||'\u2014')+'</td></tr>';
   });
   if(semAtiv.length){
-    h+='<tr style="background:#FEE2E2"><td colspan="8" style="font-family:JetBrains Mono;font-size:9px;font-weight:700;color:#B91C1C;text-transform:uppercase;padding:6px 10px">🚫 '+semAtiv.length+' FALTOSO(S)</td></tr>';
-    semAtiv.forEach(function(p){h+='<tr style="background:#FFF5F5"><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;color:#B91C1C">'+esc(p.nome)+'</td><td style="color:#991B1B">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td style="color:#94A3B8;font-style:italic">'+esc(p.atividadeRaw||'\u2014')+'</td><td style="color:#94A3B8">\u2014</td><td>'+esc(p.pav||'\u2014')+'</td><td>'+esc(p.regiao||'\u2014')+'</td></tr>';});
+    h+='<tr style="background:#FEE2E2"><td colspan="10" style="font-family:JetBrains Mono;font-size:9px;font-weight:700;color:#B91C1C;text-transform:uppercase;padding:6px 10px">🚫 '+semAtiv.length+' FALTOSO(S)</td></tr>';
+    semAtiv.forEach(function(p){h+='<tr style="background:#FFF5F5"><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;color:#B91C1C">'+esc(p.nome)+'</td><td style="color:#991B1B">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td style="color:#94A3B8;font-style:italic">'+esc(p.atividadeRaw||'\u2014')+'</td><td style="color:#94A3B8">\u2014</td><td style="color:#94A3B8">\u2014</td><td style="color:#94A3B8">\u2014</td><td>'+esc(p.pav||'\u2014')+'</td><td>'+esc(p.regiao||'\u2014')+'</td></tr>';});
   }
   if(ferias.length){
-    h+='<tr style="background:#FEF3C7"><td colspan="7" style="font-family:JetBrains Mono;font-size:9px;font-weight:700;color:#92400E;text-transform:uppercase;padding:6px 10px">🌴 '+ferias.length+' FÉRIAS / AUSENTE(S)</td></tr>';
-    ferias.forEach(function(p){h+='<tr style="background:#FFFBEB"><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;color:#92400E">'+esc(p.nome)+'</td><td style="color:#B45309">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td colspan="4"><span style="font-family:JetBrains Mono;font-size:9px;font-weight:700;background:#FEF3C7;padding:2px 6px;border-radius:10px;color:#92400E">'+esc(p.motivo||'F\u00c9RIAS')+'</span></td></tr>';});
+    h+='<tr style="background:#FEF3C7"><td colspan="10" style="font-family:JetBrains Mono;font-size:9px;font-weight:700;color:#92400E;text-transform:uppercase;padding:6px 10px">🌴 '+ferias.length+' FÉRIAS / AUSENTE(S)</td></tr>';
+    ferias.forEach(function(p){h+='<tr style="background:#FFFBEB"><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;color:#92400E">'+esc(p.nome)+'</td><td style="color:#B45309">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td colspan="6"><span style="font-family:JetBrains Mono;font-size:9px;font-weight:700;background:#FEF3C7;padding:2px 6px;border-radius:10px;color:#92400E">'+esc(p.motivo||'F\u00c9RIAS')+'</span></td></tr>';});
   }
   h+='</tbody></table></div>';
 
@@ -2324,6 +2352,9 @@ function injectEffCard(day){
   var c=effCalc(day),m=effMedias(day);
   function chip(v,un,f){return '<span class="ke'+(v>0?'':' z')+'"><b>'+f(v)+'</b> '+un+'/pessoa</span>'}
   var f=c.pess?fmtNum(c.M2)+' m² ÷ '+c.p2+' · '+fmt3(c.M3)+' m³ ÷ '+c.p3+' · '+fmtNum(c.UN)+' un ÷ '+c.pu+' · '+c.pess+' com atividade':'sem pessoas com atividade';
+  /* Detalhe por turno no rodapé: manhã e tarde lado a lado (vazio = —) */
+  var tM=computeTurnoDia(day,'M').totals,tT=computeTurnoDia(day,'T').totals;
+  if(tM.M2>0||tM.M3>0||tM.UN>0||tT.M2>0||tT.M3>0||tT.UN>0){f+=' · manhã '+turnoValTxt(tM)+' · tarde '+turnoValTxt(tT)}
   el.insertAdjacentHTML('beforeend','<div id="eff-kpi" class="kp kp-click" style="--kc:#0891B2" onclick="openEffModal()" role="button" tabindex="0" title="Produção ÷ colaboradores que lançaram cada unidade — clique para ver por empresa">'+
     '<div class="ki">⚡</div><div class="kl">Produtividade</div>'+
     '<div class="kv">'+fmtNum(c.r2)+' m²/pessoa'+effBadge(c.r2,m.r2,'vs média do mês')+'</div>'+

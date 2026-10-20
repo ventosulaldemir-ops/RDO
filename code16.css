@@ -396,14 +396,17 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
   body.custom-print #print-db-section table.t th{display:table-cell!important;position:static!important;background:#2A3F5F!important;color:#fff!important;font-family:'JetBrains Mono',monospace!important;font-size:7px!important;font-weight:700!important;line-height:1.15!important;padding:5px 5px!important;vertical-align:middle!important;white-space:normal!important;text-align:left!important;border:0!important}
   body.custom-print #print-db-section table.t td{display:table-cell!important;font-size:7.8px!important;line-height:1.25!important;padding:4px 5px!important;vertical-align:top!important;white-space:normal!important;overflow-wrap:anywhere!important;border-bottom:1px solid #E2E8F0!important;color:#1E293B!important;background:#fff!important}
   body.custom-print #print-db-section table.t tbody tr:last-child td{border-bottom:0!important}
-  body.custom-print #print-db-section table.t th:nth-child(1),body.custom-print #print-db-section table.t td:nth-child(1){width:4%}
-  body.custom-print #print-db-section table.t th:nth-child(2),body.custom-print #print-db-section table.t td:nth-child(2){width:14%}
-  body.custom-print #print-db-section table.t th:nth-child(3),body.custom-print #print-db-section table.t td:nth-child(3){width:11%}
-  body.custom-print #print-db-section table.t th:nth-child(4),body.custom-print #print-db-section table.t td:nth-child(4){width:12%}
-  body.custom-print #print-db-section table.t th:nth-child(5),body.custom-print #print-db-section table.t td:nth-child(5){width:23%}
-  body.custom-print #print-db-section table.t th:nth-child(6),body.custom-print #print-db-section table.t td:nth-child(6){width:14%}
-  body.custom-print #print-db-section table.t th:nth-child(7),body.custom-print #print-db-section table.t td:nth-child(7){width:7%}
-  body.custom-print #print-db-section table.t th:nth-child(8),body.custom-print #print-db-section table.t td:nth-child(8){width:15%}
+  /* 10 colunas: #, Nome, Função, Empresa, Serv. Manhã, Serv. Tarde, Prod. Manhã, Prod. Tarde, Pav., Local */
+  body.custom-print #print-db-section table.t th:nth-child(1),body.custom-print #print-db-section table.t td:nth-child(1){width:3%}
+  body.custom-print #print-db-section table.t th:nth-child(2),body.custom-print #print-db-section table.t td:nth-child(2){width:12%}
+  body.custom-print #print-db-section table.t th:nth-child(3),body.custom-print #print-db-section table.t td:nth-child(3){width:9%}
+  body.custom-print #print-db-section table.t th:nth-child(4),body.custom-print #print-db-section table.t td:nth-child(4){width:10%}
+  body.custom-print #print-db-section table.t th:nth-child(5),body.custom-print #print-db-section table.t td:nth-child(5){width:17%}
+  body.custom-print #print-db-section table.t th:nth-child(6),body.custom-print #print-db-section table.t td:nth-child(6){width:17%}
+  body.custom-print #print-db-section table.t th:nth-child(7),body.custom-print #print-db-section table.t td:nth-child(7){width:9%}
+  body.custom-print #print-db-section table.t th:nth-child(8),body.custom-print #print-db-section table.t td:nth-child(8){width:9%}
+  body.custom-print #print-db-section table.t th:nth-child(9),body.custom-print #print-db-section table.t td:nth-child(9){width:5%}
+  body.custom-print #print-db-section table.t th:nth-child(10),body.custom-print #print-db-section table.t td:nth-child(10){width:9%}
   body.custom-print #print-db-section table.t .nr{font-family:'JetBrains Mono',monospace!important;text-align:center!important}
   body.custom-print #print-db-section table.t tr[style*="background:#FEE2E2"] td{background:#FEE2E2!important}
   body.custom-print #print-db-section table.t tr[style*="background:#FFF5F5"] td{background:#FFF5F5!important}
