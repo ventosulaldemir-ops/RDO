@@ -505,7 +505,9 @@ function parseData(raw){
   if(ci.data<0){
     /* a célula "DATA" do cabeçalho virou uma data de verdade (ou sumiu):
        acha a coluna de data pelo conteúdo das linhas */
-    for(var c=0;c<9;c++){
+    var maxCols=hd.length;
+    for(var rr0=hIdx+1;rr0<Math.min(raw.length,hIdx+40);rr0++){if((raw[rr0]||[]).length>maxCols)maxCols=(raw[rr0]||[]).length}
+    for(var c=0;c<Math.max(maxCols,10);c++){
       var okD=0,chkD=0;
       for(var rr=hIdx+1;rr<Math.min(raw.length,hIdx+40);rr++){
         var val=(((raw[rr]||[])[c])||'').trim();if(!val)continue;chkD++;
