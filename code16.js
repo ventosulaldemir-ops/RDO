@@ -501,7 +501,18 @@ function parseData(raw){
     if(findCol(hTry,['funcionario','lider','nome'])>-1){hIdx=hi;break}
   }
   var hd=raw[hIdx]||[];
-  var ci={nome:findCol(hd,['funcionario','lider','nome']),empresa:findCol(hd,['empresa']),funcao:findCol(hd,['funcao','função']),atividade:findCol(hd,['servico','serviço','atividade']),regiao:findCol(hd,['local','regiao','região','area','área']),pav:findCol(hd,['pav']),data:findCol(hd,['data inicio','data']),prod:findCol(hd,['prod'])};
+  /* A planilha ganhou uma linha extra no topo com rotulos ("SERVIÇO T",
+     "PRODUTIVIDADE", "PRODUTIVIDADE T") e a linha real (hIdx) deixou essas
+     celulas vazias. Monta um cabecalho combinado: usa a linha real quando tem
+     texto, senao busca o rotulo na linha acima. Assim acha as colunas da tarde
+     e (re)habilita a producao da manha. */
+  var hdUp=(hIdx>0?raw[hIdx-1]:[])||[];
+  var hdM=[];
+  for(var mc=0;mc<Math.max(hd.length,hdUp.length);mc++){
+    var cA=(hd[mc]||'').trim(),cB=(hdUp[mc]||'').trim();
+    hdM[mc]=cA||cB;
+  }
+  var ci={nome:findCol(hdM,['funcionario','lider','nome']),empresa:findCol(hdM,['empresa']),funcao:findCol(hdM,['funcao','função']),atividade:findCol(hdM,['servico','serviço','atividade']),atividadeT:findCol(hdM,['servico t','serviço t','servico tarde','serviço tarde']),regiao:findCol(hdM,['local','regiao','região','area','área']),pav:findCol(hdM,['pav']),data:findCol(hdM,['data inicio','data']),prod:findCol(hdM,['produtividade','producao','produção','prod']),prodT:findCol(hdM,['produtividade t','producao t','produção t','prod t'])};
   if(ci.data<0){
     /* a célula "DATA" do cabeçalho virou uma data de verdade (ou sumiu):
        acha a coluna de data pelo conteúdo das linhas */
@@ -522,9 +533,32 @@ function parseData(raw){
     if(!nome||nome.length<2)continue;if(norm(nome).indexOf('total')>-1)continue;
     var motivo=motivoAusencia(row);var vac=!!motivo;
     var atividadeRaw=(ci.atividade>-1?row[ci.atividade]||'':'').trim();
+    var atividadeTRaw=(ci.atividadeT>-1?row[ci.atividadeT]||'':'').trim();
+    var prodM=(ci.prod>-1?row[ci.prod]||'':'').trim();
+    var prodTRaw=(ci.prodT>-1?row[ci.prodT]||'':'').trim();
     var pavNorm=normalizarPavimento((ci.pav>-1?row[ci.pav]||'':'').trim());
     if(!pavNorm&&atividadeRaw)pavNorm=detectarDoTexto(atividadeRaw);
-    people.push({nome:nome,empresa:normalizarEmpresa((ci.empresa>-1?row[ci.empresa]||'':'').trim())||'—',funcao:normalizarFuncao((ci.funcao>-1?row[ci.funcao]||'':'').trim())||'—',atividade:temAtividade(atividadeRaw)?atividadeRaw:'',atividadeRaw:atividadeRaw,regiao:(ci.regiao>-1?row[ci.regiao]||'':'').trim(),pav:pavNorm,prod:(ci.prod>-1?row[ci.prod]||'':'').trim(),data:(ci.data>-1?row[ci.data]||'':'').trim(),ferias:vac,motivo:motivo});
+    if(!pavNorm&&atividadeTRaw)pavNorm=detectarDoTexto(atividadeTRaw);
+    /* Replica producao/KPIs nos dois turnos: coluna normal = manha,
+       coluna "T" = tarde. Junta os dois num unico campo (com rotulo) para
+       que todos os KPIs e a producao considerem os dois turnos. */
+    function _turnoParts(a,b){
+      var ma=temAtividade(a),mb=temAtividade(b);
+      if(ma&&mb)return 'manh\u00e3: '+a+' \u00b7 tarde: '+b;
+      if(ma)return 'manh\u00e3: '+a;
+      if(mb)return 'tarde: '+b;
+      return '';
+    }
+    function _prodParts(a,b){
+      var ma=temAtividade(a),mb=temAtividade(b);
+      if(ma&&mb)return 'manh\u00e3: '+a+' \u00b7 tarde: '+b;
+      if(ma)return 'manh\u00e3: '+a;
+      if(mb)return 'tarde: '+b;
+      return '';
+    }
+    var atvComb=_turnoParts(atividadeRaw,atividadeTRaw);
+    var prodComb=_prodParts(prodM,prodTRaw);
+    people.push({nome:nome,empresa:normalizarEmpresa((ci.empresa>-1?row[ci.empresa]||'':'').trim())||'—',funcao:normalizarFuncao((ci.funcao>-1?row[ci.funcao]||'':'').trim())||'—',atividade:atvComb,atividadeRaw:atividadeRaw||atividadeTRaw,regiao:(ci.regiao>-1?row[ci.regiao]||'':'').trim(),pav:pavNorm,prod:prodComb,data:(ci.data>-1?row[ci.data]||'':'').trim(),ferias:vac,motivo:motivo});
   }
   var byDate={};
   people.forEach(function(p){var d=p.data||'(sem data)';if(!byDate[d])byDate[d]={date:d,all:[],ativos:[],ferias:[],byEmp:{},byFunc:{},byPav:{},byRegiao:{}};byDate[d].all.push(p);if(p.ferias){byDate[d].ferias.push(p);return}byDate[d].ativos.push(p);byDate[d].byEmp[p.empresa]=(byDate[d].byEmp[p.empresa]||0)+1;byDate[d].byFunc[p.funcao]=(byDate[d].byFunc[p.funcao]||0)+1;if(!byDate[d].byEmpAtiv)byDate[d].byEmpAtiv={};if(!byDate[d].byFuncAtiv)byDate[d].byFuncAtiv={};if(p.atividade){byDate[d].byEmpAtiv[p.empresa]=(byDate[d].byEmpAtiv[p.empresa]||0)+1;byDate[d].byFuncAtiv[p.funcao]=(byDate[d].byFuncAtiv[p.funcao]||0)+1;}if(p.pav)byDate[d].byPav[p.pav]=(byDate[d].byPav[p.pav]||0)+1;if(p.regiao){var regKey=regiaoPavKey(p);byDate[d].byRegiao[regKey]=(byDate[d].byRegiao[regKey]||0)+1}});
