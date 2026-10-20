@@ -1166,8 +1166,8 @@ function renderKPIs(day){
     {i:'🚫',l:'Faltosos',       v:faltosos,          f:'sem atividade — excluidos',         c:'var(--red)',   click:'openPeopleModal(\'faltosos\')'},
     {i:'🏢',l:'Empresas',       v:empCnt,            f:'ativas hoje',                       c:'var(--blue)',  click:''},
     {i:'⚒️',l:'Funcoes',v:funcCnt,          f:'distintas',                         c:'var(--cyan)',  click:''},
-    {i:'🌅',l:'Produção manhã',      v:turnoValTxt(turnoM.totals), f:turnoFootTxt(turnoM), c:'#D97706', click:'openProducaoModal()'},
-    {i:'🌇',l:'Produção tarde',        v:turnoValTxt(turnoT.totals), f:turnoFootTxt(turnoT), c:'#7C3AED', click:'openProducaoModal()'},
+    {i:'🌅',l:'Produção manhã',      v:turnoValTxt(turnoM.totals), f:turnoFootTxt(turnoM), c:'#D97706', click:'openProducaoModal(\'M\')'},
+    {i:'🌇',l:'Produção tarde',        v:turnoValTxt(turnoT.totals), f:turnoFootTxt(turnoT), c:'#7C3AED', click:'openProducaoModal(\'T\')'},
     {i:'📐',l:'Produção diária', v:fmtNum(prodM2Dia)+' m²', f:day.date+' — clique para ver', c:'#0891B2', click:'openProducaoModal()', feature:true, extra:miniHtml}
   ].map(function(k){
     var clickAttr=k.click?(' onclick="'+k.click+'" role="button" tabindex="0"'):'';
@@ -1207,15 +1207,17 @@ function parseProducaoUnidades(texto){
 }
 
 /* Agrega a produção do dia: só considera quem tem produção preenchida
-   (mesma regra de temAtividade usada no filtro "Com producao" da tabela). */
-function computeProducaoDia(day){
+   (mesma regra de temAtividade usada no filtro "Com producao" da tabela).
+   turno opcional: 'M' = só coluna da manhã, 'T' = só coluna da tarde, sem = total. */
+function computeProducaoDia(day,turno){
   var producers=[],totals={UN:0,M2:0,M3:0};
   if(!day)return{producers:producers,totals:totals};
   day.ativos.forEach(function(p){
-    if(!temAtividade(p.prod))return;
-    var parsed=parseProducaoUnidades(p.prod);
+    var txt=turno==='M'?(p.prodM||''):(turno==='T'?(p.prodT||''):(p.prod||''));
+    if(!temAtividade(txt))return;
+    var parsed=parseProducaoUnidades(txt);
     parsed.forEach(function(u){totals[u.unidade]+=u.valor});
-    producers.push({p:p,parsed:parsed});
+    producers.push({p:p,parsed:parsed,txt:txt});
   });
   return{producers:producers,totals:totals};
 }
@@ -1253,17 +1255,21 @@ function turnoFootTxt(s){
 
 function fmtNum(v){return v.toLocaleString('pt-BR',{maximumFractionDigits:2})}
 
-function openProducaoModal(){
+function openProducaoModal(turno){
   var day=getSelectedDay();
   if(!day){toast('Selecione um dia primeiro','warn');return}
-  var agg=computeProducaoDia(day);
+  var agg=computeProducaoDia(day,turno);
   var hdr=G('emp-modal-overlay').querySelector('.modal-h');
-  hdr.style.background='#0891B2';
-  G('emp-modal-title').textContent='📦 Produção Total';
-  G('emp-modal-sub').textContent=day.date+' · '+agg.producers.length+' pessoa(s) com produção lançada';
+  /* 🌅 manhã = âmbar, 🌇 tarde = roxo, 📐 total = ciano (mesmas cores dos cards) */
+  var cfg=turno==='M'?{cor:'#D97706',titulo:'🌅 Produção da Manhã',periodo:'manhã',prep:'na manhã'}:
+           turno==='T'?{cor:'#7C3AED',titulo:'🌇 Produção da Tarde',periodo:'tarde',prep:'na tarde'}:
+           {cor:'#0891B2',titulo:'📦 Produção Total',periodo:'dia',prep:'no dia'};
+  hdr.style.background=cfg.cor;
+  G('emp-modal-title').textContent=cfg.titulo;
+  G('emp-modal-sub').textContent=day.date+' · '+agg.producers.length+' pessoa(s) com produção '+cfg.prep;
   var body=G('emp-modal-body');
   if(!agg.producers.length){
-    body.innerHTML='<div class="modal-empty">Nenhuma produção lançada neste dia.</div>';
+    body.innerHTML='<div class="modal-empty">Nenhuma produção lançada '+cfg.prep+'.</div>';
     G('emp-modal-overlay').classList.add('on');
     return;
   }
@@ -1283,13 +1289,14 @@ function openProducaoModal(){
     lista.map(function(item,i){
       var p=item.p;var bg=i%2===0?'#fff':'#F8FAFC';
       var unidadesTxt=item.parsed.length?item.parsed.map(function(u){return fmtNum(u.valor)+' '+(u.unidade==='M2'?'m²':u.unidade==='M3'?'m³':'un')}).join(' + '):'—';
+      var prodTxtTurno=item.txt||p.prod||'—';
       return '<tr style="background:'+bg+'">'+
         '<td data-label="Nome" style="padding:8px 10px;font-weight:600;border-bottom:1px solid #E0F7FA">'+esc(p.nome)+'</td>'+
         '<td data-label="Empresa" style="padding:8px 10px;border-bottom:1px solid #E0F7FA"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
         '<td data-label="Pavimento" style="padding:8px 10px;border-bottom:1px solid #E0F7FA">'+pavBadge(p.pav)+'</td>'+
         '<td data-label="Produção" style="padding:8px 10px;border-bottom:1px solid #E0F7FA">'+
           '<div style="font-weight:700;color:#0E7490">'+esc(unidadesTxt)+'</div>'+
-          '<div style="margin-top:2px;color:var(--ink2);font-size:10px">'+esc(p.prod)+'</div>'+
+          '<div style="margin-top:2px;color:var(--ink2);font-size:10px">'+esc(prodTxtTurno)+'</div>'+
         '</td>'+
       '</tr>';
     }).join('')+
