@@ -558,7 +558,7 @@ function parseData(raw){
     }
     var atvComb=_turnoParts(atividadeRaw,atividadeTRaw);
     var prodComb=_prodParts(prodM,prodTRaw);
-    people.push({nome:nome,empresa:normalizarEmpresa((ci.empresa>-1?row[ci.empresa]||'':'').trim())||'—',funcao:normalizarFuncao((ci.funcao>-1?row[ci.funcao]||'':'').trim())||'—',atividade:atvComb,atividadeRaw:atividadeRaw||atividadeTRaw,regiao:(ci.regiao>-1?row[ci.regiao]||'':'').trim(),pav:pavNorm,prod:prodComb,data:(ci.data>-1?row[ci.data]||'':'').trim(),ferias:vac,motivo:motivo});
+    people.push({nome:nome,empresa:normalizarEmpresa((ci.empresa>-1?row[ci.empresa]||'':'').trim())||'—',funcao:normalizarFuncao((ci.funcao>-1?row[ci.funcao]||'':'').trim())||'—',atividade:atvComb,atividadeRaw:atividadeRaw||atividadeTRaw,regiao:(ci.regiao>-1?row[ci.regiao]||'':'').trim(),pav:pavNorm,prod:prodComb,ativM:atividadeRaw,ativT:atividadeTRaw,prodM:prodM,prodT:prodTRaw,data:(ci.data>-1?row[ci.data]||'':'').trim(),ferias:vac,motivo:motivo});
   }
   var byDate={};
   people.forEach(function(p){var d=p.data||'(sem data)';if(!byDate[d])byDate[d]={date:d,all:[],ativos:[],ferias:[],byEmp:{},byFunc:{},byPav:{},byRegiao:{}};byDate[d].all.push(p);if(p.ferias){byDate[d].ferias.push(p);return}byDate[d].ativos.push(p);byDate[d].byEmp[p.empresa]=(byDate[d].byEmp[p.empresa]||0)+1;byDate[d].byFunc[p.funcao]=(byDate[d].byFunc[p.funcao]||0)+1;if(!byDate[d].byEmpAtiv)byDate[d].byEmpAtiv={};if(!byDate[d].byFuncAtiv)byDate[d].byFuncAtiv={};if(p.atividade){byDate[d].byEmpAtiv[p.empresa]=(byDate[d].byEmpAtiv[p.empresa]||0)+1;byDate[d].byFuncAtiv[p.funcao]=(byDate[d].byFuncAtiv[p.funcao]||0)+1;}if(p.pav)byDate[d].byPav[p.pav]=(byDate[d].byPav[p.pav]||0)+1;if(p.regiao){var regKey=regiaoPavKey(p);byDate[d].byRegiao[regKey]=(byDate[d].byRegiao[regKey]||0)+1}});
@@ -1099,6 +1099,7 @@ function renderKPIs(day){
   var pctPrevisto=previsto>0?(comAtiv/previsto*100).toFixed(0):'0';
   var prodDia=computeProducaoDia(day);
   var prodM2Dia=prodDia.totals.M2||0;
+  var turnoM=computeTurnoDia(day,'M'),turnoT=computeTurnoDia(day,'T');
   /* Mini-ranking: top 3 empresas do dia em m², exibido dentro do card 📐 */
   var byEmpMini={};
   prodDia.producers.forEach(function(pr){pr.parsed.forEach(function(u){if(u.unidade==='M2')byEmpMini[pr.p.empresa]=(byEmpMini[pr.p.empresa]||0)+u.valor})});
@@ -1114,14 +1115,16 @@ function renderKPIs(day){
     {i:'🌴',l:'De Ferias',      v:day.ferias.length, f:'excluidos do efetivo',              c:'var(--amber)', click:'openPeopleModal(\'ferias\')'},
     {i:'🚫',l:'Faltosos',       v:faltosos,          f:'sem atividade — excluidos',         c:'var(--red)',   click:'openPeopleModal(\'faltosos\')'},
     {i:'🏢',l:'Empresas',       v:empCnt,            f:'ativas hoje',                       c:'var(--blue)',  click:''},
-    {i:'⚒️',l:'Funcoes',        v:funcCnt,           f:'distintas',                         c:'var(--cyan)',  click:''},
+    {i:'⚒️',l:'Funcoes',v:funcCnt,          f:'distintas',                         c:'var(--cyan)',  click:''},
+    {i:'🌅',l:'Produção manhã',      v:turnoValTxt(turnoM.totals), f:turnoFootTxt(turnoM), c:'#D97706', click:'openProducaoModal()'},
+    {i:'🌇',l:'Produção tarde',        v:turnoValTxt(turnoT.totals), f:turnoFootTxt(turnoT), c:'#7C3AED', click:'openProducaoModal()'},
     {i:'📐',l:'Produção diária', v:fmtNum(prodM2Dia)+' m²', f:day.date+' — clique para ver', c:'#0891B2', click:'openProducaoModal()', feature:true, extra:miniHtml}
   ].map(function(k){
     var clickAttr=k.click?(' onclick="'+k.click+'" role="button" tabindex="0"'):'';
     var cls='kp'+(k.click?' kp-click':'')+(k.feature?' kp-feature':'');
     return '<div class="'+cls+'" style="--kc:'+k.c+'"'+clickAttr+'><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div>'+(k.extra||'')+'</div>';
   });
-  G('kpis').innerHTML='<div class="kpis-left">'+cards.slice(0,6).join('')+'</div>'+cards.slice(6).join('');
+  G('kpis').innerHTML='<div class="kpis-left">'+cards.slice(0,8).join('')+'</div>'+cards.slice(8).join('');
 }
 
 /* ═══════ PRODUÇÃO POR UNIDADE (UN / M² / M³) ═══════ */
@@ -1165,6 +1168,37 @@ function computeProducaoDia(day){
     producers.push({p:p,parsed:parsed});
   });
   return{producers:producers,totals:totals};
+}
+
+/* Totais por TURNO: coluna normal = manha, coluna "T" = tarde.
+   Alimenta os KPIs "Producao manha" e "Producao tarde". */
+function computeTurnoDia(day,turno){
+  var s={ativ:0,prod:0,totals:{UN:0,M2:0,M3:0}};
+  if(!day)return s;
+  day.ativos.forEach(function(p){
+    var a=(turno==='T'?p.ativT:p.ativM)||'';
+    var pr=(turno==='T'?p.prodT:p.prodM)||'';
+    if(temAtividade(a))s.ativ++;
+    if(!temAtividade(pr))return;
+    s.prod++;
+    parseProducaoUnidades(pr).forEach(function(u){s.totals[u.unidade]+=u.valor});
+  });
+  return s;
+}
+function turnoValTxt(t){
+  if(t.M2>0)return fmtNum(t.M2)+' m\u00b2';
+  if(t.M3>0)return fmtNum(t.M3)+' m\u00b3';
+  if(t.UN>0)return fmtNum(t.UN)+' un';
+  return '\u2014';
+}
+function turnoFootTxt(s){
+  var t=s.totals,ex=[];
+  var prim=t.M2>0?'M2':(t.M3>0?'M3':(t.UN>0?'UN':null));
+  if(t.M2>0&&prim!=='M2')ex.push('m\u00b2 '+fmtNum(t.M2));
+  if(t.M3>0&&prim!=='M3')ex.push('m\u00b3 '+fmtNum(t.M3));
+  if(t.UN>0&&prim!=='UN')ex.push('un '+fmtNum(t.UN));
+  if(!s.ativ&&!s.prod)return 'sem lancamento neste turno';
+  return s.ativ+' com servi\u00e7o \u00b7 '+(s.prod>0?(s.prod+' com produ\u00e7\u00e3o'+(ex.length?' \u00b7 '+ex.join(' \u00b7 '):'')):'sem produ\u00e7\u00e3o');
 }
 
 function fmtNum(v){return v.toLocaleString('pt-BR',{maximumFractionDigits:2})}

@@ -48,7 +48,7 @@ input,select,button{-webkit-appearance:none;appearance:none}
    espelhando a divisão 1.618fr/1fr do .gg abaixo — o card 📐 alinha com a coluna "Por empresa" */
 @media(min-width:901px){
   #kpis{grid-template-columns:1.618fr 1fr;gap:14px}
-  #kpis .kpis-left{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;grid-auto-rows:1fr}
+  #kpis .kpis-left{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;grid-auto-rows:1fr}
   .kp-feature{display:flex;flex-direction:column;justify-content:center;background:linear-gradient(135deg,rgba(8,145,178,.10),rgba(8,145,178,.03) 55%,#fff)!important;padding:16px 18px!important}
   .kp-feature .kl{color:#0E7490!important}
   .kp-feature .kv{font-size:36px!important;color:var(--navy)!important;margin:2px 0 4px!important}
