@@ -45,6 +45,7 @@ input,select,button{-webkit-appearance:none;appearance:none}
 .btn-gr{background:var(--green);color:#fff}.btn-gr:hover{background:#047857}
 .btn-ghost{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2)}.btn-ghost:hover{background:rgba(255,255,255,.2)}
 .btn.spin svg{animation:spin .8s linear infinite}
+a.btn{text-decoration:none}
 
 .tabs{background:var(--navy2);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;position:sticky;top:var(--topbar-h);z-index:90;border-bottom:1px solid rgba(255,255,255,.06)}.tabs::-webkit-scrollbar{display:none}
 .tabs-in{max-width:1440px;margin:0 auto;display:flex;min-width:max-content}
@@ -186,13 +187,12 @@ tr.pav-detail-row td:first-child::before{content:'';position:absolute;left:20px;
   .brand h1{font-size:13px}
   .actions{width:100%;overflow-x:auto;flex-wrap:nowrap}
   .btn-label{display:none}
+  .btn-pain .btn-label{display:inline}
   .tab{padding:10px 10px;font-size:9px}
 }
 </style>
 </head>
 <body>
-<div class="print-header" id="print-header"></div>
-
 <div class="topbar"><div class="topbar-in">
   <div class="brand">
     <div class="logo">OB</div>
@@ -201,9 +201,8 @@ tr.pav-detail-row td:first-child::before{content:'';position:absolute;left:20px;
   <div class="actions">
     <span class="chip chip-warn" id="chip"><span class="livedot" style="display:none" id="livedot"></span><span id="chip-txt">carregando</span></span>
     <span style="font-family:'JetBrains Mono';font-size:9px;color:#8BADC4" id="clk">--:--</span>
+    <a class="btn btn-a btn-pain" id="bpain" href="index.html" target="_blank" rel="noopener" title="Abrir painéis" aria-label="Painéis"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg><span class="btn-label">Painéis</span></a>
     <button class="btn btn-a" id="bref" onclick="doReload()"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 11-2.6-6.4M21 3v6h-6"/></svg><span class="btn-label">Atualizar</span></button>
-    <button class="btn btn-bl" id="bprint" onclick="printReport()"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg><span class="btn-label">Imprimir</span></button>
-    <button class="btn btn-gr" id="bcsv" onclick="exportCSV()"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg><span class="btn-label">CSV</span></button>
   </div>
 </div></div>
 
@@ -785,33 +784,6 @@ function doReload(){
 
     renderAll();
   });
-}
-
-/* ============================================================ PRINT */
-function printReport(){
-  var now=new Date(),k=G.kpis||{};
-  var tabName=document.querySelector('.tab.on').textContent.trim();
-  var kpiHtml='';
-  if(k.av_pct!=null)kpiHtml+='<span style="margin-right:12px">Civil: <b>'+k.av_pct.toFixed(1)+'%</b></span>';
-  if(k.mep_pct!=null)kpiHtml+='<span>Elétrica/MEP: <b>'+k.mep_pct.toFixed(1)+'%</b></span>';
-  var ph=document.getElementById('print-header');
-  ph.innerHTML='<h1 style="font-family:Space Grotesk;font-size:20px;font-weight:700;color:var(--navy)">Relatório de Obra — '+esc(tabName)+'</h1><p style="font-family:JetBrains Mono;font-size:10px;color:var(--ink2);margin-top:4px">'+now.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})+' '+now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'</p>'+(kpiHtml?'<div style="margin-top:8px">'+kpiHtml+'</div>':'');
-  setTimeout(function(){window.print()},120);
-}
-
-/* ============================================================ EXPORT CSV */
-function csvCell(v){return'"'+String(v==null?'':v).replace(/"/g,'""')+'"'}
-function exportCSV(){
-  var on=document.querySelector('.tab.on'),tag=on?on.dataset.s:'civil';
-  var key=null;for(var k in SRC){if(SRC[k].tag===tag){key=k;break}}
-  var rows=key?G.data[key]:null;
-  if(!rows||rows.length<2){toast('Sem dados para exportar','warn');return}
-  var csv=rows.map(function(r){return r.map(csvCell).join(',')}).join('\r\n');
-  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
-  var url=URL.createObjectURL(blob),a=document.createElement('a');
-  a.href=url;a.download=((key?SRC[key].n:'dados')||'dados').replace(/\s+/g,'_')+'.csv';
-  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
-  toast('CSV exportado','ok');
 }
 
 /* ============================================================ SCHEDULER */
