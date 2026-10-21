@@ -403,7 +403,7 @@ function analyzeSec(sec){
 }
 
 /* ============================================================ RESUMO */
-function fmtDeltaBadge(delta){if(delta==null)return'';var arrow=delta>0.05?'▲':delta<-0.05?'▼':'▬';var color=delta>0.05?'var(--green)':delta<-0.05?'var(--red)':'var(--ink3)';return'<span style="font-family:\'JetBrains Mono\';font-size:11px;font-weight:700;color:'+color+';margin-left:8px;white-space:nowrap">'+arrow+' '+(delta>=0?'+':'')+delta.toFixed(1)+'pp</span>'}
+function fmtDeltaBadge(delta){if(delta==null)return'';var arrow=delta>0.05?'▲':delta<-0.05?'▼':'▬';var color=delta>0.05?'var(--green)':delta<-0.05?'var(--red)':'var(--ink3)';return'<span style="font-family:\'JetBrains Mono\';font-size:11px;font-weight:700;color:'+color+';margin-left:8px;white-space:nowrap;display:inline-block;margin-top:3px">'+arrow+' '+(delta>=0?'+':'')+delta.toFixed(1)+'pp</span>'}
 function fmtDeltaFoot(delta,prevDate){if(delta==null)return'<div class="kf">primeiro registro do histórico</div>';var nd=daysBetweenKeys(prevDate,localDateKey());var per=(nd>0&&Math.abs(delta)>0.001)?' ('+(delta/nd>=0?'+':'')+(delta/nd).toFixed(2)+'pp/dia)':'';return'<div class="kf">'+(nd<=0?'desde o último registro':nd===1?'há 1 dia':'há '+nd+' dias')+per+'</div>'}
 
 function rResumo(){try{
