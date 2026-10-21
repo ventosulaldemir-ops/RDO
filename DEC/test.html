@@ -128,6 +128,15 @@ tr.pav-detail-row td{background:#FAFBFC}
 tr.pav-detail-row td:first-child{padding-left:38px;position:relative}
 tr.pav-detail-row td:first-child::before{content:'';position:absolute;left:20px;top:0;bottom:0;width:1px;background:var(--grid)}
 
+.svc-chart{padding:12px 16px 14px}
+.svc-row{display:flex;align-items:center;gap:10px;padding:4px 0}
+.svc-name{flex:0 0 165px;font-size:11px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.svc-track{flex:1;height:11px;background:var(--grid);border-radius:4px;position:relative;min-width:50px}
+.svc-fill{position:absolute;top:0;left:0;height:100%;border-radius:4px;transition:width .6s}
+.svc-pct{flex:0 0 50px;text-align:right;font-family:'JetBrains Mono';font-size:10.5px;font-weight:700}
+.svc-meta{flex:0 0 130px;text-align:right;font-family:'JetBrains Mono';font-size:9px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:640px){.svc-chart{padding:10px}.svc-name{flex-basis:112px}.svc-meta{display:none}.svc-pct{flex-basis:44px}}
+
 #toast{position:fixed;bottom:calc(var(--safe-b) + 14px);left:14px;right:14px;z-index:200;display:none;padding:12px 18px;border-radius:6px;font-family:'JetBrains Mono';font-size:11px;font-weight:600;color:#fff;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:480px;margin:0 auto}
 
 .print-header{display:none}
@@ -221,6 +230,14 @@ tr.pav-detail-row td:first-child::before{content:'';position:absolute;left:20px;
 <section class="sh" id="s-civil"><div class="container">
   <div class="sec-h"><div><h2><span class="tag tag-civ">civil</span>Avanço Físico</h2></div></div>
   <div class="kr" id="av-kpi"></div>
+  <div class="cd">
+    <div class="cd-h"><h3>Produtividade geral por serviço</h3><span class="mt" id="av-svc-m"></span></div>
+    <div class="svc-chart" id="av-svc-chart"></div>
+  </div>
+  <div class="cd">
+    <div class="cd-h"><h3>KPIs por serviço</h3><span class="mt" id="av-svc-kpi-m"></span></div>
+    <div style="padding:12px 14px"><div class="kr" id="av-svc-kpi" style="margin-bottom:0"></div></div>
+  </div>
   <div class="cd">
     <div class="cd-t">
       <input type="text" id="favq" placeholder="Buscar serviço..." oninput="rAv()">
@@ -446,7 +463,8 @@ function rAv(){
   var rows=G.data.avanco,el=document.getElementById('av-tbl');
   if(!rows||rows.length<2){el.innerHTML='<div class="em">Carregando...</div>';return}
   var hd=rows[0],li=-1,qi=-1,ei=-1;
-  for(var i=0;i<hd.length;i++){var n=norm(hd[i]);if(n.indexOf('local')>-1||n.indexOf('pavimento')>-1)li=i;if(n.indexOf('prevista')>-1)qi=i;if(n.indexOf('executada')>-1)ei=i}
+  /* primeira correspondência: senão casa com "Notas / Localização" e o filtro de pavimento falha */
+  for(var i=0;i<hd.length;i++){var n=norm(hd[i]);if(li===-1&&(n.indexOf('local')>-1||n.indexOf('pavimento')>-1))li=i;if(n.indexOf('prevista')>-1)qi=i;if(n.indexOf('executada')>-1)ei=i}
   var q=norm(document.getElementById('favq').value),pv=document.getElementById('favp').value,k=G.kpis;
   var cards=kpiCard('▲','Avanço geral',(k.av_pct||0).toFixed(1)+'%','civil','#6B4226');
   cards+=kpiCard('🔧','Pendente',(k.av_plan!=null&&k.av_exec!=null)?(k.av_plan-k.av_exec).toFixed(1):'—','a executar','var(--red)');
@@ -455,9 +473,70 @@ function rAv(){
   cards+=kpiCard('🚧','Em execução',(k.av_cnt!=null&&k.av_at100!=null&&k.av_notstarted!=null)?(k.av_cnt-k.av_at100-k.av_notstarted):'—','entre 0% e 100%','var(--blue)');
   cards+=kpiCard('⏳','Não iniciados',k.av_notstarted!=null?k.av_notstarted:'—','0% de avanço','var(--ink3)');
   document.getElementById('av-kpi').innerHTML=cards;
-  renderAvGroupedTable(el,rows,{filter:function(r){var t=norm(r.join(' '));if(t.indexOf('total')>-1)return false;if(q&&t.indexOf(q)===-1)return false;if(pv&&li>-1&&norm((r[li]||'').trim())!==norm(pv))return false;return true}});
+  var filtro=function(r){var t=norm(r.join(' '));if(t.indexOf('total')>-1)return false;if(q&&t.indexOf(q)===-1)return false;if(pv&&li>-1&&norm((r[li]||'').trim())!==norm(pv))return false;return true};
+  renderAvGroupedTable(el,rows,{filter:filtro});
+  renderAvServicos(filtro);
   var cnt=0;for(var c=1;c<rows.length;c++){if(norm(rows[c].join(' ')).indexOf('total')===-1)cnt++}
   document.getElementById('cav').textContent=cnt+' serviços';
+}
+function fmtQ(v){return(isNaN(v)?0:v).toLocaleString('pt-BR',{maximumFractionDigits:2})}
+function svcColor(p){return p>=85?'var(--green)':p>=50?'var(--amber)':'var(--red)'}
+/* Agrega por "Disciplina / Serviço": soma previsto/executado e calcula % */
+function avSvcAgg(filter){
+  var rows=G.data.avanco,list=[],map={};
+  if(!rows||rows.length<2)return list;
+  var hd=rows[0],si=-1,li=-1,qi=-1,ei=-1,ui=-1;
+  for(var i=0;i<hd.length;i++){var n=norm(hd[i]);
+    if(si===-1&&(n.indexOf('disciplina')>-1||n.indexOf('servico')>-1))si=i;
+    if(li===-1&&(n.indexOf('local')>-1||n.indexOf('pavimento')>-1))li=i;
+    if(qi===-1&&(n.indexOf('prevista')>-1||n.indexOf('previsto')>-1))qi=i;
+    if(ei===-1&&(n.indexOf('executada')>-1||n.indexOf('executado')>-1))ei=i;
+    if(ui===-1&&n==='un')ui=i;
+  }
+  if(si===-1)return list;
+  for(var r=1;r<rows.length;r++){
+    var row=rows[r];
+    if(filter&&!filter(row))continue;
+    var name=(row[si]||'').toString().trim();
+    if(!name)continue;
+    var key=norm(name);
+    var g=map[key];
+    if(!g){g={name:name,prev:0,exec:0,cnt:0,uns:{}};map[key]=g;list.push(g)}
+    var pvv=qi>-1?num(row[qi]):NaN,evv=ei>-1?num(row[ei]):NaN;
+    if(!isNaN(pvv))g.prev+=pvv;
+    if(!isNaN(evv))g.exec+=evv;
+    g.cnt++;
+    if(ui>-1&&row[ui])g.uns[(row[ui]||'').toString().trim()]=1;
+  }
+  list.forEach(function(s){s.pct=s.prev>0?s.exec/s.prev*100:0;s.un=Object.keys(s.uns).filter(Boolean).join('+')});
+  list.sort(function(a,b){return b.pct-a.pct||b.prev-a.prev});
+  return list;
+}
+function renderAvServicos(filter){
+  var chartEl=document.getElementById('av-svc-chart'),kpiEl=document.getElementById('av-svc-kpi'),
+      mEl=document.getElementById('av-svc-m'),mk=document.getElementById('av-svc-kpi-m');
+  var agg=avSvcAgg(filter);
+  if(!agg.length){chartEl.innerHTML='<div class="em">Nenhum serviço para o filtro atual.</div>';kpiEl.innerHTML='';mEl.textContent='';mk.textContent='';return}
+  mEl.textContent=agg.length+' serviços · do mais avançado ao menos';
+  mk.textContent=agg.length+' serviço(s) · soma de todos os pavimentos';
+  var h='';
+  agg.forEach(function(s){
+    var c=svcColor(s.pct),w=Math.max(0,Math.min(100,s.pct));
+    var title=esc(s.name)+'\n'+fmtQ(s.exec)+' de '+fmtQ(s.prev)+(s.un?' '+s.un:'')+' · saldo '+fmtQ(s.prev-s.exec)+' · '+s.cnt+' lançamento(s)';
+    h+='<div class="svc-row" title="'+title.replace(/"/g,'&quot;')+'">'+
+       '<span class="svc-name">'+esc(s.name)+'</span>'+
+       '<span class="svc-track"><i class="svc-fill" style="width:'+w.toFixed(1)+'%;background:'+c+'"></i></span>'+
+       '<span class="svc-pct" style="color:'+c+'">'+s.pct.toFixed(1)+'%</span>'+
+       '<span class="svc-meta">'+fmtQ(s.exec)+'/'+fmtQ(s.prev)+(s.un?' '+esc(s.un):'')+'</span>'+
+       '</div>';
+  });
+  chartEl.innerHTML=h;
+  var cards='';
+  agg.forEach(function(s){
+    var c=svcColor(s.pct),ic=s.pct>=99.95?'✅':s.pct<=0.05?'⏳':'🔧';
+    cards+=kpiCard(ic,s.name,s.pct.toFixed(1)+'%',fmtQ(s.exec)+' de '+fmtQ(s.prev)+(s.un?' '+esc(s.un):'')+' · saldo '+fmtQ(s.prev-s.exec),c);
+  });
+  kpiEl.innerHTML=cards;
 }
 function renderAvGroupedTable(el,rows,opts){
   opts=opts||{};if(!rows||rows.length<2){el.innerHTML='<div class="em">Sem dados.</div>';return}
