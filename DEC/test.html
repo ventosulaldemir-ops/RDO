@@ -128,14 +128,27 @@ tr.pav-detail-row td{background:#FAFBFC}
 tr.pav-detail-row td:first-child{padding-left:38px;position:relative}
 tr.pav-detail-row td:first-child::before{content:'';position:absolute;left:20px;top:0;bottom:0;width:1px;background:var(--grid)}
 
-.svc-chart{padding:12px 16px 14px}
-.svc-row{display:flex;align-items:center;gap:10px;padding:4px 0}
-.svc-name{flex:0 0 165px;font-size:11px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.svc-track{flex:1;height:11px;background:var(--grid);border-radius:4px;position:relative;min-width:50px}
-.svc-fill{position:absolute;top:0;left:0;height:100%;border-radius:4px;transition:width .6s}
-.svc-pct{flex:0 0 50px;text-align:right;font-family:'JetBrains Mono';font-size:10.5px;font-weight:700}
-.svc-meta{flex:0 0 130px;text-align:right;font-family:'JetBrains Mono';font-size:9px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-@media(max-width:640px){.svc-chart{padding:10px}.svc-name{flex-basis:112px}.svc-meta{display:none}.svc-pct{flex-basis:44px}}
+/* ===== Gráfico de produtividade por serviço ===== */
+.svc-chart{padding:10px 8px 12px}
+.svc-row{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:8px;transition:background .15s}
+.svc-row:nth-child(odd){background:#F8FAFC}
+.svc-row:hover{background:#EEF2FF}
+.svc-rank{flex:0 0 22px;height:22px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono';font-size:10px;font-weight:700;color:var(--ink3);background:var(--grid);border-radius:6px}
+.svc-row:nth-child(-n+3) .svc-rank{background:linear-gradient(135deg,#FDE68A,#F59E0B);color:#78350F}
+.svc-name{flex:1 1 auto;min-width:0;font-size:12px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.svc-track{flex:2 1 60px;height:14px;background:var(--grid);border-radius:7px;position:relative;min-width:40px;box-shadow:inset 0 1px 2px rgba(0,0,0,.06)}
+.svc-fill{position:absolute;top:0;left:0;height:100%;border-radius:7px;transition:width .8s cubic-bezier(.4,0,.2,1);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.svc-fill::after{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.35),transparent);border-radius:7px 7px 0 0}
+.svc-pct{flex:0 0 auto;min-width:52px;text-align:right;font-family:'JetBrains Mono';font-size:12px;font-weight:700}
+.svc-meta{flex:0 0 135px;text-align:right;font-family:'JetBrains Mono';font-size:9.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.svc-badge{flex:0 0 auto;font-family:'JetBrains Mono';font-size:8px;font-weight:700;padding:2px 7px;border-radius:10px;text-transform:uppercase;letter-spacing:.03em}
+.svc-badge.ok{background:var(--green2);color:var(--green)}
+.svc-badge.run{background:var(--blue2);color:var(--blue)}
+.svc-badge.wait{background:var(--amber2);color:var(--amber)}
+.svc-badge.stop{background:var(--red2);color:var(--red)}
+.svc-badge.none{background:var(--grid);color:var(--ink3)}
+.svc-empty{padding:24px;text-align:center;color:var(--ink3);font-size:11px}
+@media(max-width:640px){.svc-chart{padding:8px 4px}.svc-rank{display:none}.svc-name{font-size:11px}.svc-meta{display:none}.svc-badge{display:none}.svc-row{padding:6px 8px;gap:8px}}
 
 #toast{position:fixed;bottom:calc(var(--safe-b) + 14px);left:14px;right:14px;z-index:200;display:none;padding:12px 18px;border-radius:6px;font-family:'JetBrains Mono';font-size:11px;font-weight:600;color:#fff;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:480px;margin:0 auto}
 
@@ -252,6 +265,14 @@ tr.pav-detail-row td:first-child::before{content:'';position:absolute;left:20px;
 <section class="sh" id="s-eletrica"><div class="container">
   <div class="sec-h"><div><h2><span class="tag tag-ele">mep</span>Elétrica / MEP</h2></div></div>
   <div class="kr" id="mep-kpi"></div>
+  <div class="cd">
+    <div class="cd-h"><h3>Produtividade por tipo de serviço</h3><span class="mt" id="me-svc-m"></span></div>
+    <div class="svc-chart" id="me-svc-chart"></div>
+  </div>
+  <div class="cd">
+    <div class="cd-h"><h3>KPIs por tipo de serviço</h3><span class="mt" id="me-svc-kpi-m"></span></div>
+    <div style="padding:12px 14px"><div class="kr" id="me-svc-kpi" style="margin-bottom:0"></div></div>
+  </div>
   <div class="g2">
     <div class="cd"><div class="cd-h"><h3>Por tipo</h3><span class="mt" id="mdm"></span></div><div class="cd-b" id="mdt"></div></div>
     <div class="cd"><div class="cd-h"><h3>Por pavimento</h3><span class="mt" id="mfm"></span></div><div class="cd-b" id="mft"></div></div>
@@ -481,6 +502,8 @@ function rAv(){
 }
 function fmtQ(v){return(isNaN(v)?0:v).toLocaleString('pt-BR',{maximumFractionDigits:2})}
 function svcColor(p){return p>=85?'var(--green)':p>=50?'var(--amber)':'var(--red)'}
+function svcHex(p){return p>=85?'#059669':p>=50?'#D97706':'#DC2626'}
+function svcBadge(p,prev){if(!prev||prev<=0)return['none','Sem dados'];if(p>=99.95)return['ok','Concluído'];if(p<=0.05)return['stop','Não iniciado'];if(p<50)return['wait','Atenção'];return['run','Em execução']}
 /* Agrega por "Disciplina / Serviço": soma previsto/executado e calcula % */
 function avSvcAgg(filter){
   var rows=G.data.avanco,list=[],map={};
@@ -512,22 +535,68 @@ function avSvcAgg(filter){
   list.sort(function(a,b){return b.pct-a.pct||b.prev-a.prev});
   return list;
 }
+/* Elétrica: agrega por "Tipo de Serviço". Cabeçalho na linha 1, dados da linha 2 em diante. */
+function meSvcAgg(){
+  var rows=G.data.resumo,list=[],map={};
+  if(!rows||rows.length<2)return list;
+  /* Só as seções de serviço: Consolidado por Tipo (a partir do cabeçalho da linha 1)
+     e Novas Categorias (depois do cabeçalho "Serviço / Categoria").
+     Pulamos cabealhos de seção, "Resumo por Pavimento", "Progresso por Pavimento"
+     e linhas de total, senao viram "servico" e inflam o %. */
+  var STOP=['resumo por pavimento','progresso por pavimento','novas categorias','local / pavimento'];
+  function isStopName(nn){for(var i=0;i<STOP.length;i++){if(nn.indexOf(STOP[i])>-1)return true}return false}
+  function push(name,prev,exec){
+    var key=norm(name),g=map[key];
+    if(!g){g={name:name,prev:0,exec:0,cnt:0,un:''};map[key]=g;list.push(g)}
+    if(!isNaN(prev))g.prev+=prev;
+    if(!isNaN(exec))g.exec+=exec;
+    g.cnt++;
+  }
+  /* Seção 1: Consolidado por Tipo (linhas 2..8 do CSV, ate o TOTAL GERAL COMBINADO) */
+  for(var r=1;r<rows.length;r++){
+    var row=rows[r],nn=norm(row.join(' '));
+    if(nn.indexOf('total geral combinado')>-1)break;
+    if(isB(row)||isStopName(nn))continue;
+    var name=(row[0]||'').toString().trim();
+    if(!name)continue;
+    push(name,num(row[1]),num(row[2]));
+  }
+  /* Seção 2: Novas Categorias / Serviços (depois do rotulo "Servico / Categoria") */
+  var start=-1;
+  for(var r2=0;r2<rows.length;r2++){if(norm((rows[r2][0]||''))==='servico / categoria'){start=r2+1;break}}
+  if(start>-1){
+    for(var r3=start;r3<rows.length;r3++){
+      var row3=rows[r3];
+      if(isB(row3))continue;
+      var nn3=norm(row3.join(' '));
+      if(nn3.indexOf('total')>-1)break;
+      var nm3=(row3[0]||'').toString().trim();
+      if(!nm3)continue;
+      push(nm3,num(row3[1]),num(row3[2]));
+    }
+  }
+  list.forEach(function(s){s.pct=s.prev>0?Math.min(100,s.exec/s.prev*100):0});
+  list.sort(function(a,b){return b.pct-a.pct||b.prev-a.prev});
+  return list;
+}
 function renderAvServicos(filter){
   var chartEl=document.getElementById('av-svc-chart'),kpiEl=document.getElementById('av-svc-kpi'),
       mEl=document.getElementById('av-svc-m'),mk=document.getElementById('av-svc-kpi-m');
   var agg=avSvcAgg(filter);
-  if(!agg.length){chartEl.innerHTML='<div class="em">Nenhum serviço para o filtro atual.</div>';kpiEl.innerHTML='';mEl.textContent='';mk.textContent='';return}
+  if(!agg.length){chartEl.innerHTML='<div class="svc-empty">Nenhum serviço para o filtro atual.</div>';kpiEl.innerHTML='';mEl.textContent='';mk.textContent='';return}
   mEl.textContent=agg.length+' serviços · do mais avançado ao menos';
   mk.textContent=agg.length+' serviço(s) · soma de todos os pavimentos';
   var h='';
-  agg.forEach(function(s){
-    var c=svcColor(s.pct),w=Math.max(0,Math.min(100,s.pct));
+  agg.forEach(function(s,idx){
+    var c=svcColor(s.pct),hx=svcHex(s.pct),w=Math.max(2,Math.min(100,s.pct)),bs=svcBadge(s.pct,s.prev);
     var title=esc(s.name)+'\n'+fmtQ(s.exec)+' de '+fmtQ(s.prev)+(s.un?' '+s.un:'')+' · saldo '+fmtQ(s.prev-s.exec)+' · '+s.cnt+' lançamento(s)';
     h+='<div class="svc-row" title="'+title.replace(/"/g,'&quot;')+'">'+
+       '<span class="svc-rank">'+(idx+1)+'</span>'+
        '<span class="svc-name">'+esc(s.name)+'</span>'+
-       '<span class="svc-track"><i class="svc-fill" style="width:'+w.toFixed(1)+'%;background:'+c+'"></i></span>'+
+       '<span class="svc-track"><i class="svc-fill" style="width:'+w.toFixed(1)+'%;background:linear-gradient(90deg,'+hx+' 0%,'+hx+'CC 100%)"></i></span>'+
        '<span class="svc-pct" style="color:'+c+'">'+s.pct.toFixed(1)+'%</span>'+
        '<span class="svc-meta">'+fmtQ(s.exec)+'/'+fmtQ(s.prev)+(s.un?' '+esc(s.un):'')+'</span>'+
+       '<span class="svc-badge '+bs[0]+'">'+bs[1]+'</span>'+
        '</div>';
   });
   chartEl.innerHTML=h;
@@ -596,7 +665,36 @@ function rMEP(){try{
   if(!rows){dE.innerHTML=fE.innerHTML='<div class="em">Carregando...</div>';return}
   if(ds){mkTbl(dE,ds);document.getElementById('mdm').textContent=(ds.length-1)+' tipos'}else dE.innerHTML='<div class="em">Seção não encontrada.</div>';
   if(fs){mkTbl(fE,fs);document.getElementById('mfm').textContent=(fs.length-1)+' pavimentos'}else fE.innerHTML='<div class="em">Seção não encontrada.</div>';
+  renderMeServicos();
 }catch(e){console.error('MEP',e)}}
+function renderMeServicos(){
+  var chartEl=document.getElementById('me-svc-chart'),kpiEl=document.getElementById('me-svc-kpi'),
+      mEl=document.getElementById('me-svc-m'),mk=document.getElementById('me-svc-kpi-m');
+  var agg=meSvcAgg();
+  if(!agg.length){chartEl.innerHTML='<div class="svc-empty">Nenhum tipo de serviço encontrado.</div>';kpiEl.innerHTML='';mEl.textContent='';mk.textContent='';return}
+  mEl.textContent=agg.length+' tipos · do mais avançado ao menos';
+  mk.textContent=agg.length+' tipo(s) · Consolidado por Tipo + Novas Categorias';
+  var h='';
+  agg.forEach(function(s,idx){
+    var c=svcColor(s.pct),hx=svcHex(s.pct),w=Math.max(2,Math.min(100,s.pct)),bs=svcBadge(s.pct,s.prev);
+    var title=esc(s.name)+'\n'+fmtQ(s.exec)+' de '+fmtQ(s.prev)+' · saldo '+fmtQ(s.prev-s.exec);
+    h+='<div class="svc-row" title="'+title.replace(/"/g,'&quot;')+'">'+
+       '<span class="svc-rank">'+(idx+1)+'</span>'+
+       '<span class="svc-name">'+esc(s.name)+'</span>'+
+       '<span class="svc-track"><i class="svc-fill" style="width:'+w.toFixed(1)+'%;background:linear-gradient(90deg,'+hx+' 0%,'+hx+'CC 100%)"></i></span>'+
+       '<span class="svc-pct" style="color:'+c+'">'+s.pct.toFixed(1)+'%</span>'+
+       '<span class="svc-meta">'+fmtQ(s.exec)+'/'+fmtQ(s.prev)+' itens</span>'+
+       '<span class="svc-badge '+bs[0]+'">'+bs[1]+'</span>'+
+       '</div>';
+  });
+  chartEl.innerHTML=h;
+  var cards='';
+  agg.forEach(function(s){
+    var c=svcColor(s.pct),ic=s.pct>=99.95?'✅':s.pct<=0.05?'⏳':'🔧';
+    cards+=kpiCard(ic,s.name,s.pct.toFixed(1)+'%',fmtQ(s.exec)+' de '+fmtQ(s.prev)+' itens · saldo '+fmtQ(s.prev-s.exec),c);
+  });
+  kpiEl.innerHTML=cards;
+}
 
 /* ============================================================ RENDER ALL */
 function renderAll(){
