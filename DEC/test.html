@@ -151,13 +151,59 @@ tr.pav-detail-row td:first-child::before{content:'';position:absolute;left:20px;
 .svc-empty{padding:24px;text-align:center;color:var(--ink3);font-size:11px}
 @media(max-width:640px){.svc-chart{padding:8px 4px}.svc-rank{display:none}.svc-name{font-size:11px}.svc-meta{display:none}.svc-badge{display:none}.svc-row{padding:6px 8px;gap:8px}}
 
+/* ===== Detalhe do serviço / pavimento / atenção / mapa ===== */
+.svc-row{cursor:pointer}
+.svc-row.on{background:rgba(11,29,51,.07);box-shadow:inset 0 0 0 1.5px var(--navy)}
+.kp[data-svc]{cursor:pointer}
+.kp[data-svc]:hover{box-shadow:0 4px 14px rgba(11,29,51,.18)}
+.dt{border:1px solid var(--line);border-radius:6px;background:var(--w);margin-bottom:12px;box-shadow:0 6px 18px rgba(11,29,51,.12);scroll-margin-top:calc(var(--topbar-h) + 58px)}
+.dt-h{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--navy);color:#fff}
+.dt-h h3{font-family:'Space Grotesk';font-size:13px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dt-h small{font-family:'JetBrains Mono';font-size:9px;color:#8BADC4;flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right}
+.dt-x{background:rgba(255,255,255,.14);border:none;color:#fff;width:26px;height:26px;border-radius:4px;cursor:pointer;font-size:14px;line-height:1;flex-shrink:0}
+.dt-x:hover{background:rgba(255,255,255,.32)}
+.dt-b{padding:12px 14px}
+.dt-sum{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.dt-chip{font-family:'JetBrains Mono';font-size:10px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:4px 9px;color:var(--ink2)}
+.dt-chip b{color:var(--navy)}
+.dt-tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.dt-note{font-size:10px;color:var(--ink3);margin-top:9px;line-height:1.55}
+.dt-note b{color:var(--ink2)}
+.pb{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dashed var(--grid);cursor:pointer}
+.pb:last-child{border-bottom:none}
+.pb:hover{background:rgba(11,29,51,.03)}
+.pbars.mute .pb,.pbars.mute .pb:hover{cursor:default;background:transparent}
+.pb-n{font-family:'JetBrains Mono';font-size:10px;font-weight:700;color:var(--navy);min-width:92px;flex-shrink:0}
+.pb-t{flex:1;min-width:0}
+.pb-p{font-family:'JetBrains Mono';font-size:11px;font-weight:700;min-width:46px;text-align:right;flex-shrink:0}
+.pb-m{font-family:'JetBrains Mono';font-size:9px;color:var(--ink3);min-width:112px;text-align:right;flex-shrink:0}
+.risk{display:flex;flex-direction:column;gap:8px}
+.risk-i{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:5px;background:#fff;cursor:pointer}
+.risk-i.red{border-left-color:var(--red)}
+.risk-i:hover{background:#FFFBEB}
+.risk-i .ri-n{flex:1;min-width:0;font-size:12px;font-weight:600;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.risk-i .ri-p{font-family:'JetBrains Mono';font-size:12px;font-weight:700}
+.risk-i .ri-s{font-family:'JetBrains Mono';font-size:10px;color:var(--ink2);white-space:nowrap}
+.hm-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:12px 14px}
+table.hm{border-collapse:separate;border-spacing:3px;font-family:'JetBrains Mono';font-size:9px}
+table.hm th{font-size:9px;color:var(--ink3);font-weight:600;text-align:left;padding:4px 6px;white-space:normal;max-width:66px;vertical-align:bottom;line-height:1.25}
+table.hm td.pavn{font-size:10px;font-weight:700;color:var(--navy);white-space:nowrap;padding-right:6px;position:sticky;left:0;background:var(--w);z-index:1}
+.hm-c{min-width:54px;height:32px;text-align:center;border-radius:4px;cursor:pointer;font-weight:700;border:1px solid rgba(11,29,51,.06)}
+.hm-c:hover{outline:2px solid var(--navy)}
+.hm-c.sel{outline:2px solid var(--navy);outline-offset:-2px}
+.sk{background:linear-gradient(90deg,#E8EEF5 25%,#F6F9FC 50%,#E8EEF5 75%);background-size:200% 100%;animation:skm 1.2s linear infinite;border-radius:5px;height:15px;margin:9px 0}
+@keyframes skm{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@media(max-width:640px){.pb-m{display:none}.pb-n{min-width:74px}.hm-wrap{padding:8px}.dt-b{padding:10px}.risk-i .ri-s{display:none}}
+
+#av-detail,#me-detail,#av-err,#me-err{display:none}
 #toast{position:fixed;bottom:calc(var(--safe-b) + 14px);left:14px;right:14px;z-index:200;display:none;padding:12px 18px;border-radius:6px;font-family:'JetBrains Mono';font-size:11px;font-weight:600;color:#fff;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:480px;margin:0 auto}
 
 .print-header{display:none}
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   body{background:#fff!important;font-size:11px!important;padding:0!important}
-  .topbar,.tabs,.cd-t,footer,#toast{display:none!important}
+  .topbar,.tabs,.cd-t,footer,#av-detail,#me-detail,#av-err,#me-err{display:none}
+#toast{display:none!important}
   .print-header{display:block!important;padding:10px 0 8px;border-bottom:3px solid var(--navy);margin-bottom:12px}
   .print-header h1{font-family:'Space Grotesk';font-size:18px;font-weight:700;color:var(--navy)}
   .sh{display:none!important}.sh.on{display:block!important;animation:none!important}
@@ -241,14 +287,28 @@ tr.pav-detail-row td:first-child::before{content:'';position:absolute;left:20px;
 <!-- ===== ABA CIVIL ===== -->
 <section class="sh" id="s-civil"><div class="container">
   <div class="sec-h"><div><h2><span class="tag tag-civ">civil</span>Avanço Físico</h2></div></div>
+  <div id="av-detail"></div>
+  <div id="av-err"></div>
   <div class="kr" id="av-kpi"></div>
+  <div class="cd">
+    <div class="cd-h"><h3>Avanço por pavimento</h3><span class="mt" id="av-pav-m"></span></div>
+    <div class="cd-b pbars" id="av-pav" style="padding:8px 14px"></div>
+  </div>
   <div class="cd">
     <div class="cd-h"><h3>Produtividade geral por serviço</h3><span class="mt" id="av-svc-m"></span></div>
     <div class="svc-chart" id="av-svc-chart"></div>
   </div>
   <div class="cd">
+    <div class="cd-h"><h3>Serviços em atenção</h3><span class="mt" id="av-risk-m"></span></div>
+    <div class="cd-b risk" id="av-risk" style="padding:12px 14px"></div>
+  </div>
+  <div class="cd">
     <div class="cd-h"><h3>KPIs por serviço</h3><span class="mt" id="av-svc-kpi-m"></span></div>
     <div style="padding:12px 14px"><div class="kr" id="av-svc-kpi" style="margin-bottom:0"></div></div>
+  </div>
+  <div class="cd">
+    <div class="cd-h"><h3>Mapa de avanço — pavimento × serviço</h3><span class="mt" id="av-hm-m"></span></div>
+    <div class="hm-wrap" id="av-hm"></div>
   </div>
   <div class="cd">
     <div class="cd-t">
@@ -263,10 +323,20 @@ tr.pav-detail-row td:first-child::before{content:'';position:absolute;left:20px;
 <!-- ===== ABA ELÉTRICA ===== -->
 <section class="sh" id="s-eletrica"><div class="container">
   <div class="sec-h"><div><h2><span class="tag tag-ele">mep</span>Elétrica / MEP</h2></div></div>
+  <div id="me-detail"></div>
+  <div id="me-err"></div>
   <div class="kr" id="mep-kpi"></div>
+  <div class="cd">
+    <div class="cd-h"><h3>Avanço por pavimento</h3><span class="mt" id="me-pav-m"></span></div>
+    <div class="cd-b pbars" id="me-pav" style="padding:8px 14px"></div>
+  </div>
   <div class="cd">
     <div class="cd-h"><h3>Produtividade por tipo de serviço</h3><span class="mt" id="me-svc-m"></span></div>
     <div class="svc-chart" id="me-svc-chart"></div>
+  </div>
+  <div class="cd">
+    <div class="cd-h"><h3>Tipos em atenção</h3><span class="mt" id="me-risk-m"></span></div>
+    <div class="cd-b risk" id="me-risk" style="padding:12px 14px"></div>
   </div>
   <div class="cd">
     <div class="cd-h"><h3>KPIs por tipo de serviço</h3><span class="mt" id="me-svc-kpi-m"></span></div>
@@ -292,8 +362,7 @@ var SRC={
   resumo:{id:'1lG1fYSpUsFxlCLTdMH_ddGcLudrL9BxGqo3R8WFN5Lo',gid:'0',n:'Acompanhamento',disc:'Eletrica/MEP',tag:'eletrica'}
 };
 var KEYS=['avanco','resumo'];
-var SCHED_H1=7,SCHED_H2=17;
-var G={data:{},diag:[],kpis:{},mepAgg:{},lastReloadHour:null};
+var G={data:{},diag:[],kpis:{},mepAgg:{},lastReloadAt:0};
 
 /* ============================================================ HELPERS */
 function norm(s){return(s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim()}
@@ -346,7 +415,7 @@ function calcKPIs(){
   var av=G.data.avanco;
   if(av&&av.length>1){
     var hd=av[0],qi=-1,ei=-1,pi=-1,li=-1;
-    for(var j=0;j<hd.length;j++){var hn=norm(hd[j]);if(hn.indexOf('prevista')>-1)qi=j;if(hn.indexOf('executada')>-1)ei=j;if(isPct(hd[j]))pi=j;if(hn.indexOf('local')>-1||hn.indexOf('pavimento')>-1)li=j}
+    for(var j=0;j<hd.length;j++){var hn=norm(hd[j]);if(hn.indexOf('prevista')>-1)qi=j;if(hn.indexOf('executada')>-1)ei=j;if(isPct(hd[j]))pi=j;if(li===-1&&(hn.indexOf('local')>-1||hn.indexOf('pavimento')>-1))li=j}
     var tp=0,te=0,cnt=0,bh=0,at100=0,notstarted=0;
     var byPav={};
     for(var r=1;r<av.length;r++){
@@ -427,6 +496,10 @@ function rResumo(){try{
   cards+=kpiCard('⚠','Itens abaixo de 50%',(k.av_bh||0)+(aT?aT.below50:0),(k.av_bh||0)+' civil + '+(aT?aT.below50:0)+' elétrica','var(--amber)');
   cards+=kpiCard('⏳','Não iniciados',(k.av_notstarted||0)+(aT?aT.notStarted:0),(k.av_notstarted||0)+' civil + '+(aT?aT.notStarted:0)+' elétrica','var(--ink3)');
   cards+=kpiCard('📊','Itens monitorados',civCnt+mepCnt,civCnt+' civil + '+mepCnt+' elétrica','var(--blue)');
+  var pr=projFromHist(hist);
+  if(pr&&pr.ok)cards+=kpiCard('📅','Projeção de conclusão',pr.data,'ritmo '+pr.ritmo.toFixed(2)+' pp/dia · '+(pr.dias>0?pr.dias+' dias para 100% (pond.)':'atingido agora'),pr.dias<=45?'var(--green)':pr.dias<=120?'var(--amber)':'var(--red)');
+  else if(pr&&pr.ritmo!=null)cards+=kpiCard('📅','Projeção de conclusão','—','ritmo '+(pr.ritmo>=0?'+':'')+pr.ritmo.toFixed(2)+' pp/dia · sem avanço recente','var(--ink3)');
+  else cards+=kpiCard('📅','Projeção de conclusão','—','histórico curto (mín. 2 dias)','var(--ink3)');
   document.getElementById('res-kpi').innerHTML=cards;
   document.getElementById('res-cmp').innerHTML='<div>'+mkBarThick(civPct,'#6B4226','Civil'+(dCiv!=null?' ('+fmtDelta(dCiv)+')':''))+mkBarThick(mepPct,'var(--blue)','Elétrica/MEP'+(dMep!=null?' ('+fmtDelta(dMep)+')':''))+'</div>';
   document.getElementById('res-cmp-m').textContent=civCnt+' serviços civil · '+mepCnt+' tipos elétrica/mep';
@@ -589,7 +662,7 @@ function renderAvServicos(filter){
   agg.forEach(function(s,idx){
     var c=svcColor(s.pct),hx=svcHex(s.pct),w=Math.max(2,Math.min(100,s.pct)),bs=svcBadge(s.pct,s.prev);
     var title=esc(s.name)+'\n'+fmtQ(s.exec)+' de '+fmtQ(s.prev)+(s.un?' '+s.un:'')+' · saldo '+fmtQ(s.prev-s.exec)+' · '+s.cnt+' lançamento(s)';
-    h+='<div class="svc-row" title="'+title.replace(/"/g,'&quot;')+'">'+
+    h+='<div class="svc-row" data-svc="'+esc(s.name)+'" title="'+title.replace(/"/g,'&quot;')+'">'+
        '<span class="svc-rank">'+(idx+1)+'</span>'+
        '<span class="svc-name">'+esc(s.name)+'</span>'+
        '<span class="svc-track"><i class="svc-fill" style="width:'+w.toFixed(1)+'%;background:linear-gradient(90deg,'+hx+' 0%,'+hx+'CC 100%)"></i></span>'+
@@ -605,6 +678,9 @@ function renderAvServicos(filter){
     cards+=kpiCard(ic,s.name,s.pct.toFixed(1)+'%',fmtQ(s.exec)+' de '+fmtQ(s.prev)+(s.un?' '+esc(s.un):'')+' · saldo '+fmtQ(s.prev-s.exec),c);
   });
   kpiEl.innerHTML=cards;
+  var cEls=kpiEl.querySelectorAll('.kp');
+  agg.forEach(function(s,i){if(cEls[i])cEls[i].setAttribute('data-svc',s.name)});
+  try{syncSvcDetail()}catch(e){}
 }
 function renderAvGroupedTable(el,rows,opts){
   opts=opts||{};if(!rows||rows.length<2){el.innerHTML='<div class="em">Sem dados.</div>';return}
@@ -651,7 +727,7 @@ function rMEP(){try{
   var ds=rows?fixHdr(secSlice(rows,'consolidado por tipo',['resumo por pavimento']),'Tipo'):null;
   var fs=rows?fixHdr(secSlice(rows,'resumo por pavimento',['progresso por pavimento']),'Local / Pavimento'):null;
   var aT=analyzeSec(ds),aP=analyzeSec(fs);
-  G.mepAgg={aT:aT,aP:aP,tipoCount:ds?ds.length-2:0,pavCount:fs?fs.length-2:0};
+  G.mepAgg={aT:aT,aP:aP,tipoCount:ds?ds.length-2:0,pavCount:fs?fs.length-2:0,pavRows:fs};
   var cards='';
   cards+=kpiCard('⚡','Avanço geral',(k.mep_pct||0).toFixed(1)+'%',(k.mep_exec!=null&&k.mep_plan!=null?(k.mep_exec+' de '+k.mep_plan+' pts'):''),'var(--blue)');
   var pendTotal=(k.mep_plan!=null&&k.mep_exec!=null)?(k.mep_plan-k.mep_exec):(aT?aT.totalPend:null);
@@ -677,7 +753,7 @@ function renderMeServicos(){
   agg.forEach(function(s,idx){
     var c=svcColor(s.pct),hx=svcHex(s.pct),w=Math.max(2,Math.min(100,s.pct)),bs=svcBadge(s.pct,s.prev);
     var title=esc(s.name)+'\n'+fmtQ(s.exec)+' de '+fmtQ(s.prev)+' · saldo '+fmtQ(s.prev-s.exec);
-    h+='<div class="svc-row" title="'+title.replace(/"/g,'&quot;')+'">'+
+    h+='<div class="svc-row" data-svc="'+esc(s.name)+'" title="'+title.replace(/"/g,'&quot;')+'">'+
        '<span class="svc-rank">'+(idx+1)+'</span>'+
        '<span class="svc-name">'+esc(s.name)+'</span>'+
        '<span class="svc-track"><i class="svc-fill" style="width:'+w.toFixed(1)+'%;background:linear-gradient(90deg,'+hx+' 0%,'+hx+'CC 100%)"></i></span>'+
@@ -693,12 +769,290 @@ function renderMeServicos(){
     cards+=kpiCard(ic,s.name,s.pct.toFixed(1)+'%',fmtQ(s.exec)+' de '+fmtQ(s.prev)+' itens · saldo '+fmtQ(s.prev-s.exec),c);
   });
   kpiEl.innerHTML=cards;
+  var cEls=kpiEl.querySelectorAll('.kp');
+  agg.forEach(function(s,i){if(cEls[i])cEls[i].setAttribute('data-svc',s.name)});
+  try{syncSvcDetail()}catch(e){}
+}
+
+/* ============================================================ DRILL-DOWN: ONDE ESTÁ O SERVIÇO */
+var DT={front:null,name:null};
+function detailHost(front){return document.getElementById(front==='civil'?'av-detail':'me-detail')}
+function closeSvcDetail(){DT.front=null;DT.name=null;
+  ['av-detail','me-detail'].forEach(function(id){var el=document.getElementById(id);if(el){el.style.display='none';el.innerHTML=''}});
+  document.querySelectorAll('.svc-row.on').forEach(function(r){r.classList.remove('on')});
+  document.querySelectorAll('.hm-c.sel').forEach(function(c){c.classList.remove('sel')});
+}
+function openSvcDetail(front,name){
+  if(!name)return;
+  DT.front=front;DT.name=name;
+  var other=detailHost(front==='civil'?'mep':'civil');
+  if(other){other.style.display='none';other.innerHTML=''}
+  var host=detailHost(front);
+  host.innerHTML=front==='civil'?avDetailHTML(name):meDetailHTML(name);
+  host.style.display=host.innerHTML?'block':'none';
+  syncSvcSel();
+  if(host.innerHTML)host.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function syncSvcSel(){
+  document.querySelectorAll('.svc-row').forEach(function(r){r.classList.toggle('on',!!DT.name&&r.getAttribute('data-svc')===DT.name)});
+  document.querySelectorAll('.hm-c').forEach(function(c){c.classList.toggle('sel',!!DT.name&&c.getAttribute('data-svc')===DT.name)});
+}
+function syncSvcDetail(){if(!DT.front||!DT.name)return;var host=detailHost(DT.front);if(!host||host.style.display==='none')return;host.innerHTML=DT.front==='civil'?avDetailHTML(DT.name):meDetailHTML(DT.name);syncSvcSel()}
+function avHdr(){
+  var rows=G.data.avanco;
+  if(!rows||rows.length<2)return null;
+  var hd=rows[0],si=-1,li=-1,qi=-1,ei=-1,ui=-1,pi=-1,ni=-1;
+  for(var i=0;i<hd.length;i++){var n=norm(hd[i]);
+    if(si===-1&&(n.indexOf('disciplina')>-1||n.indexOf('servico')>-1))si=i;
+    if(li===-1&&(n.indexOf('local')>-1||n.indexOf('pavimento')>-1))li=i;
+    if(qi===-1&&(n.indexOf('prevista')>-1||n.indexOf('previsto')>-1))qi=i;
+    if(ei===-1&&(n.indexOf('executada')>-1||n.indexOf('executado')>-1))ei=i;
+    if(ui===-1&&n==='un')ui=i;
+    if(pi===-1&&isPct(hd[i]))pi=i;
+    if(ni===-1&&n.indexOf('nota')>-1)ni=i}
+  if(si===-1||li===-1)return null;
+  return{hd:hd,si:si,li:li,qi:qi,ei:ei,ui:ui,pi:pi,ni:ni};
+}
+function avDetailHTML(name){
+  var C=avHdr();if(!C)return'';
+  var rows=G.data.avanco,list=[],tp=0,te=0;
+  for(var r=1;r<rows.length;r++){var row=rows[r];
+    if(norm(row.join(' ')).indexOf('total')>-1)continue;
+    if(norm((row[C.si]||''))!==norm(name))continue;
+    var pv=num(row[C.qi]),ev=num(row[C.ei]);
+    if(!isNaN(pv))tp+=pv;
+    if(!isNaN(ev))te+=ev;
+    list.push(row)}
+  if(!list.length)return'';
+  var pct=tp>0?te/tp*100:0,bs=svcBadge(pct,tp);
+  var h='<div class="dt"><div class="dt-h"><h3>'+esc(name)+'</h3><small>'+list.length+' registro(s) por '+esc(C.hd[C.li]||'local')+'</small><button class="dt-x" onclick="closeSvcDetail()" aria-label="Fechar">✕</button></div><div class="dt-b">';
+  h+='<div class="dt-sum">'+
+     '<span class="dt-chip">Progresso <b style="color:'+svcColor(pct)+'">'+pct.toFixed(1)+'%</b></span>'+
+     '<span class="dt-chip">Previsto <b>'+fmtQ(tp)+'</b></span>'+
+     '<span class="dt-chip">Executado <b>'+fmtQ(te)+'</b></span>'+
+     '<span class="dt-chip">Saldo <b>'+fmtQ(tp-te)+'</b></span>'+
+     (C.ui>-1&&list[0][C.ui]?'<span class="dt-chip">UN <b>'+esc(list[0][C.ui])+'</b></span>':'')+
+     '<span class="dt-chip">'+bs[1]+'</span></div>';
+  var cols=[];
+  for(var c2=0;c2<C.hd.length;c2++){if(c2===C.li||c2===C.si)continue;if(!C.hd[c2])continue;cols.push(c2)}
+  h+='<div class="dt-tbl-wrap"><table class="t"><thead><tr><th>'+esc(C.hd[C.li]||'Local')+'</th>';
+  cols.forEach(function(c2){h+='<th>'+esc(C.hd[c2])+'</th>'});
+  h+='</tr></thead><tbody>';
+  list.forEach(function(row){
+    h+='<tr><td style="font-weight:700">'+esc(row[C.li]||'—')+'</td>';
+    cols.forEach(function(c2){var raw=row[c2]!==undefined?row[c2]:'';
+      if(c2===C.pi&&raw.toString().trim())h+='<td class="pc">'+mkBar(num(raw))+'</td>';
+      else if(raw.toString().trim()&&/[0-9]/.test(raw.toString())&&!isNaN(num(raw)))h+='<td class="nr">'+esc(raw)+'</td>';
+      else h+='<td>'+esc(raw)+'</td>'});
+    h+='</tr>'});
+  h+='</tbody></table></div>';
+  if(C.ni>-1){var notes=[];list.forEach(function(row){var t=(row[C.ni]||'').toString().trim();if(t&&notes.indexOf(t)===-1)notes.push(t)});
+    if(notes.length)h+='<div class="dt-note"><b>Onde executar (Notas / Localização):</b> '+esc(notes.join(' · '))+'</div>'}
+  h+='</div></div>';
+  return h;
+}
+function meDetailHTML(name){
+  var rows=G.data.resumo;if(!rows||rows.length<2)return'';
+  var STOP=['resumo por pavimento','progresso por pavimento','novas categorias','local / pavimento'];
+  function isStop(nn){for(var i=0;i<STOP.length;i++){if(nn.indexOf(STOP[i])>-1)return true}return false}
+  var hit=null,sec='';
+  for(var r=1;r<rows.length;r++){var row=rows[r],nn=norm(row.join(' '));
+    if(nn.indexOf('total geral combinado')>-1)break;
+    if(isB(row)||isStop(nn))continue;
+    if(norm((row[0]||''))===norm(name)){hit=row;sec='Consolidado por Tipo';break}}
+  if(!hit){var start=-1;
+    for(var r2=0;r2<rows.length;r2++){if(norm((rows[r2][0]||''))==='servico / categoria'){start=r2+1;break}}
+    if(start>-1){for(var r3=start;r3<rows.length;r3++){var row3=rows[r3];
+      if(isB(row3))continue;
+      var nn3=norm(row3.join(' '));
+      if(nn3.indexOf('total')>-1)break;
+      if(norm((row3[0]||''))===norm(name)){hit=row3;sec='Novas Categorias';break}}}}
+  var h='<div class="dt"><div class="dt-h"><h3>'+esc(name)+'</h3><small>'+esc(sec||'tipo de serviço')+'</small><button class="dt-x" onclick="closeSvcDetail()" aria-label="Fechar">✕</button></div><div class="dt-b">';
+  if(hit){
+    var prev=num(hit[1]),ex=num(hit[2]),sal=num(hit[3]),pct4=num(hit[4]);
+    var pct=isNaN(pct4)?(prev>0?Math.min(100,ex/prev*100):0):pct4;
+    if(isNaN(sal))sal=prev-ex;
+    var bs=svcBadge(pct,prev);
+    h+='<div class="dt-sum">'+
+      '<span class="dt-chip">Progresso <b style="color:'+svcColor(pct)+'">'+pct.toFixed(1)+'%</b></span>'+
+      '<span class="dt-chip">Previsto <b>'+fmtQ(prev)+'</b></span>'+
+      '<span class="dt-chip">Executado <b>'+fmtQ(ex)+'</b></span>'+
+      '<span class="dt-chip">Pendente <b>'+fmtQ(sal)+'</b></span>'+
+      '<span class="dt-chip">'+bs[1]+'</span></div>';
+  }
+  var pavSec=secSlice(rows,'resumo por pavimento',['progresso por pavimento']);
+  var pavH='';
+  if(pavSec){for(var p=1;p<pavSec.length;p++){var pr=pavSec[p];if(isB(pr))continue;
+    var pn=(pr[0]||'').toString().trim();
+    if(!pn||norm(pn).indexOf('total')>-1||norm(pn)==='local / pavimento')continue;
+    var ppv=num(pr[1]),pev=num(pr[2]),ppc=num(pr[4]);
+    var ppct=isNaN(ppc)?(ppv>0?Math.min(100,pev/ppv*100):0):ppc;
+    pavH+='<div class="pb"><span class="pb-n">'+esc(pn)+'</span><span class="pb-t">'+mkBar(ppct)+'</span><span class="pb-p" style="color:'+svcColor(ppct)+'">'+ppct.toFixed(1)+'%</span><span class="pb-m">'+fmtQ(pev)+'/'+fmtQ(ppv)+' · saldo '+fmtQ(ppv-pev)+'</span></div>'}}
+  h+='<div class="dt-note">Avanço da frente por local — a planilha não cruza tipo × pavimento:</div>';
+  h+='<div class="pbars mute" style="margin-top:6px">'+(pavH||'<div class="em">Sem dados por pavimento.</div>')+'</div>';
+  h+='</div></div>';
+  return h;
+}
+/* ============================================================ PAVIMENTOS */
+function renderPavPanel(){
+  var el=document.getElementById('av-pav'),m=document.getElementById('av-pav-m');
+  if(el){
+    var by=(G.kpis||{}).av_byPav||{},keys=Object.keys(by);
+    if(!keys.length)el.innerHTML='<div class="em">Sem dados de pavimento.</div>';
+    else{var h='';
+      keys.forEach(function(p){var g=by[p],pct=g.prev>0?Math.min(100,g.exec/g.prev*100):0;
+        h+='<div class="pb" data-pav="'+esc(p)+'" title="Clique para filtrar a tabela por este pavimento"><span class="pb-n">'+esc(p)+'</span><span class="pb-t">'+mkBar(pct)+'</span><span class="pb-p" style="color:'+svcColor(pct)+'">'+pct.toFixed(1)+'%</span><span class="pb-m">'+fmtQ(g.exec)+'/'+fmtQ(g.prev)+' · '+g.cnt+' itens</span></div>'});
+      el.innerHTML=h}
+    if(m)m.textContent=keys.length+' locais · clique para filtrar a tabela';
+  }
+  var el2=document.getElementById('me-pav'),m2=document.getElementById('me-pav-m');
+  if(el2){
+    var fs=(G.mepAgg||{}).pavRows,h2='';
+    if(fs&&fs.length>1){for(var p2=1;p2<fs.length;p2++){var row=fs[p2];if(isB(row))continue;
+      var nm=(row[0]||'').toString().trim();
+      if(!nm||norm(nm).indexOf('total')>-1||norm(nm)==='local / pavimento')continue;
+      var pv=num(row[1]),ev=num(row[2]),pc=num(row[4]);
+      var pct=isNaN(pc)?(pv>0?Math.min(100,ev/pv*100):0):pc;
+      var pend=num(row[3]);if(isNaN(pend))pend=pv-ev;
+      h2+='<div class="pb"><span class="pb-n">'+esc(nm)+'</span><span class="pb-t">'+mkBar(pct)+'</span><span class="pb-p" style="color:'+svcColor(pct)+'">'+pct.toFixed(1)+'%</span><span class="pb-m">'+fmtQ(ev)+'/'+fmtQ(pv)+' · saldo '+fmtQ(pend)+'</span></div>'}}
+    el2.innerHTML=h2||'<div class="em">Sem dados de pavimento.</div>';
+    if(m2)m2.textContent=(h2.match(/class="pb"/g)||[]).length+' locais';
+  }
+}
+/* ============================================================ SERVIÇOS EM ATENÇÃO */
+function renderRisk(){
+  riskList('av-risk','av-risk-m',avSvcAgg(),'civil');
+  riskList('me-risk','me-risk-m',meSvcAgg(),'mep');
+}
+function riskList(elId,mId,agg,front){
+  var el=document.getElementById(elId),m=document.getElementById(mId);if(!el)return;
+  var list=agg.filter(function(s){return s.prev>0&&s.pct<50}).sort(function(a,b){return (b.prev-b.exec)-(a.prev-a.exec)});
+  var tot=0;list.forEach(function(s){tot+=s.prev-s.exec});
+  if(m)m.textContent=list.length?list.length+' abaixo de 50% · saldo total '+fmtQ(tot):'nenhum abaixo de 50%';
+  if(!list.length){el.innerHTML='<div class="em" style="color:var(--green);font-weight:700">Nenhum serviço abaixo de 50% — tudo em dia.</div>';return}
+  var h='';
+  list.slice(0,8).forEach(function(s){
+    h+='<div class="risk-i'+(s.pct<=0.05?' red':'')+'" data-svc="'+esc(s.name)+'" title="Clique para ver onde este serviço está"><span class="ri-n">'+esc(s.name)+'</span><span class="ri-p" style="color:'+svcColor(s.pct)+'">'+s.pct.toFixed(1)+'%</span><span class="ri-s">saldo '+fmtQ(s.prev-s.exec)+(s.un?' '+esc(s.un):'')+'</span></div>'});
+  if(list.length>8)h+='<div class="em">+ '+(list.length-8)+' outros abaixo de 50% · clique em um acima para detalhar</div>';
+  el.innerHTML=h;
+}
+/* ============================================================ MAPA PAVIMENTO × SERVIÇO */
+function hexRGBA(hex,a){var hx=(hex||'').replace('#','');if(hx.length===3)hx=hx[0]+hx[0]+hx[1]+hx[1]+hx[2]+hx[2];var r=parseInt(hx.substr(0,2),16),g=parseInt(hx.substr(2,2),16),b=parseInt(hx.substr(4,2),16);if(isNaN(r))return'rgba(148,163,184,.25)';return'rgba('+r+','+g+','+b+','+a+')'}
+function renderHeatmap(){
+  var el=document.getElementById('av-hm'),m=document.getElementById('av-hm-m');if(!el)return;
+  var rows=G.data.avanco;
+  if(!rows||rows.length<2){el.innerHTML='<div class="em">Carregando...</div>';return}
+  var C=avHdr();
+  if(!C){el.innerHTML='<div class="em">Estrutura de colunas não reconhecida.</div>';return}
+  var pavs=[],svcs=[],map={},dispP={},dispS={};
+  for(var r=1;r<rows.length;r++){var row=rows[r];
+    if(norm(row.join(' ')).indexOf('total')>-1)continue;
+    var sv=(row[C.si]||'').toString().trim(),pv=(row[C.li]||'').toString().trim();
+    if(!sv||!pv)continue;
+    var sk=norm(sv),pk=norm(pv);
+    if(svcs.indexOf(sk)===-1){svcs.push(sk);dispS[sk]=sv}
+    if(pavs.indexOf(pk)===-1){pavs.push(pk);dispP[pk]=pv}
+    var key=pk+'@'+sk,g=map[key];
+    if(!g){g={prev:0,exec:0,name:sv};map[key]=g}
+    var pvv=num(row[C.qi]),evv=num(row[C.ei]);
+    if(!isNaN(pvv))g.prev+=pvv;
+    if(!isNaN(evv))g.exec+=evv;
+  }
+  if(!svcs.length||!pavs.length){el.innerHTML='<div class="em">Sem dados para o mapa.</div>';if(m)m.textContent='';return}
+  var h='<table class="hm"><thead><tr><th style="min-width:78px;position:sticky;left:0;background:#fff;z-index:2"></th>';
+  svcs.forEach(function(sk){h+='<th>'+esc(dispS[sk])+'</th>'});
+  h+='<th style="text-align:right">% local</th></tr></thead><tbody>';
+  pavs.forEach(function(pk){
+    var rPrev=0,rExec=0;
+    h+='<tr><td class="pavn">'+esc(dispP[pk])+'</td>';
+    svcs.forEach(function(sk){
+      var g=map[pk+'@'+sk];
+      if(!g){h+='<td class="hm-c" style="background:#F1F5F9;color:#CBD5E1;cursor:default" title="sem lançamento">—</td>';return}
+      rPrev+=g.prev;rExec+=g.exec;
+      var pct=g.prev>0?Math.min(100,g.exec/g.prev*100):0,hx=svcHex(pct);
+      h+='<td class="hm-c" data-svc="'+esc(g.name)+'" title="'+esc(dispP[pk])+' · '+esc(g.name)+': '+fmtQ(g.exec)+'/'+fmtQ(g.prev)+' ('+pct.toFixed(1)+'%)" style="background:'+hexRGBA(hx,0.10+Math.min(1,pct/100)*0.45)+';color:'+hx+'">'+pct.toFixed(0)+'%</td>';
+    });
+    var rpct=rPrev>0?Math.min(100,rExec/rPrev*100):0;
+    h+='<td class="hm-c" style="background:'+hexRGBA(svcHex(rpct),0.9)+';color:#fff;cursor:default">'+rpct.toFixed(0)+'%</td></tr>';
+  });
+  h+='</tbody></table>';
+  el.innerHTML=h;
+  if(m)m.textContent=pavs.length+' locais × '+svcs.length+' serviços · clique numa célula';
+}
+/* ============================================================ PROJEÇÃO DE CONCLUSÃO */
+function projFromHist(hist){
+  if(!hist||hist.length<2)return null;
+  var last=hist[hist.length-1];
+  var idx=hist.length>7?hist.length-7:0;
+  var base=hist[idx],dd=daysBetweenKeys(base.date,last.date);
+  if(dd<1){base=hist[0];dd=daysBetweenKeys(base.date,last.date)}
+  if(dd<1)return{ritmo:0,ok:false};
+  var ritmo=(last.pond-base.pond)/dd,falta=100-last.pond;
+  if(falta<=0)return{ritmo:ritmo,dias:0,ok:true,data:'atingido'};
+  if(!(ritmo>0.01))return{ritmo:ritmo,ok:false,falta:falta};
+  var dias=Math.ceil(falta/ritmo);
+  var d=new Date();d.setDate(d.getDate()+dias);
+  return{ritmo:ritmo,dias:dias,falta:falta,ok:true,data:d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})};
+}
+/* ============================================================ LOADING: SKELETON E ERROS */
+function showSkeletons(){
+  ['av-kpi','av-pav','av-svc-chart','av-svc-kpi','av-risk','av-hm','mep-kpi','me-pav','me-svc-chart','me-svc-kpi','me-risk','res-kpi'].forEach(function(id){
+    var el=document.getElementById(id);if(!el)return;
+    var n=id.indexOf('svc-chart')>-1?6:3,h='';
+    for(var i=0;i<n;i++)h+='<div class="sk" style="width:'+(i%2?'86%':'100%')+'"></div>';
+    el.innerHTML=h;
+  });
+}
+function renderLoadErrors(){
+  ['av-err','me-err'].forEach(function(id){
+    var el=document.getElementById(id);if(!el)return;
+    var fails=(G.diag||[]).filter(function(d){return d.st!=='ok'});
+    if(!fails.length||!G.diag.length){el.innerHTML='';return}
+    var all=fails.length>=G.diag.length;
+    var txt=all?'Planilhas inacessíveis — exibindo dados de exemplo':
+      'Atualização parcial: '+fails.map(function(d){return (SRC[d.key]?SRC[d.key].n:d.key)+' ('+(d.d||'erro')+')'}).join(' · ');
+    el.innerHTML='<div class="alert-box '+(all?'alert-red':'alert-amber')+'"><span class="alert-icon">⚠</span><span>'+txt+'</span>'+
+      '<button style="margin-left:auto;background:#fff;border:1px solid var(--line);border-radius:4px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap" onclick="doReload()">Tentar de novo</button></div>';
+  });
+}
+/* ============================================================ CLIQUES */
+function bindUI(){
+  ['av-svc-chart','av-svc-kpi','me-svc-chart','me-svc-kpi'].forEach(function(id){
+    var el=document.getElementById(id);if(!el)return;
+    el.addEventListener('click',function(e){
+      var t=e.target.closest('.svc-row,.kp');if(!t)return;
+      var nm=t.getAttribute('data-svc');if(!nm)return;
+      openSvcDetail(id.indexOf('av-')===0?'civil':'mep',nm);
+    });
+  });
+  ['av-risk','me-risk'].forEach(function(id){
+    var el=document.getElementById(id);if(!el)return;
+    el.addEventListener('click',function(e){
+      var t=e.target.closest('.risk-i');if(!t)return;
+      var nm=t.getAttribute('data-svc');if(!nm)return;
+      openSvcDetail(id.indexOf('av-')===0?'civil':'mep',nm);
+    });
+  });
+  var hm=document.getElementById('av-hm');
+  if(hm)hm.addEventListener('click',function(e){var t=e.target.closest('.hm-c');if(t&&t.getAttribute('data-svc'))openSvcDetail('civil',t.getAttribute('data-svc'))});
+  var pv=document.getElementById('av-pav');
+  if(pv)pv.addEventListener('click',function(e){
+    var t=e.target.closest('.pb');if(!t)return;
+    var pav=t.getAttribute('data-pav');if(!pav)return;
+    var sel=document.getElementById('favp'),found=false;
+    for(var i=0;i<sel.options.length;i++){if(norm(sel.options[i].value)===norm(pav)){sel.selectedIndex=i;found=true;break}}
+    if(found){rAv();var tb=document.getElementById('av-tbl');if(tb)tb.scrollIntoView({behavior:'smooth',block:'start'});toast('Tabela filtrada: '+pav,'ok')}
+    else toast('Pavimento não está entre as opções do filtro','warn');
+  });
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSvcDetail()});
 }
 
 /* ============================================================ RENDER ALL */
 function renderAll(){
   try{initAvF();rAv()}catch(e){console.error('AV',e)}
   rMEP();rResumo();
+  try{renderPavPanel();renderRisk();renderHeatmap();syncSvcDetail()}catch(e){console.error('extras',e)}
+  try{renderLoadErrors()}catch(e){}
 }
 
 /* ============================================================ DATA LOADING */
@@ -772,7 +1126,7 @@ function doReload(){
     document.getElementById('clk').textContent=fmtT();
     if(ok===KEYS.length)setChip('online','ok');else if(ok>0)setChip(ok+'/'+KEYS.length,'warn');else setChip('offline','err');
     document.getElementById('bref').classList.remove('spin');
-    G.lastReloadHour=new Date().getHours();
+    G.lastReloadAt=Date.now();
 
     if(ok===0){
       loadSampleData();
@@ -786,11 +1140,12 @@ function doReload(){
   });
 }
 
-/* ============================================================ SCHEDULER */
-function isWorkTime(){var d=new Date(),day=d.getDay(),h=d.getHours();return day>=1&&day<=5&&h>=SCHED_H1&&h<SCHED_H2}
+/* ============================================================ SCHEDULER (atualiza a cada 5 min) */
 function startScheduler(){
-  setInterval(function(){if(isWorkTime()){var h=new Date().getHours();if(G.lastReloadHour!==h)doReload()}},60000);
-  document.addEventListener('visibilitychange',function(){if(!document.hidden&&isWorkTime()){var h=new Date().getHours();if(G.lastReloadHour!==h)doReload()}});
+  setInterval(function(){doReload()},5*60*1000);
+  document.addEventListener('visibilitychange',function(){
+    if(!document.hidden&&Date.now()-(G.lastReloadAt||0)>=4*60*1000)doReload();
+  });
 }
 
 /* ============================================================ RELÓGIO */
@@ -799,6 +1154,8 @@ setInterval(function(){document.getElementById('clk').textContent=new Date().toL
 /* ============================================================ INICIALIZAÇÃO */
 document.addEventListener('DOMContentLoaded', function(){
   console.log('[Painel] Iniciando...');
+  showSkeletons();
+  bindUI();
   doReload();
   startScheduler();
 });
