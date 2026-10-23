@@ -168,6 +168,28 @@
   body.custom-print #print-db-section .ppc-print-table tbody tr:nth-child(even) td,body.range-print #print-db-section .ppc-print-table tbody tr:nth-child(even) td{background:#F8FAFC!important}
 }
 </style>
+
+<style id="mobile-paineis-button-side-by-side">
+  @media (max-width: 640px) {
+    .topbar-in { flex-wrap: nowrap !important; gap: 8px; }
+    .topbar-in .brand { flex: 0 1 auto; min-width: 0; }
+    .topbar-in .actions {
+      flex: 1 1 auto;
+      min-width: 0;
+      flex-wrap: nowrap !important;
+      overflow-x: auto;
+      white-space: nowrap;
+      gap: 5px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .topbar-in .actions > * { flex: 0 0 auto; }
+    .topbar-in .actions a[href="DEC/index.html"] { order: -1; }
+    .topbar-in .actions #chip,
+    .topbar-in .actions #clk,
+    .topbar-in .actions [title="Proximo auto-refresh em"] { display: none !important; }
+    .topbar-in .brand small { display: none; }
+  }
+</style>
 </head>
 <body>
 <div class="print-header" id="print-header"></div>
@@ -479,3 +501,4 @@
 <script src="code16.js?v=38"></script>
 </body>
 </html>
+
