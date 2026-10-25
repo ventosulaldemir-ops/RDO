@@ -279,7 +279,7 @@ table.hm td.pavn{font-size:10px;font-weight:700;color:var(--navy);white-space:no
     <div class="cd-h"><h3>Metodologia</h3></div>
     <div style="padding:12px 16px;font-size:11px;color:var(--ink2);line-height:1.7">
       Civil e Elétrica/MEP usam unidades diferentes (m²/serviço vs pontos), então não dá pra somar os totais direto. A média simples trata as duas frentes como igualmente importantes; a média ponderada pesa pelo número de itens de cada frente. Nenhuma substitui uma curva de avanço físico oficial (ponderada por custo ou HH) — use como estimativa gerencial, não como número contratual.<br><br>
-      O histórico é salvo no navegador (localStorage) a cada abertura — nunca com dados de exemplo ou leitura parcial. A <strong>projeção de conclusão</strong> usa o ritmo médio dos últimos registros (até 7) e projeta, <strong>a partir de hoje</strong>, quantos dias faltam para chegar a 100% no avanço ponderado; se o ritmo recente estiver zerado ou negativo, cai para a média de toda a série. Enquanto não há 2 dias de histórico (ou não dá pra tirar ritmo dos registros), vale o <strong>ritmo estimado</strong> definido no código (<code>RITMO_ESTIMADO</code>, em pp/dia) e o card aparece em âmbar marcado como estimativa. À data final ainda é somado o <strong>atraso de folga</strong> definido em <code>PROJECAO_ATRASO_MESES</code> (meses) — ajuste os dois no topo do arquivo.
+      O histórico é salvo no navegador (localStorage) a cada abertura — nunca com dados de exemplo ou leitura parcial. A <strong>projeção de conclusão</strong> usa o ritmo médio dos últimos registros (até 7) e projeta, <strong>a partir de hoje</strong>, quantos dias faltam para chegar a 100% no avanço ponderado; se o ritmo recente estiver zerado ou negativo, cai para a média de toda a série. Enquanto não há 2 dias de histórico (ou não dá pra tirar ritmo dos registros), vale o <strong>ritmo estimado</strong> definido no código (<code>RITMO_ESTIMADO</code>, em pp/dia) e o card aparece em âmbar marcado como estimativa.
     </div>
   </div>
 </div></section>
@@ -526,7 +526,7 @@ function rResumo(){try{
   cards+=kpiCard('📊','Itens monitorados',civCnt+mepCnt,civCnt+' civil + '+mepCnt+' elétrica','var(--blue)');
   var pr=projFromHist(hist,pond);
   if(pr&&pr.ok){
-    var pf=(pr.est?'ritmo estimado ':'ritmo ')+pr.ritmo.toFixed(2)+' pp/dia · '+(pr.dias>0?pr.dias+' dias para 100% (pond.)':'atingido agora')+(pr.atraso?' · +'+pr.atraso+' meses de folga':'')+(pr.est?' · sem histórico real':'');
+    var pf=(pr.est?'ritmo estimado ':'ritmo ')+pr.ritmo.toFixed(2)+' pp/dia · '+(pr.dias>0?pr.dias+' dias para 100% (pond.)':'atingido agora');
     cards+=kpiCard('📅','Projeção de conclusão',pr.data,pf,pr.est?'var(--amber)':(pr.dias<=45?'var(--green)':pr.dias<=120?'var(--amber)':'var(--red)'));
   }
   else if(pr&&pr.ritmo!=null)cards+=kpiCard('📅','Projeção de conclusão','—','ritmo '+(pr.ritmo>=0?'+':'')+pr.ritmo.toFixed(2)+' pp/dia · falta '+(isNaN(pr.falta)?0:pr.falta).toFixed(1)+' pp · sem avanço para projetar','var(--ink3)');
