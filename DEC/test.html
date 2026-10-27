@@ -71,7 +71,6 @@ a.btn{text-decoration:none}
 .bar-w{display:flex;align-items:center;gap:8px;margin-top:8px}
 .bar-t{flex:1;height:5px;background:var(--grid);position:relative;border-radius:3px}
 .bar-f{position:absolute;top:0;left:0;height:100%;border-radius:3px;transition:width .6s}
-.bar-v{font-family:'JetBrains Mono';font-size:10.5px;font-weight:700;min-width:40px;text-align:right}
 
 .cd{background:var(--w);border:1px solid var(--line);border-radius:6px;margin-bottom:14px;overflow:hidden}
 .cd-h{padding:11px 16px;border-bottom:1px solid var(--line);background:var(--paper);display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap}
@@ -388,7 +387,7 @@ var _ttmr=null;
 function toast(msg,type){var el=document.getElementById('toast');el.style.display='block';el.style.background=type==='ok'?'#059669':type==='warn'?'#D97706':'#DC2626';el.textContent=msg;clearTimeout(_ttmr);_ttmr=setTimeout(function(){el.style.display='none'},4000)}
 function setChip(t,ty){var c=document.getElementById('chip-txt'),dot=document.getElementById('livedot');c.textContent=t;document.getElementById('chip').className='chip chip-'+ty;dot.style.display=ty==='ok'?'inline-block':'none'}
 
-function mkBar(p,clr){var pp=isNaN(p)?0:Math.max(0,Math.min(100,p));var c=clr||(pp>=85?'var(--green)':pp>=50?'var(--amber)':'var(--red)');return '<div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:5px;background:var(--grid);position:relative;border-radius:3px"><div style="position:absolute;top:0;left:0;height:100%;width:'+pp+'%;background:'+c+';border-radius:3px;transition:width .6s"></div></div><span style="font-family:JetBrains Mono;font-size:10.5px;font-weight:700;color:'+c+';min-width:42px;text-align:right">'+(isNaN(p)?'—':pp.toFixed(1)+'%')+'</span></div>'}
+function mkBar(p,clr,noLabel){var pp=isNaN(p)?0:Math.max(0,Math.min(100,p));var c=clr||(pp>=85?'var(--green)':pp>=50?'var(--amber)':'var(--red)');return '<div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:5px;background:var(--grid);position:relative;border-radius:3px"><div style="position:absolute;top:0;left:0;height:100%;width:'+pp+'%;background:'+c+';border-radius:3px;transition:width .6s"></div></div>'+(noLabel?'':'<span style="font-family:JetBrains Mono;font-size:10.5px;font-weight:700;color:'+c+';min-width:42px;text-align:right">'+(isNaN(p)?'—':pp.toFixed(1)+'%')+'</span>')+'</div>'}
 function mkBarThick(p,clr,label){var pp=isNaN(p)?0:Math.max(0,Math.min(100,p));var c=clr||(pp>=85?'var(--green)':pp>=50?'var(--amber)':'var(--red)');return '<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:11px;color:var(--ink2)">'+esc(label||'')+'</span><span style="font-family:JetBrains Mono;font-size:11px;font-weight:700;color:'+c+'">'+pp.toFixed(1)+'%</span></div><div style="height:10px;background:var(--grid);border-radius:5px;overflow:hidden"><div style="height:100%;width:'+pp+'%;background:'+c+';border-radius:5px;transition:width .8s"></div></div></div>'}
 function kpiCard(ic,lbl,val,foot,color){return '<div class="kp" style="--kc:'+color+'"><div class="ki">'+ic+'</div><div class="kl">'+lbl+'</div><div class="kv">'+val+'</div>'+(foot?'<div class="kf">'+foot+'</div>':'')+'</div>'}
 function mkTbl(el,rows,opts){opts=opts||{};if(!rows||rows.length<2){el.innerHTML='<div class="em">Sem dados.</div>';return}var hd=rows[0],body=rows.slice(1);if(opts.filter)body=body.filter(opts.filter);var pc=[];for(var p=0;p<hd.length;p++)pc.push(isPct(hd[p]));var h='<table class="t"><thead><tr>';for(var i=0;i<hd.length;i++)h+='<th>'+esc(hd[i])+'</th>';h+='</tr></thead><tbody>';if(!body.length)h+='<tr><td colspan="'+hd.length+'" style="text-align:center;padding:24px;color:var(--ink3)">Nenhum resultado.</td></tr>';for(var b=0;b<body.length;b++){var r=body[b],txt=norm(r.join(' ')),sub=txt.indexOf('total')>-1;h+='<tr class="'+(sub?'sub':'')+'">';for(var c=0;c<hd.length;c++){var raw=r[c]!==undefined?r[c]:'';var n=num(raw);if(pc[c]&&raw.toString().trim())h+='<td class="pc">'+mkBar(n)+'</td>';else if(!isNaN(n)&&raw.toString().trim()&&/[0-9]/.test(raw.toString()))h+='<td class="nr">'+esc(raw)+'</td>';else h+='<td>'+esc(raw)+'</td>'}h+='</tr>'}h+='</tbody></table>';el.innerHTML=h}
@@ -518,8 +517,8 @@ function rResumo(){try{
     saveHistory(hist);
   }
   var cards='';
-  cards+='<div class="kp" style="--kc:'+cor+'"><div class="ki">🏗</div><div class="kl">Avanço geral (média simples)</div><div class="kv">'+simples.toFixed(1)+'%'+fmtDeltaBadge(dSimples)+'</div><div class="bar-w"><div class="bar-t"><div class="bar-f" style="width:'+Math.min(100,simples)+'%;background:'+cor+'"></div></div><span class="bar-v" style="color:'+cor+'">'+simples.toFixed(1)+'%</span></div>'+fmtDeltaFoot(dSimples,prevEntry?prevEntry.date:null)+'</div>';
-  cards+='<div class="kp" style="--kc:'+cor+'"><div class="ki">⚖</div><div class="kl">Avanço geral (ponderado)</div><div class="kv">'+pond.toFixed(1)+'%'+fmtDeltaBadge(dPond)+'</div><div class="bar-w"><div class="bar-t"><div class="bar-f" style="width:'+Math.min(100,pond)+'%;background:'+cor+'"></div></div><span class="bar-v" style="color:'+cor+'">'+pond.toFixed(1)+'%</span></div>'+fmtDeltaFoot(dPond,prevEntry?prevEntry.date:null)+'</div>';
+  cards+='<div class="kp" style="--kc:'+cor+'"><div class="ki">🏗</div><div class="kl">Avanço geral (média simples)</div><div class="kv">'+simples.toFixed(1)+'%'+fmtDeltaBadge(dSimples)+'</div><div class="bar-w"><div class="bar-t"><div class="bar-f" style="width:'+Math.min(100,simples)+'%;background:'+cor+'"></div></div></div>'+fmtDeltaFoot(dSimples,prevEntry?prevEntry.date:null)+'</div>';
+  cards+='<div class="kp" style="--kc:'+cor+'"><div class="ki">⚖</div><div class="kl">Avanço geral (ponderado)</div><div class="kv">'+pond.toFixed(1)+'%'+fmtDeltaBadge(dPond)+'</div><div class="bar-w"><div class="bar-t"><div class="bar-f" style="width:'+Math.min(100,pond)+'%;background:'+cor+'"></div></div></div>'+fmtDeltaFoot(dPond,prevEntry?prevEntry.date:null)+'</div>';
   cards+=kpiCard('📐','Gap Civil × Elétrica',gap.toFixed(1)+'pp',gap>=20?'Divergência alta':gap>=10?'Divergência moderada':'Frentes alinhadas',gap>=20?'var(--red)':gap>=10?'var(--amber)':'var(--green)');
   cards+=kpiCard('⚠','Itens abaixo de 50%',(k.av_bh||0)+(aT?aT.below50:0),(k.av_bh||0)+' civil + '+(aT?aT.below50:0)+' elétrica','var(--amber)');
   cards+=kpiCard('⏳','Não iniciados',(k.av_notstarted||0)+(aT?aT.notStarted:0),(k.av_notstarted||0)+' civil + '+(aT?aT.notStarted:0)+' elétrica','var(--ink3)');
@@ -910,7 +909,7 @@ function meDetailHTML(name){
     if(!pn||norm(pn).indexOf('total')>-1||norm(pn)==='local / pavimento')continue;
     var ppv=num(pr[1]),pev=num(pr[2]),ppc=num(pr[4]);
     var ppct=isNaN(ppc)?(ppv>0?Math.min(100,pev/ppv*100):0):ppc;
-    pavH+='<div class="pb"><span class="pb-n">'+esc(pn)+'</span><span class="pb-t">'+mkBar(ppct)+'</span><span class="pb-p" style="color:'+svcColor(ppct)+'">'+ppct.toFixed(1)+'%</span><span class="pb-m">'+fmtQ(pev)+'/'+fmtQ(ppv)+' · saldo '+fmtQ(ppv-pev)+'</span></div>'}}
+    pavH+='<div class="pb"><span class="pb-n">'+esc(pn)+'</span><span class="pb-t">'+mkBar(ppct,null,true)+'</span><span class="pb-p" style="color:'+svcColor(ppct)+'">'+ppct.toFixed(1)+'%</span><span class="pb-m">'+fmtQ(pev)+'/'+fmtQ(ppv)+' · saldo '+fmtQ(ppv-pev)+'</span></div>'}}
   h+='<div class="dt-note">Avanço da frente por local — a planilha não cruza tipo × pavimento:</div>';
   h+='<div class="pbars mute" style="margin-top:6px">'+(pavH||'<div class="em">Sem dados por pavimento.</div>')+'</div>';
   h+='</div></div>';
@@ -924,7 +923,7 @@ function renderPavPanel(){
     if(!keys.length)el.innerHTML='<div class="em">Sem dados de pavimento.</div>';
     else{var h='';
       keys.forEach(function(p){var g=by[p],pct=g.prev>0?Math.min(100,g.exec/g.prev*100):0;
-        h+='<div class="pb" data-pav="'+esc(p)+'" title="Clique para filtrar a tabela por este pavimento"><span class="pb-n">'+esc(p)+'</span><span class="pb-t">'+mkBar(pct)+'</span><span class="pb-p" style="color:'+svcColor(pct)+'">'+pct.toFixed(1)+'%</span><span class="pb-m">'+fmtQ(g.exec)+'/'+fmtQ(g.prev)+' · '+g.cnt+' itens</span></div>'});
+        h+='<div class="pb" data-pav="'+esc(p)+'" title="Clique para filtrar a tabela por este pavimento"><span class="pb-n">'+esc(p)+'</span><span class="pb-t">'+mkBar(pct,null,true)+'</span><span class="pb-p" style="color:'+svcColor(pct)+'">'+pct.toFixed(1)+'%</span><span class="pb-m">'+fmtQ(g.exec)+'/'+fmtQ(g.prev)+' · '+g.cnt+' itens</span></div>'});
       el.innerHTML=h}
     if(m)m.textContent=keys.length+' locais · clique para filtrar a tabela';
   }
@@ -937,7 +936,7 @@ function renderPavPanel(){
       var pv=num(row[1]),ev=num(row[2]),pc=num(row[4]);
       var pct=isNaN(pc)?(pv>0?Math.min(100,ev/pv*100):0):pc;
       var pend=num(row[3]);if(isNaN(pend))pend=pv-ev;
-      h2+='<div class="pb"><span class="pb-n">'+esc(nm)+'</span><span class="pb-t">'+mkBar(pct)+'</span><span class="pb-p" style="color:'+svcColor(pct)+'">'+pct.toFixed(1)+'%</span><span class="pb-m">'+fmtQ(ev)+'/'+fmtQ(pv)+' · saldo '+fmtQ(pend)+'</span></div>'}}
+      h2+='<div class="pb"><span class="pb-n">'+esc(nm)+'</span><span class="pb-t">'+mkBar(pct,null,true)+'</span><span class="pb-p" style="color:'+svcColor(pct)+'">'+pct.toFixed(1)+'%</span><span class="pb-m">'+fmtQ(ev)+'/'+fmtQ(pv)+' · saldo '+fmtQ(pend)+'</span></div>'}}
     el2.innerHTML=h2||'<div class="em">Sem dados de pavimento.</div>';
     if(m2)m2.textContent=(h2.match(/class="pb"/g)||[]).length+' locais';
   }
