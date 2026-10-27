@@ -416,6 +416,16 @@ function limparParaMatch(s){return norm(s).replace(/[^a-z0-9\s]/g,'').replace(/\
    primeira grafia encontrada na planilha, exibida em Title Case consistente */
 var FUNCAO_CANON={};
 var EMPRESA_CANON={};
+/* aliases: grafias diferentes da MESMA empresa -> um unico rotulo
+   (chave = limparParaMatch, igual ao cache do normalizarRotulo) */
+var EMPRESA_ALIAS={
+  'alan pablo serralheiria':'Alan Pablo Serralheria',
+  'alan serralheiria':'Alan Pablo Serralheria',
+  'alan serralheria':'Alan Pablo Serralheria',
+  'cassio':'CJS',
+  'central cartonado':'Central Acartonado',
+  'central acatonado':'Central Acartonado'
+};
 function tituloConsistente(raw){
   return raw.toLowerCase().replace(/\s+/g,' ').trim().replace(/(^|[\s\/\-])\S/g,function(c){return c.toUpperCase()});
 }
@@ -429,7 +439,12 @@ function normalizarRotulo(cru,cache){
   return cache[chave];
 }
 function normalizarFuncao(cru){return normalizarRotulo(cru,FUNCAO_CANON)}
-function normalizarEmpresa(cru){return normalizarRotulo(cru,EMPRESA_CANON)}
+function normalizarEmpresa(cru){
+  if(!cru)return '';
+  var k=limparParaMatch(String(cru));
+  if(k&&EMPRESA_ALIAS[k])cru=EMPRESA_ALIAS[k];
+  return normalizarRotulo(cru,EMPRESA_CANON);
+}
 
 function normalizarPavimento(cru){
   if(!cru)return '';var raw=String(cru).trim();if(!raw)return '';
