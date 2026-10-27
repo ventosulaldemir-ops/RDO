@@ -279,7 +279,7 @@ table.hm td.pavn{font-size:10px;font-weight:700;color:var(--navy);white-space:no
     <div class="cd-h"><h3>Metodologia</h3></div>
     <div style="padding:12px 16px;font-size:11px;color:var(--ink2);line-height:1.7">
       Civil e Elétrica/MEP usam unidades diferentes (m²/serviço vs pontos), então não dá pra somar os totais direto. A média simples trata as duas frentes como igualmente importantes; a média ponderada pesa pelo número de itens de cada frente. Nenhuma substitui uma curva de avanço físico oficial (ponderada por custo ou HH) — use como estimativa gerencial, não como número contratual.<br><br>
-      O histórico é salvo no navegador (localStorage) a cada abertura. A <strong>projeção de conclusão</strong> usa o ritmo médio dos últimos registros: se o avanço médio diário for X, estima quanto falta para chegar a 100%.
+      O histórico é salvo no navegador (localStorage) a cada abertura — nunca com dados de exemplo ou leitura parcial. A <strong>projeção de conclusão</strong> usa o ritmo médio dos últimos registros (até 7) e projeta, <strong>a partir de hoje</strong>, quantos dias faltam para chegar a 100% no avanço ponderado; se o ritmo recente estiver zerado ou negativo, cai para a média de toda a série. Enquanto não há 2 dias de histórico (ou não dá pra tirar ritmo dos registros), vale o <strong>ritmo estimado</strong> definido no código (<code>RITMO_ESTIMADO</code>, em pp/dia) e o card aparece em âmbar marcado como estimativa.
     </div>
   </div>
 </div></section>
@@ -363,6 +363,11 @@ var SRC={
 };
 var KEYS=['avanco','resumo'];
 var G={data:{},diag:[],kpis:{},mepAgg:{},lastReloadAt:0};
+/* Ritmo estimado em pontos percentuais por dia — usado enquanto o histórico não tem
+   2 dias (ou quando não dá pra tirar ritmo dos registros). Troque o número aqui. */
+var RITMO_ESTIMADO=0.5;
+/* Atraso somado à data final da projeção, em meses (folga real da obra). 0 = sem ajuste. */
+var PROJECAO_ATRASO_MESES=7;
 
 /* ============================================================ HELPERS */
 function norm(s){return(s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim()}
@@ -400,7 +405,23 @@ document.getElementById('tabs').addEventListener('click',function(e){
 
 /* ============================================================ HISTÓRICO */
 function localDateKey(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
-function loadHistory(){try{return JSON.parse(localStorage.getItem('painel_hist')||'[]')}catch(e){return[]}}
+function loadHistory(){
+  try{
+    var a=JSON.parse(localStorage.getItem('painel_hist')||'[]');
+    if(!Array.isArray(a))return[];
+    var byDate={};
+    for(var i=0;i<a.length;i++){
+      var e=a[i];
+      if(!e||typeof e.date!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(e.date))continue; /* data inválida quebrava gráfico e tabela */
+      var civ=(typeof e.civ==='number'&&isFinite(e.civ))?e.civ:null;
+      var mep=(typeof e.mep==='number'&&isFinite(e.mep))?e.mep:null;
+      var pond=(typeof e.pond==='number'&&isFinite(e.pond))?e.pond:((civ!=null&&mep!=null)?(civ+mep)/2:NaN);
+      if(!isFinite(pond))continue;
+      byDate[e.date]={date:e.date,civ:civ!=null?civ:pond,mep:mep!=null?mep:pond,pond:Math.max(0,Math.min(100,pond))};
+    }
+    return Object.keys(byDate).sort().map(function(k){return byDate[k]}); /* um registro por data, em ordem */
+  }catch(e){return[]}
+}
 function saveHistory(arr){try{localStorage.setItem('painel_hist',JSON.stringify(arr))}catch(e){}}
 function daysBetweenKeys(d1,d2){var a=new Date(d1+'T00:00:00'),b=new Date(d2+'T00:00:00');return Math.round((b-a)/86400000)}
 
@@ -489,6 +510,13 @@ function rResumo(){try{
   var dPond=prevEntry?(pond-prevEntry.pond):null;
   var dCiv=prevEntry?(civPct-prevEntry.civ):null;
   var dMep=prevEntry?(mepPct-prevEntry.mep):null;
+  /* Grava HOJE antes de projetar e desenhar — senão projeção e gráfico ficam 1 dia atrasados */
+  if((civCnt>0||mepCnt>0)&&G.online===true){
+    var today0=localDateKey();
+    if(hist.length&&hist[hist.length-1].date===today0){hist[hist.length-1]={date:today0,civ:civPct,mep:mepPct,pond:pond}}
+    else hist.push({date:today0,civ:civPct,mep:mepPct,pond:pond});
+    saveHistory(hist);
+  }
   var cards='';
   cards+='<div class="kp" style="--kc:'+cor+'"><div class="ki">🏗</div><div class="kl">Avanço geral (média simples)</div><div class="kv">'+simples.toFixed(1)+'%'+fmtDeltaBadge(dSimples)+'</div><div class="bar-w"><div class="bar-t"><div class="bar-f" style="width:'+Math.min(100,simples)+'%;background:'+cor+'"></div></div><span class="bar-v" style="color:'+cor+'">'+simples.toFixed(1)+'%</span></div>'+fmtDeltaFoot(dSimples,prevEntry?prevEntry.date:null)+'</div>';
   cards+='<div class="kp" style="--kc:'+cor+'"><div class="ki">⚖</div><div class="kl">Avanço geral (ponderado)</div><div class="kv">'+pond.toFixed(1)+'%'+fmtDeltaBadge(dPond)+'</div><div class="bar-w"><div class="bar-t"><div class="bar-f" style="width:'+Math.min(100,pond)+'%;background:'+cor+'"></div></div><span class="bar-v" style="color:'+cor+'">'+pond.toFixed(1)+'%</span></div>'+fmtDeltaFoot(dPond,prevEntry?prevEntry.date:null)+'</div>';
@@ -496,10 +524,13 @@ function rResumo(){try{
   cards+=kpiCard('⚠','Itens abaixo de 50%',(k.av_bh||0)+(aT?aT.below50:0),(k.av_bh||0)+' civil + '+(aT?aT.below50:0)+' elétrica','var(--amber)');
   cards+=kpiCard('⏳','Não iniciados',(k.av_notstarted||0)+(aT?aT.notStarted:0),(k.av_notstarted||0)+' civil + '+(aT?aT.notStarted:0)+' elétrica','var(--ink3)');
   cards+=kpiCard('📊','Itens monitorados',civCnt+mepCnt,civCnt+' civil + '+mepCnt+' elétrica','var(--blue)');
-  var pr=projFromHist(hist);
-  if(pr&&pr.ok)cards+=kpiCard('📅','Projeção de conclusão',pr.data,'ritmo '+pr.ritmo.toFixed(2)+' pp/dia · '+(pr.dias>0?pr.dias+' dias para 100% (pond.)':'atingido agora'),pr.dias<=45?'var(--green)':pr.dias<=120?'var(--amber)':'var(--red)');
-  else if(pr&&pr.ritmo!=null)cards+=kpiCard('📅','Projeção de conclusão','—','ritmo '+(pr.ritmo>=0?'+':'')+pr.ritmo.toFixed(2)+' pp/dia · sem avanço recente','var(--ink3)');
-  else cards+=kpiCard('📅','Projeção de conclusão','—','histórico curto (mín. 2 dias)','var(--ink3)');
+  var pr=projFromHist(hist,pond);
+  if(pr&&pr.ok){
+    var pf=(pr.est?'ritmo estimado ':'ritmo ')+pr.ritmo.toFixed(2)+' pp/dia · '+(pr.dias>0?pr.dias+' dias para 100% (pond.)':'atingido agora');
+    cards+=kpiCard('📅','Projeção de conclusão',pr.data,pf,pr.est?'var(--amber)':(pr.dias<=45?'var(--green)':pr.dias<=120?'var(--amber)':'var(--red)'));
+  }
+  else if(pr&&pr.ritmo!=null)cards+=kpiCard('📅','Projeção de conclusão','—','ritmo '+(pr.ritmo>=0?'+':'')+pr.ritmo.toFixed(2)+' pp/dia · falta '+(isNaN(pr.falta)?0:pr.falta).toFixed(1)+' pp · sem avanço para projetar','var(--ink3)');
+  else cards+=kpiCard('📅','Projeção de conclusão','—','sem leitura atual para projetar','var(--ink3)');
   document.getElementById('res-kpi').innerHTML=cards;
   document.getElementById('res-cmp').innerHTML='<div>'+mkBarThick(civPct,'#6B4226','Civil'+(dCiv!=null?' ('+fmtDelta(dCiv)+')':''))+mkBarThick(mepPct,'var(--blue)','Elétrica/MEP'+(dMep!=null?' ('+fmtDelta(dMep)+')':''))+'</div>';
   document.getElementById('res-cmp-m').textContent=civCnt+' serviços civil · '+mepCnt+' tipos elétrica/mep';
@@ -507,14 +538,6 @@ function rResumo(){try{
   if(gap>=20)alertEl.innerHTML='<div class="alert-box alert-red"><span class="alert-icon">⚠</span><span>'+(civPct>mepPct?'Elétrica/MEP':'Civil')+' está '+gap.toFixed(1)+'pp atrás da outra frente.</span></div>';
   else alertEl.innerHTML='';
   renderResHistChart(hist);renderResHistTable(hist);
-
-  /* Salva histórico */
-  if(civCnt>0||mepCnt>0){
-    var today=localDateKey();
-    if(hist.length&&hist[hist.length-1].date===today){hist[hist.length-1]={date:today,civ:civPct,mep:mepPct,pond:pond}}
-    else hist.push({date:today,civ:civPct,mep:mepPct,pond:pond});
-    saveHistory(hist);
-  }
 }catch(e){console.error('resumo',e)}}
 function fmtDelta(d){return(d>=0?'+':'')+d.toFixed(1)+'pp'}
 
@@ -980,19 +1003,51 @@ function renderHeatmap(){
   if(m)m.textContent=pavs.length+' locais × '+svcs.length+' serviços · clique numa célula';
 }
 /* ============================================================ PROJEÇÃO DE CONCLUSÃO */
-function projFromHist(hist){
-  if(!hist||hist.length<2)return null;
-  var last=hist[hist.length-1];
-  var idx=hist.length>7?hist.length-7:0;
-  var base=hist[idx],dd=daysBetweenKeys(base.date,last.date);
-  if(dd<1){base=hist[0];dd=daysBetweenKeys(base.date,last.date)}
-  if(dd<1)return{ritmo:0,ok:false};
-  var ritmo=(last.pond-base.pond)/dd,falta=100-last.pond;
-  if(falta<=0)return{ritmo:ritmo,dias:0,ok:true,data:'atingido'};
-  if(!(ritmo>0.01))return{ritmo:ritmo,ok:false,falta:falta};
+function projFromHist(hist,pondNow){
+  if(!hist||!hist.length)return null;
+  /* 1) limpa entradas inválidas/antigas — um pond ausente quebrava tudo (ritmo NaN) */
+  var e=[];
+  for(var i=0;i<hist.length;i++){
+    var h=hist[i];
+    if(!h||typeof h.date!=='string'||!h.date)continue;
+    var pv=(typeof h.pond==='number'&&isFinite(h.pond))?h.pond:
+      (typeof h.civ==='number'&&isFinite(h.civ)&&typeof h.mep==='number'&&isFinite(h.mep))?(h.civ+h.mep)/2:NaN;
+    if(!isFinite(pv))continue;
+    e.push({date:h.date,pond:Math.max(0,Math.min(100,pv))});
+  }
+  e.sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:0});
+  /* 2) valor atual: a leitura desta sessão é a mais fresca (serve até com histórico vazio) */
+  var today=localDateKey(),last=e.length?e[e.length-1]:null;
+  var cur=(typeof pondNow==='number'&&isFinite(pondNow))?pondNow:(last?last.pond:NaN);
+  if(!isFinite(cur))return null;
+  cur=Math.max(0,Math.min(100,cur));
+  var falta=100-cur,endDate=last?((today>=last.date)?today:last.date):today;
+  if(falta<=0)return{ritmo:0,dias:0,ok:true,falta:0,est:false,data:'atingido'};
+  /* 3) ritmo real = janela dos últimos 7 registros, com >= 2 dias de distância */
+  var ritmo=NaN,est=true;
+  if(e.length>=2){
+    var idx=e.length>7?e.length-7:0,base=e[idx];
+    var dd=daysBetweenKeys(base.date,endDate);
+    if(dd<1){base=e[0];dd=daysBetweenKeys(base.date,endDate)}
+    if(dd>=1)ritmo=(cur-base.pond)/dd;
+    /* 4) ritmo recente zerado/negativo: cai para a média de toda a série */
+    if(!(ritmo>0.01)){
+      var ddAll=daysBetweenKeys(e[0].date,endDate);
+      var alt=ddAll>=1?(cur-e[0].pond)/ddAll:0;
+      if(alt>0.01)ritmo=alt;
+    }
+    if(ritmo>0.01)est=false;
+  }
+  /* 5) sem ritmo derivável: usa o RITMO_ESTIMADO do topo do arquivo (projeção desde o 1º dia) */
+  if(!(ritmo>0.01))ritmo=(typeof RITMO_ESTIMADO==='number'&&RITMO_ESTIMADO>0)?RITMO_ESTIMADO:0;
+  if(!(ritmo>0.01))return{ritmo:0,ok:false,falta:falta};
+  /* 6) faltam N dias a partir de HOJE + o atraso configurado (PROJECAO_ATRASO_MESES) */
   var dias=Math.ceil(falta/ritmo);
-  var d=new Date();d.setDate(d.getDate()+dias);
-  return{ritmo:ritmo,dias:dias,falta:falta,ok:true,data:d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})};
+  var hj=new Date();hj.setHours(0,0,0,0);
+  var d=new Date(hj);d.setDate(d.getDate()+dias);
+  if(typeof PROJECAO_ATRASO_MESES==='number'&&PROJECAO_ATRASO_MESES!==0)d.setMonth(d.getMonth()+PROJECAO_ATRASO_MESES);
+  dias=Math.round((d-hj)/86400000); /* mantém "N dias" coerente com a data mostrada */
+  return{ritmo:ritmo,dias:dias,falta:falta,ok:true,est:est,atraso:(typeof PROJECAO_ATRASO_MESES==='number'?PROJECAO_ATRASO_MESES:0),data:d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})};
 }
 /* ============================================================ LOADING: SKELETON E ERROS */
 function showSkeletons(){
@@ -1123,6 +1178,7 @@ function doReload(){
   loadJSONP(function(){
     try{calcKPIs()}catch(e){console.error('calcKPIs',e)}
     var ok=0;for(var i=0;i<KEYS.length;i++){for(var j=0;j<G.diag.length;j++){if(G.diag[j].key===KEYS[i]&&G.diag[j].st==='ok'){ok++;break}}}
+    G.online=(ok===KEYS.length); /* só leitura 100% completa entra no histórico */
     document.getElementById('clk').textContent=fmtT();
     if(ok===KEYS.length)setChip('online','ok');else if(ok>0)setChip(ok+'/'+KEYS.length,'warn');else setChip('offline','err');
     document.getElementById('bref').classList.remove('spin');
