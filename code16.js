@@ -1181,8 +1181,8 @@ function renderKPIs(day){
     {i:'🚫',l:'Faltosos',       v:faltosos,          f:'sem atividade — excluidos',         c:'var(--red)',   click:'openPeopleModal(\'faltosos\')'},
     {i:'🏢',l:'Empresas',       v:empCnt,            f:'ativas hoje',                       c:'var(--blue)',  click:''},
     {i:'⚒️',l:'Funcoes',v:funcCnt,          f:'distintas',                         c:'var(--cyan)',  click:''},
-    {i:'🌅',l:'Produção manhã',      v:turnoValTxt(turnoM.totals), f:turnoFootTxt(turnoM), c:'#D97706', click:'openProducaoModal(\'M\')'},
-    {i:'🌇',l:'Produção tarde',        v:turnoValTxt(turnoT.totals), f:turnoFootTxt(turnoT), c:'#7C3AED', click:'openProducaoModal(\'T\')'},
+    {i:'🌅',l:'Serviço manhã',      v:turnoValTxt(turnoM.totals), f:turnoFootTxt(turnoM), c:'#D97706', click:'openProducaoModal(\'M\')'},
+    {i:'🌇',l:'Serviço tarde',        v:turnoValTxt(turnoT.totals), f:turnoFootTxt(turnoT), c:'#7C3AED', click:'openProducaoModal(\'T\')'},
     {i:'📐',l:'Produção diária', v:fmtNum(prodM2Dia)+' m²', f:day.date+' — clique para ver', c:'#0891B2', click:'openProducaoModal()', feature:true, extra:miniHtml}
   ].map(function(k){
     var clickAttr=k.click?(' onclick="'+k.click+'" role="button" tabindex="0"'):'';
@@ -1238,7 +1238,7 @@ function computeProducaoDia(day,turno){
 }
 
 /* Totais por TURNO: coluna normal = manha, coluna "T" = tarde.
-   Alimenta os KPIs "Producao manha" e "Producao tarde". */
+   Alimenta os KPIs "Servico manha" e "Servico tarde". */
 function computeTurnoDia(day,turno){
   var s={ativ:0,prod:0,totals:{UN:0,M2:0,M3:0}};
   if(!day)return s;
@@ -1276,8 +1276,8 @@ function openProducaoModal(turno){
   var agg=computeProducaoDia(day,turno);
   var hdr=G('emp-modal-overlay').querySelector('.modal-h');
   /* 🌅 manhã = âmbar, 🌇 tarde = roxo, 📐 total = ciano (mesmas cores dos cards) */
-  var cfg=turno==='M'?{cor:'#D97706',titulo:'🌅 Produção da Manhã',periodo:'manhã',prep:'na manhã'}:
-           turno==='T'?{cor:'#7C3AED',titulo:'🌇 Produção da Tarde',periodo:'tarde',prep:'na tarde'}:
+  var cfg=turno==='M'?{cor:'#D97706',titulo:'🌅 Serviço da Manhã',periodo:'manhã',prep:'na manhã'}:
+           turno==='T'?{cor:'#7C3AED',titulo:'🌇 Serviço da Tarde',periodo:'tarde',prep:'na tarde'}:
            {cor:'#0891B2',titulo:'📦 Produção Total',periodo:'dia',prep:'no dia'};
   hdr.style.background=cfg.cor;
   G('emp-modal-title').textContent=cfg.titulo;
