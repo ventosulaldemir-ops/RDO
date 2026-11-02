@@ -699,6 +699,14 @@ function parseDateBR(s){
   return{d:d,m:m,y:y,key:y+'-'+String(m).padStart(2,'0')};
 }
 
+var RANGE_PRESET=null;
+function setRangePreset(id){
+  RANGE_PRESET=id||null;
+  ['range-btn-all','range-btn-clear','range-btn-7','range-btn-30','range-btn-month','range-btn-prev-month'].forEach(function(b){
+    var el=G(b);if(el)el.classList.toggle('on',RANGE_PRESET===b);
+  });
+}
+
 function initRangeChips(){
   var box=G('range-chips');
   if(!PARSED||!PARSED.days.length){box.innerHTML='<div class="em">Sem datas</div>';return}
@@ -717,15 +725,18 @@ function initRangeChips(){
   });
   box.innerHTML=html;
   G('range-meta').textContent=PARSED.days.length+' data(s) disponiveis';
+  var firstSel=box.querySelector('.date-chip.sel');
+  if(firstSel&&firstSel.scrollIntoView)firstSel.scrollIntoView({block:'nearest'});
 }
 
 function toggleRangeDate(date){
   if(RANGE_SELECTED.has(date))RANGE_SELECTED.delete(date);else RANGE_SELECTED.add(date);
+  setRangePreset(null);
   initRangeChips();renderRangeAll();
 }
-function selectAllRangeDates(){if(!PARSED)return;PARSED.days.forEach(function(d){RANGE_SELECTED.add(d.date)});initRangeChips();renderRangeAll()}
-function clearRangeDates(){RANGE_SELECTED.clear();initRangeChips();renderRangeAll()}
-function selectLastNDates(n){if(!PARSED)return;RANGE_SELECTED.clear();PARSED.days.slice(0,n).forEach(function(d){RANGE_SELECTED.add(d.date)});initRangeChips();renderRangeAll()}
+function selectAllRangeDates(){if(!PARSED)return;PARSED.days.forEach(function(d){RANGE_SELECTED.add(d.date)});setRangePreset('range-btn-all');initRangeChips();renderRangeAll()}
+function clearRangeDates(){RANGE_SELECTED.clear();setRangePreset(null);initRangeChips();renderRangeAll()}
+function selectLastNDates(n){if(!PARSED)return;RANGE_SELECTED.clear();PARSED.days.slice(0,n).forEach(function(d){RANGE_SELECTED.add(d.date)});setRangePreset(n===7?'range-btn-7':(n===30?'range-btn-30':null));initRangeChips();renderRangeAll()}
 function selectCurrentMonth(offset){
   if(!PARSED||!PARSED.days.length)return;
   var now=new Date();
@@ -746,6 +757,7 @@ function selectCurrentMonth(offset){
   }
   RANGE_SELECTED.clear();
   picked.forEach(function(dt){RANGE_SELECTED.add(dt)});
+  setRangePreset(offset===0?'range-btn-month':'range-btn-prev-month');
   initRangeChips();renderRangeAll();
   if(usado)toast('Sem dias em '+MESES_PT[targetM-1]+' de '+targetY+' \u2014 mostrando '+MESES_PT[usado.m-1]+' de '+usado.y+' ('+picked.length+' dia(s))','warn');
   else if(!picked.length)toast('Nenhum dia encontrado na planilha','warn');
@@ -1021,7 +1033,8 @@ function renderRangeTable(){
 function renderRangeAll(){
   var days=getRangeDays(),agg=computeRangeAgg(days);
   G('sub-date').textContent=days.length?('Periodo: '+days.length+' dia(s) selecionados'):'Nenhum dia selecionado no periodo';
-  G('range-summary').textContent=days.length?(days.length+' dia(s) selecionados de '+(PARSED?PARSED.days.length:0)):'Nenhum dia selecionado';
+  var diasOrd=days.slice().sort(function(a,b){return dateKey(a.date).localeCompare(dateKey(b.date))});
+  G('range-summary').textContent=days.length?(days.length+' dia(s) selecionados de '+(PARSED?PARSED.days.length:0)+' \u00b7 '+diasOrd[0].date+' a '+diasOrd[diasOrd.length-1].date):'Nenhum dia selecionado';
   renderRangeKPIs(days,agg);
   renderRangeKPIs2(days,agg);
   if(days.length){

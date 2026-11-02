@@ -241,12 +241,12 @@
     <div class="cd-h"><h3>Selecionar periodo / dias</h3><span class="mt" id="range-meta"></span></div>
     <div class="range-box">
       <div class="range-tools">
-        <button class="btn btn-bl" onclick="selectAllRangeDates()">Selecionar todos</button>
-        <button class="btn btn-a" onclick="clearRangeDates()">Limpar selecao</button>
-        <button class="btn btn-gr" onclick="selectLastNDates(7)">Ultimos 7 dias</button>
-        <button class="btn btn-gr" onclick="selectLastNDates(30)">Ultimos 30 dias</button>
-        <button class="btn btn-gr" onclick="selectCurrentMonth(0)">Este mes</button>
-        <button class="btn btn-gr" onclick="selectCurrentMonth(-1)">Mes passado</button>
+        <button class="btn btn-bl" id="range-btn-all" onclick="selectAllRangeDates()">Selecionar todos</button>
+        <button class="btn btn-a" id="range-btn-clear" onclick="clearRangeDates()">Limpar selecao</button>
+        <button class="btn btn-gr" id="range-btn-7" onclick="selectLastNDates(7)">Ultimos 7 dias</button>
+        <button class="btn btn-gr" id="range-btn-30" onclick="selectLastNDates(30)">Ultimos 30 dias</button>
+        <button class="btn btn-gr" id="range-btn-month" onclick="selectCurrentMonth(0)">Este mes</button>
+        <button class="btn btn-gr" id="range-btn-prev-month" onclick="selectCurrentMonth(-1)">Mes passado</button>
       </div>
       <div class="date-chips" id="range-chips"></div>
       <div class="range-summary" id="range-summary"></div>
@@ -506,7 +506,7 @@
 </div>
 
 
-<script src="code16.js?v=44"></script>
+<script src="code16.js?v=45"></script>
 </body>
 </html>
 
