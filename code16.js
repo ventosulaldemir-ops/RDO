@@ -823,6 +823,7 @@ function renderRangeKPIs2(days,agg){
 }
 
 function openUnicosModal(){
+  resetUnicosSearch();
   var days=getRangeDays();
   if(!days.length){toast('Selecione um ou mais dias no periodo','warn');return}
   /* Presença única = pessoa com diasPresente === 1 no período selecionado */
@@ -893,6 +894,84 @@ function getFilteredRangeAgg(){
 
 function setRangeSort(k){if(rangeSortKey===k)rangeSortDir*=-1;else{rangeSortKey=k;rangeSortDir=1}renderRangeTable()}
 
+/* ═══ Busca por nome dentro do modal de Presença Única ═══ */
+var PRESENCE_INDEX=null;
+function dateKey(d){var m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(d||'');return m?(m[3]+m[2]+m[1]):(d||'')}
+function weekdayPt(d){
+  var m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(d||'');if(!m)return '';
+  var dias=['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+  return dias[new Date(+m[3],+m[2]-1,+m[1]).getDay()]||'';
+}
+function buildPresenceIndex(){
+  if(PRESENCE_INDEX&&PRESENCE_INDEX.src===PARSED)return PRESENCE_INDEX.map;
+  var map={};
+  if(PARSED&&PARSED.days)PARSED.days.forEach(function(day){
+    (day.all||[]).forEach(function(p){
+      var k=norm(p.nome);if(!k)return;
+      var e=map[k];
+      if(!e)e=map[k]={nome:p.nome,emps:{},funcs:{},firstData:'',lastData:'',firstKey:'',lastKey:'',dias:0,ferias:0,primeiraAtiv:'',primeiroPav:''};
+      if(p.empresa)e.emps[p.empresa]=1;
+      if(p.funcao)e.funcs[p.funcao]=1;
+      var data=day.date||p.data||'',dk=dateKey(data);
+      if(!e.firstKey||dk<e.firstKey){e.firstData=data;e.firstKey=dk;e.primeiraAtiv=p.atividadeRaw||p.atividade||'';e.primeiroPav=p.pav||'';}
+      if(!e.lastKey||dk>e.lastKey){e.lastData=data;e.lastKey=dk;}
+      e.dias++;
+      if(p.ferias)e.ferias++;
+    });
+  });
+  PRESENCE_INDEX={src:PARSED,map:map};
+  return map;
+}
+function resetUnicosSearch(){
+  var q=G('unicos-q');if(q)q.value='';
+  var res=G('unicos-result');if(res){res.innerHTML='';res.style.display='none'}
+  var body=G('unicos-modal-body');if(body)body.style.display='';
+}
+function clearUnicosSearch(){
+  resetUnicosSearch();
+  var q=G('unicos-q');if(q)q.focus();
+}
+function renderUnicosSearch(){
+  var qEl=G('unicos-q'),res=G('unicos-result'),body=G('unicos-modal-body');
+  if(!qEl||!res||!body)return;
+  var q=norm(qEl.value);
+  if(q.length<2){res.style.display='none';res.innerHTML='';body.style.display='';return}
+  body.style.display='none';res.style.display='';
+  if(!PARSED||!PARSED.days||!PARSED.days.length){res.innerHTML='<div class="modal-empty">Carregando...</div>';return}
+  var map=buildPresenceIndex(),all=Object.keys(map).map(function(k){return map[k]});
+  var hits=all.filter(function(p){return norm(p.nome).indexOf(q)>-1});
+  if(!hits.length)hits=all.filter(function(p){return Object.keys(p.emps).some(function(e){return norm(e).indexOf(q)>-1})});
+  if(!hits.length){res.innerHTML='<div class="modal-empty">Nenhuma pessoa encontrada para "'+esc(qEl.value)+'" nos '+PARSED.days.length+' dias carregados.</div>';return}
+  hits.sort(function(a,b){return a.nome.localeCompare(b.nome,'pt-BR')});
+  var exato=hits.filter(function(p){return norm(p.nome)===q});
+  var destaque=exato.length===1?exato[0]:(hits.length===1?hits[0]:null);
+  var h='<div class="unicos-note">Primeira presença na obra — olha os '+PARSED.days.length+' dias carregados, não só o período selecionado.</div>';
+  if(destaque){
+    var empsD=Object.keys(destaque.emps),funcsD=Object.keys(destaque.funcs);
+    h+='<div class="unicos-answer">'+
+      '<div class="ua-k">Primeira vez na obra</div>'+
+      '<div class="ua-date">'+esc(destaque.firstData)+' <span>'+esc(weekdayPt(destaque.firstData))+'</span></div>'+
+      '<div class="ua-line"><b>'+esc(destaque.nome)+'</b> — '+destaque.dias+' dia(s) de presença'+(destaque.ferias?' ('+destaque.ferias+' de férias)':'')+(empsD.length?' · '+esc(empsD.join(' / ')):'')+(funcsD.length?' · '+esc(funcsD.join(' / ')):'')+'</div>'+
+      '<div class="ua-sub">Último dia na obra: '+esc(destaque.lastData||'—')+(RANGE_SELECTED.has(destaque.firstData)?' · primeira presença dentro do período selecionado':'')+'</div>'+
+      (destaque.primeiraAtiv?'<div class="ua-sub">Serviço no primeiro dia: '+esc(destaque.primeiraAtiv)+'</div>':'')+
+    '</div>';
+  }
+  h+='<div class="unicos-table-wrap"><table><thead><tr><th>Nome</th><th>Empresa</th><th>Função</th><th>Primeira vez na obra</th><th>Último dia</th><th>Dias presente</th></tr></thead><tbody>'+
+    hits.slice(0,80).map(function(p){
+      var emps=Object.keys(p.emps),funcs=Object.keys(p.funcs);
+      return '<tr'+(destaque===p?' class="ua-hit"':'')+'>'+
+        '<td data-label="Nome" style="font-weight:600">'+esc(p.nome)+'</td>'+
+        '<td data-label="Empresa">'+esc(emps.join(' / ')||'—')+'</td>'+
+        '<td data-label="Função">'+esc(funcs.join(' / ')||'—')+'</td>'+
+        '<td data-label="Primeira vez" style="font-weight:700;color:#15803D;white-space:nowrap">'+esc(p.firstData)+'</td>'+
+        '<td data-label="Último dia" style="white-space:nowrap">'+esc(p.lastData||'—')+'</td>'+
+        '<td data-label="Dias presente">'+p.dias+'</td>'+
+      '</tr>';
+    }).join('')+'</tbody></table></div>'+
+    (hits.length>80?'<div class="modal-empty">Mostrando 80 de '+hits.length+' pessoas — refine a busca.</div>':'');
+  res.innerHTML=h;
+}
+
 function renderRangeTable(){
   var el=G('range-tbl-box'),meta=G('range-tbl-meta');
   var days=getRangeDays();
@@ -942,6 +1021,7 @@ function renderRangeAll(){
     ['rtop-emp-meta','rtop-func-meta'].forEach(function(id){G(id).textContent=''});
   }
   populateRangeFilters(agg);
+
   renderRangeTable();
   G('upd-ts').textContent='atualizado '+fmtNow();
 }

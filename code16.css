@@ -320,6 +320,17 @@ td.nr{text-align:right;font-family:'JetBrains Mono'}
 
 /* Modal de Presença Única */
 #unicos-modal-overlay .modal-card{max-width:760px}
+#unicos-modal-overlay #unicos-tools{display:flex;gap:6px;margin-bottom:10px}
+#unicos-modal-overlay #unicos-tools input{flex:1;font-family:'Inter';font-size:13px;padding:8px 10px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:4px;min-height:36px;min-width:0}
+#unicos-modal-overlay #unicos-tools input:focus{outline:2px solid #7C3AED;outline-offset:-1px}
+#unicos-modal-overlay .unicos-note{font-size:11px;color:#64748B;margin-bottom:8px}
+#unicos-modal-overlay .unicos-answer{border:1px solid #DDD6FE;background:#F5F3FF;border-radius:6px;padding:12px 14px;margin-bottom:10px}
+#unicos-modal-overlay .ua-k{font-family:'JetBrains Mono';font-size:8px;text-transform:uppercase;letter-spacing:.05em;color:#6D28D9;font-weight:700}
+#unicos-modal-overlay .ua-date{font-family:'Space Grotesk';font-size:22px;font-weight:700;color:#0F172A;line-height:1.15;margin-top:2px}
+#unicos-modal-overlay .ua-date span{font-size:12px;font-weight:500;color:#6D28D9}
+#unicos-modal-overlay .ua-line{font-size:12px;color:#334155;margin-top:5px}
+#unicos-modal-overlay .ua-sub{font-size:11px;color:#64748B;margin-top:3px}
+#unicos-modal-overlay tr.ua-hit td{background:#F5F3FF}
 #unicos-modal-overlay .modal-h{background:#7C3AED}
 #unicos-modal-overlay .unicos-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
 #unicos-modal-overlay .unicos-stat{background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:10px}

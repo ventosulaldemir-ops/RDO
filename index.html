@@ -434,7 +434,14 @@
       <div><h4 id="unicos-modal-title">🔄 Presença Única</h4><div class="mt2" id="unicos-modal-sub">—</div></div>
       <button class="modal-close" onclick="closeUnicosModal()" aria-label="Fechar">&times;</button>
     </div>
-    <div class="modal-b" id="unicos-modal-body"></div>
+    <div class="modal-b">
+      <div id="unicos-tools">
+        <input type="text" id="unicos-q" placeholder="Buscar nome para ver desde quando está na obra..." oninput="renderUnicosSearch()" autocomplete="off">
+        <button type="button" class="btn btn-a" onclick="clearUnicosSearch()">Limpar</button>
+      </div>
+      <div id="unicos-result" style="display:none"></div>
+      <div id="unicos-modal-body"></div>
+    </div>
   </div>
 </div>
 
@@ -499,7 +506,7 @@
 </div>
 
 
-<script src="code16.js?v=41"></script>
+<script src="code16.js?v=43"></script>
 </body>
 </html>
 
