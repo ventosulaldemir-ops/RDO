@@ -727,14 +727,28 @@ function selectAllRangeDates(){if(!PARSED)return;PARSED.days.forEach(function(d)
 function clearRangeDates(){RANGE_SELECTED.clear();initRangeChips();renderRangeAll()}
 function selectLastNDates(n){if(!PARSED)return;RANGE_SELECTED.clear();PARSED.days.slice(0,n).forEach(function(d){RANGE_SELECTED.add(d.date)});initRangeChips();renderRangeAll()}
 function selectCurrentMonth(offset){
-  if(!PARSED)return;
+  if(!PARSED||!PARSED.days.length)return;
   var now=new Date();
   var targetM=now.getMonth()+1+offset,targetY=now.getFullYear();
   while(targetM<1){targetM+=12;targetY--}
   while(targetM>12){targetM-=12;targetY++}
+  function pick(m,y){var out=[];PARSED.days.forEach(function(d){var pd=parseDateBR(d.date);if(pd&&pd.m===m&&pd.y===y)out.push(d.date)});return out}
+  var picked=pick(targetM,targetY),usado=null;
+  if(!picked.length){
+    /* Mês sem nenhum dia lançado: cai no mês mais próximo que tenha dados. */
+    var alvo=targetY*12+(targetM-1),melhor=null;
+    PARSED.days.forEach(function(d){
+      var pd=parseDateBR(d.date);if(!pd)return;
+      var idx=pd.y*12+(pd.m-1),dist=Math.abs(idx-alvo);
+      if(!melhor||dist<melhor.dist||(dist===melhor.dist&&idx>melhor.idx))melhor={m:pd.m,y:pd.y,idx:idx,dist:dist};
+    });
+    if(melhor){picked=pick(melhor.m,melhor.y);usado=melhor}
+  }
   RANGE_SELECTED.clear();
-  PARSED.days.forEach(function(d){var pd=parseDateBR(d.date);if(pd&&pd.m===targetM&&pd.y===targetY)RANGE_SELECTED.add(d.date)});
+  picked.forEach(function(dt){RANGE_SELECTED.add(dt)});
   initRangeChips();renderRangeAll();
+  if(usado)toast('Sem dias em '+MESES_PT[targetM-1]+' de '+targetY+' \u2014 mostrando '+MESES_PT[usado.m-1]+' de '+usado.y+' ('+picked.length+' dia(s))','warn');
+  else if(!picked.length)toast('Nenhum dia encontrado na planilha','warn');
 }
 
 function getRangeDays(){if(!PARSED)return[];return PARSED.days.filter(function(d){return RANGE_SELECTED.has(d.date)})}
