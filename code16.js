@@ -62,7 +62,7 @@ function getMonthlyProdRows(days){
       parsed.forEach(function(u){if(u.unidade==='M2')m2+=u.valor;else if(u.unidade==='UN')un+=u.valor;else if(u.unidade==='M3')m3+=u.valor;});
       parseProducaoUnidades(p.prodM||'').forEach(function(u){if(u.unidade==='M2')m2M+=u.valor});
       parseProducaoUnidades(p.prodT||'').forEach(function(u){if(u.unidade==='M2')m2T+=u.valor});
-      rows.push({date:day.date||p.data||'—',nome:p.nome||'—',empresa:p.empresa||'—',funcao:p.funcao||'—',pav:p.pav||'—',local:p.regiao||'—',atividade:p.atividade||p.atividadeRaw||'—',prod:p.prod||'—',prodM:p.prodM||'',prodT:p.prodT||'',m2:m2,un:un,m3:m3,m2M:m2M,m2T:m2T,ponto:m2>0,horas:JORNADA_HORAS});
+      rows.push({date:day.date||p.data||'—',nome:p.nome||'—',empresa:p.empresa||'—',funcao:p.funcao||'—',pav:p.pav||'—',local:p.regiao||'—',atividade:p.atividadeRaw||'—',prod:p.prod||'—',prodM:p.prodM||'',prodT:p.prodT||'',m2:m2,un:un,m3:m3,m2M:m2M,m2T:m2T,ponto:m2>0,horas:JORNADA_HORAS});
     });
   });
   return rows;
@@ -345,6 +345,9 @@ function renderMonthlyProdModal(){
   });
   h+='</tbody></table>';body.innerHTML=h;
 }
+/* Produção do dia em coluna única: a manhã vale pelo dia todo (a tarde só aparece se a manhã estiver vazia) */
+function prodDiaTxt(a,b){a=(a||'').trim();b=(b||'').trim();return a||b||'\u2014'}
+
 function printMonthlyProdModal(){
   if(!PARSED)return;
   var rows=getMonthlyProdRows(getRangeDays());
@@ -353,10 +356,10 @@ function printMonthlyProdModal(){
   var m=calcMonthlyProd(rows);
   var printTitle='Produção — Período selecionado';
   var empsPrint=prodPorEmpresa(rows);
-  var tP={M2:0,M3:0,UN:0,lan:0,M2M:0,M2T:0};
+  var tP={M2:0,M3:0,UN:0,lan:0};
   empsPrint.forEach(function(e){tP.M2+=e.M2;tP.M3+=e.M3;tP.UN+=e.UN;tP.lan+=e.lan});
-  rows.forEach(function(r){tP.M2M+=r.m2M||0;tP.M2T+=r.m2T||0});
-  G('print-header').innerHTML='<h1>RDO — '+esc(printTitle)+'</h1><p>'+rows.length+' lançamento(s) · '+empsPrint.length+' empresa(s) · '+m.pontosM2+' colaborador(es) m² · '+fmtNum(m.m2)+' m² (manhã '+fmtNum(tP.M2M||0)+' m² · tarde '+(tP.M2T>0?fmtNum(tP.M2T)+' m²':'—')+') · '+m.horasM2+' h m² · '+m.dias+' dia(s) · Impresso em '+fmtNow()+'</p>';
+  /* sem total separado por turno: a produção do dia fica em coluna única */
+  G('print-header').innerHTML='<h1>RDO — '+esc(printTitle)+'</h1><p>'+rows.length+' lançamento(s) · '+empsPrint.length+' empresa(s) · '+m.pontosM2+' colaborador(es) m² · '+fmtNum(m.m2)+' m² · '+m.horasM2+' h m² · '+m.dias+' dia(s) · Impresso em '+fmtNow()+'</p>';
   var h='<div class="monthly-print-report"><div class="mpr-summary">'+
     '<section class="mpr-group"><div class="mpr-group-title">M²</div><div class="mpr-grid">'+
     '<div class="mpr-stat"><div class="mpr-label">Produção do período</div><div class="mpr-val">'+fmtNum(m.m2)+' m²</div><div class="mpr-fact">soma dos lançamentos</div></div>'+
@@ -389,13 +392,13 @@ function printMonthlyProdModal(){
     h+='<tr><td colspan="2" style="text-align:left!important;font-weight:700">TOTAL</td><td style="font-weight:700">'+fmtNum(tP.M2)+'</td><td style="font-weight:700">'+tP.M3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+'</td><td style="font-weight:700">'+fmtNum(tP.UN)+'</td><td style="font-weight:700">'+tP.lan+'</td></tr>';
     h+='</tbody></table>';
   }
-  h+='<div class="mpr-section-title">Detalhamento da produção</div><table><thead><tr><th>#</th><th>Data</th><th>Nome</th><th>Empresa</th><th>Função</th><th>Pav.</th><th>Local</th><th>Atividade</th><th>Prod. Manhã</th><th>Prod. Tarde</th><th>M²</th><th>UN</th><th>M³</th></tr></thead><tbody>';
+  h+='<div class="mpr-section-title">Detalhamento da produção</div><table><thead><tr><th>#</th><th>Data</th><th>Nome</th><th>Empresa</th><th>Função</th><th>Pav.</th><th>Local</th><th>Atividade</th><th>Produção</th><th>M²</th><th>UN</th><th>M³</th></tr></thead><tbody>';
   rows.forEach(function(r,i){
     var m3txt=r.m3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3});
     h+='<tr><td>'+
-      (i+1)+'</td><td>'+esc(r.date)+'</td><td>'+esc(r.nome)+'</td><td>'+esc(r.empresa)+'</td><td>'+esc(r.funcao)+'</td><td>'+esc(r.pav)+'</td><td>'+esc(r.local)+'</td><td>'+esc(r.atividade)+'</td><td><b>'+esc(r.prodM||'—')+'</b></td><td><b>'+esc(r.prodT||'—')+'</b></td><td><b>'+fmtNum(r.m2)+' m²</b></td><td><b>'+fmtNum(r.un)+'</b></td><td><b>'+m3txt+' m³</b></td></tr>';
+      (i+1)+'</td><td>'+esc(r.date)+'</td><td>'+esc(r.nome)+'</td><td>'+esc(r.empresa)+'</td><td>'+esc(r.funcao)+'</td><td>'+esc(r.pav)+'</td><td>'+esc(r.local)+'</td><td>'+esc(r.atividade)+'</td><td><b>'+esc(prodDiaTxt(r.prodM,r.prodT))+'</b></td><td><b>'+fmtNum(r.m2)+' m²</b></td><td><b>'+fmtNum(r.un)+'</b></td><td><b>'+m3txt+' m³</b></td></tr>';
   });
-  if(!rows.length)h+='<tr><td colspan="13" style="text-align:center;padding:14px">Nenhuma produção encontrada.</td></tr>';
+  if(!rows.length)h+='<tr><td colspan="12" style="text-align:center;padding:14px">Nenhuma produção encontrada.</td></tr>';
   h+='</tbody></table></div>';
   G('print-db-section').innerHTML=h;G('print-db-section').style.display='block';document.body.classList.add('monthly-prod-print');closeMonthlyProdModal();
   requestAnimationFrame(function(){window.print();setTimeout(function(){G('print-db-section').style.display='none';G('print-db-section').innerHTML='';document.body.classList.remove('monthly-prod-print');},700);});
@@ -1021,16 +1024,16 @@ function executeRangePrint(){
       parseProducaoUnidades(p.prodM||'').forEach(function(u){if(u.unidade==='M2')m2M+=u.valor});
       parseProducaoUnidades(p.prodT||'').forEach(function(u){if(u.unidade==='M2')m2T+=u.valor});
       parsed.forEach(function(u){
-        if(!summary[p.empresa])summary[p.empresa]={M2:0,M3:0,UN:0,M2M:0,M2T:0};
+        if(!summary[p.empresa])summary[p.empresa]={M2:0,M3:0,UN:0};
         summary[p.empresa][u.unidade]+=u.valor;
       });
-      if(!summary[p.empresa])summary[p.empresa]={M2:0,M3:0,UN:0,M2M:0,M2T:0};
-      summary[p.empresa].M2M+=m2M;summary[p.empresa].M2T+=m2T;
-      launchRows.push({date:day.date,nome:p.nome,empresa:p.empresa,funcao:p.funcao,pav:p.pav||'—',local:p.regiao||'—',atividade:p.atividade||p.atividadeRaw||'—',prod:p.prod||'—',prodM:p.prodM||'',prodT:p.prodT||''});
+      if(!summary[p.empresa])summary[p.empresa]={M2:0,M3:0,UN:0};
+      /* produção do dia em coluna única: sem acumulado por turno */
+      launchRows.push({date:day.date,nome:p.nome,empresa:p.empresa,funcao:p.funcao,pav:p.pav||'—',local:p.regiao||'—',atividade:p.atividadeRaw||'—',prod:p.prod||'—',prodM:p.prodM||'',prodT:p.prodT||''});
     });
   });
   var companies=Object.keys(summary).filter(function(k){return summary[k].M2>0||summary[k].M3>0||summary[k].UN>0}).sort(function(a,b){return a.localeCompare(b,'pt-BR')});
-  var totals=companies.reduce(function(t,k){t.M2+=summary[k].M2;t.M3+=summary[k].M3;t.UN+=summary[k].UN;t.M2M+=summary[k].M2M||0;t.M2T+=summary[k].M2T||0;return t;},{M2:0,M3:0,UN:0,M2M:0,M2T:0});
+  var totals=companies.reduce(function(t,k){t.M2+=summary[k].M2;t.M3+=summary[k].M3;t.UN+=summary[k].UN;return t;},{M2:0,M3:0,UN:0});
   var titleParts=[days.length+' dia(s) selecionados'];
   if(empFilter)titleParts.push('Empreiteira: '+empFilter);
   if(funcFilter)titleParts.push('Função: '+funcFilter);
@@ -1043,29 +1046,29 @@ function executeRangePrint(){
   var h='<div class="range-print-report">';
   h+='<div class="range-print-title">Produção do período</div>';
   h+='<div class="range-print-total-grid">'+
-    '<div class="range-print-total"><span>M² manhã</span><b>'+fmtNum(totals.M2M||0)+' m²</b></div>'+
-    '<div class="range-print-total"><span>M² tarde</span><b>'+(totals.M2T>0?fmtNum(totals.M2T)+' m²':'—')+'</b></div>'+
-    '<div class="range-print-total"><span>M² total</span><b>'+fmtNum(totals.M2)+' m²</b></div>'+
+
+
+    '<div class="range-print-total"><span>M²</span><b>'+fmtNum(totals.M2)+' m²</b></div>'+
     '<div class="range-print-total"><span>M³</span><b>'+totals.M3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+' m³</b></div>'+
     '<div class="range-print-total"><span>UN</span><b>'+fmtNum(totals.UN)+' UN</b></div>'+
     '</div>';
 
   h+='<div class="range-print-section-title">Lançamentos de produção</div>';
-  h+='<table class="range-print-table"><thead><tr><th>Data</th><th>Nome</th><th>Empresa</th><th>Função</th><th>Pav.</th><th>Local</th><th>Atividade</th><th>Prod. Manhã</th><th>Prod. Tarde</th></tr></thead><tbody>';
+  h+='<table class="range-print-table"><thead><tr><th>Data</th><th>Nome</th><th>Empresa</th><th>Função</th><th>Pav.</th><th>Local</th><th>Atividade</th><th>Produção</th></tr></thead><tbody>';
   launchRows.sort(function(a,b){var da=parseDateBR(a.date),db=parseDateBR(b.date);var va=da?da.y*10000+da.m*100+da.d:0,vb=db?db.y*10000+db.m*100+db.d:0;return va-vb||a.empresa.localeCompare(b.empresa,'pt-BR')||a.nome.localeCompare(b.nome,'pt-BR')});
   launchRows.forEach(function(r){
-    h+='<tr><td>'+esc(r.date)+'</td><td><b>'+esc(r.nome)+'</b></td><td>'+esc(r.empresa)+'</td><td>'+esc(r.funcao)+'</td><td>'+esc(r.pav)+'</td><td>'+esc(r.local)+'</td><td>'+esc(r.atividade)+'</td><td><b>'+esc(r.prodM||'—')+'</b></td><td><b>'+esc(r.prodT||'—')+'</b></td></tr>';
+    h+='<tr><td>'+esc(r.date)+'</td><td><b>'+esc(r.nome)+'</b></td><td>'+esc(r.empresa)+'</td><td>'+esc(r.funcao)+'</td><td>'+esc(r.pav)+'</td><td>'+esc(r.local)+'</td><td>'+esc(r.atividade)+'</td><td><b>'+esc(prodDiaTxt(r.prodM,r.prodT))+'</b></td></tr>';
   });
-  if(!launchRows.length)h+='<tr><td colspan="9" style="text-align:center;padding:12px">Nenhum lançamento de produção encontrado.</td></tr>';
+  if(!launchRows.length)h+='<tr><td colspan="8" style="text-align:center;padding:12px">Nenhum lançamento de produção encontrado.</td></tr>';
   h+='</tbody></table>';
 
   h+='<div class="range-print-section-title">Resumo da produção por empreiteira</div>';
-  h+='<table class="range-print-summary-table"><thead><tr><th>Empreiteira</th><th>M² manhã</th><th>M² tarde</th><th>M² total</th><th>M³</th><th>UN</th></tr></thead><tbody>';
+  h+='<table class="range-print-summary-table"><thead><tr><th>Empreiteira</th><th>M²</th><th>M³</th><th>UN</th></tr></thead><tbody>';
   companies.forEach(function(k){
     var v=summary[k];
-    h+='<tr><td><b>'+esc(k)+'</b></td><td>'+fmtNum(v.M2M||0)+' m²</td><td>'+(v.M2T>0?fmtNum(v.M2T)+' m²':'—')+'</td><td>'+fmtNum(v.M2)+' m²</td><td>'+v.M3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+' m³</td><td>'+fmtNum(v.UN)+' UN</td></tr>';
+    h+='<tr><td><b>'+esc(k)+'</b></td><td>'+fmtNum(v.M2)+' m²</td><td>'+v.M3.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+' m³</td><td>'+fmtNum(v.UN)+' UN</td></tr>';
   });
-  if(!companies.length)h+='<tr><td colspan="6" style="text-align:center;padding:10px">Nenhuma produção encontrada para os filtros selecionados.</td></tr>';
+  if(!companies.length)h+='<tr><td colspan="4" style="text-align:center;padding:10px">Nenhuma produção encontrada para os filtros selecionados.</td></tr>';
   h+='</tbody></table>';
 
   /* Seção PPC (2ª planilha) no PDF do período */
@@ -1103,26 +1106,26 @@ function executePrint(){
   if(funcs.length&&funcs.length<tF)fl.push('Fun\u00e7\u00e3o: '+funcs.join(', '));
   if(pavs.length&&pavs.length<tP)fl.push('Pav.: '+pavs.join(', '));
   var sf=fl.length?' \u00b7 '+fl.join(' / '):'';
-  /* Resumo por turno no cabeçalho: Manhã · Tarde · Dia (nunca o turno vazio herda o outro) */
-  var tpM=computeTurnoDia(day,'M'),tpT=computeTurnoDia(day,'T'),tpD=computeProducaoDia(day).totals;
-  var turnoResumo='Manhã: '+turnoValTxt(tpM.totals)+' \u00b7 Tarde: '+turnoValTxt(tpT.totals)+' \u00b7 Dia: '+fmtNum(tpD.M2||0)+' m²';
+  /* Cabeçalho: produção do dia (sem separação por turno) */
+  var tpD=computeProducaoDia(day).totals;
+  var turnoResumo='Dia: '+fmtNum(tpD.M2||0)+' m²';
   G('print-header').innerHTML=
     '<h1>RDO \u2014 Relatorio Diario de Obra</h1>'+
     '<p>Data: '+esc(day.date)+' \u00b7 Efetivo: '+ativos.length+' \u00b7 Faltosos: '+semAtiv.length+' \u00b7 F\u00e9rias: '+ferias.length+sf+' \u00b7 '+esc(turnoResumo)+' \u00b7 Impresso em '+fmtNow()+'</p>';
   var h='<div class="cd"><div class="cd-h"><h3>Equipe do dia \u2014 '+esc(day.date)+'</h3>'+
     '<span class="mt">'+ativos.length+' ativo(s)'+(semAtiv.length?' \u00b7 '+semAtiv.length+' faltoso(s)':'')+(ferias.length?' \u00b7 '+ferias.length+' f\u00e9rias':'')+'</span></div>'+
-    '<table class="t"><thead><tr><th>#</th><th>Nome</th><th>Fun\u00e7\u00e3o</th><th>Empresa</th><th>Servi\u00e7o Manh\u00e3</th><th>Servi\u00e7o Tarde</th><th>Prod. Manh\u00e3</th><th>Prod. Tarde</th><th>Pav.</th><th>Local</th></tr></thead><tbody>';
+    '<table class="t"><thead><tr><th>#</th><th>Nome</th><th>Fun\u00e7\u00e3o</th><th>Empresa</th><th>Servi\u00e7o</th><th>Produ\u00e7\u00e3o</th><th>Pav.</th><th>Local</th></tr></thead><tbody>';
   var num=1;
   ativos.forEach(function(p){
-    h+='<tr><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td><td style="color:#475569">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td style="white-space:normal">'+esc(p.ativM||'\u2014')+'</td><td style="white-space:normal">'+esc(p.ativT||'\u2014')+'</td><td style="white-space:normal;font-weight:600">'+esc(p.prodM||'\u2014')+'</td><td style="white-space:normal;font-weight:600">'+esc(p.prodT||'\u2014')+'</td><td>'+esc(p.pav||'\u2014')+'</td><td style="color:#475569">'+esc(p.regiao||'\u2014')+'</td></tr>';
+    h+='<tr><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td><td style="color:#475569">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td style="white-space:normal">'+esc(p.atividadeRaw||'\u2014')+'</td><td style="white-space:normal;font-weight:600">'+esc(prodDiaTxt(p.prodM,p.prodT))+'</td><td>'+esc(p.pav||'\u2014')+'</td><td style="color:#475569">'+esc(p.regiao||'\u2014')+'</td></tr>';
   });
   if(semAtiv.length){
-    h+='<tr style="background:#FEE2E2"><td colspan="10" style="font-family:JetBrains Mono;font-size:9px;font-weight:700;color:#B91C1C;text-transform:uppercase;padding:6px 10px">🚫 '+semAtiv.length+' FALTOSO(S)</td></tr>';
-    semAtiv.forEach(function(p){h+='<tr style="background:#FFF5F5"><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;color:#B91C1C">'+esc(p.nome)+'</td><td style="color:#991B1B">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td style="color:#94A3B8;font-style:italic">'+esc(p.atividadeRaw||'\u2014')+'</td><td style="color:#94A3B8">\u2014</td><td style="color:#94A3B8">\u2014</td><td style="color:#94A3B8">\u2014</td><td>'+esc(p.pav||'\u2014')+'</td><td>'+esc(p.regiao||'\u2014')+'</td></tr>';});
+    h+='<tr style="background:#FEE2E2"><td colspan="8" style="font-family:JetBrains Mono;font-size:9px;font-weight:700;color:#B91C1C;text-transform:uppercase;padding:6px 10px">🚫 '+semAtiv.length+' FALTOSO(S)</td></tr>';
+    semAtiv.forEach(function(p){h+='<tr style="background:#FFF5F5"><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;color:#B91C1C">'+esc(p.nome)+'</td><td style="color:#991B1B">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td style="color:#94A3B8;font-style:italic">'+esc(p.atividadeRaw||'\u2014')+'</td><td style="color:#94A3B8">\u2014</td><td>'+esc(p.pav||'\u2014')+'</td><td>'+esc(p.regiao||'\u2014')+'</td></tr>';});
   }
   if(ferias.length){
-    h+='<tr style="background:#FEF3C7"><td colspan="10" style="font-family:JetBrains Mono;font-size:9px;font-weight:700;color:#92400E;text-transform:uppercase;padding:6px 10px">🌴 '+ferias.length+' FÉRIAS / AUSENTE(S)</td></tr>';
-    ferias.forEach(function(p){h+='<tr style="background:#FFFBEB"><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;color:#92400E">'+esc(p.nome)+'</td><td style="color:#B45309">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td colspan="6"><span style="font-family:JetBrains Mono;font-size:9px;font-weight:700;background:#FEF3C7;padding:2px 6px;border-radius:10px;color:#92400E">'+esc(p.motivo||'F\u00c9RIAS')+'</span></td></tr>';});
+    h+='<tr style="background:#FEF3C7"><td colspan="8" style="font-family:JetBrains Mono;font-size:9px;font-weight:700;color:#92400E;text-transform:uppercase;padding:6px 10px">🌴 '+ferias.length+' FÉRIAS / AUSENTE(S)</td></tr>';
+    ferias.forEach(function(p){h+='<tr style="background:#FFFBEB"><td class="nr" style="color:#94A3B8">'+num+++'</td><td style="font-weight:600;color:#92400E">'+esc(p.nome)+'</td><td style="color:#B45309">'+esc(p.funcao)+'</td><td>'+esc(p.empresa)+'</td><td colspan="4"><span style="font-family:JetBrains Mono;font-size:9px;font-weight:700;background:#FEF3C7;padding:2px 6px;border-radius:10px;color:#92400E">'+esc(p.motivo||'F\u00c9RIAS')+'</span></td></tr>';});
   }
   h+='</tbody></table></div>';
 
@@ -1164,7 +1167,7 @@ function renderKPIs(day){
   var pctPrevisto=previsto>0?(comAtiv/previsto*100).toFixed(0):'0';
   var prodDia=computeProducaoDia(day);
   var prodM2Dia=prodDia.totals.M2||0;
-  var turnoM=computeTurnoDia(day,'M'),turnoT=computeTurnoDia(day,'T');
+  var turnoM=computeTurnoDia(day,'M');
   /* Mini-ranking: top 3 empresas do dia em m², exibido dentro do card 📐 */
   var byEmpMini={};
   prodDia.producers.forEach(function(pr){pr.parsed.forEach(function(u){if(u.unidade==='M2')byEmpMini[pr.p.empresa]=(byEmpMini[pr.p.empresa]||0)+u.valor})});
@@ -1181,15 +1184,15 @@ function renderKPIs(day){
     {i:'🚫',l:'Faltosos',       v:faltosos,          f:'sem atividade — excluidos',         c:'var(--red)',   click:'openPeopleModal(\'faltosos\')'},
     {i:'🏢',l:'Empresas',       v:empCnt,            f:'ativas hoje',                       c:'var(--blue)',  click:''},
     {i:'⚒️',l:'Funcoes',v:funcCnt,          f:'distintas',                         c:'var(--cyan)',  click:''},
-    {i:'🌅',l:'Serviço manhã',      v:turnoValTxt(turnoM.totals), f:turnoFootTxt(turnoM), c:'#D97706', click:'openProducaoModal(\'M\')'},
-    {i:'🌇',l:'Serviço tarde',        v:turnoValTxt(turnoT.totals), f:turnoFootTxt(turnoT), c:'#7C3AED', click:'openProducaoModal(\'T\')'},
+    {i:'🌅',l:'Serviço do dia',      v:turnoValTxt(turnoM.totals), f:turnoFootTxt(turnoM), c:'#D97706', click:'openProducaoModal(\'M\')'},
+
     {i:'📐',l:'Produção diária', v:fmtNum(prodM2Dia)+' m²', f:day.date+' — clique para ver', c:'#0891B2', click:'openProducaoModal()', feature:true, extra:miniHtml}
   ].map(function(k){
     var clickAttr=k.click?(' onclick="'+k.click+'" role="button" tabindex="0"'):'';
     var cls='kp'+(k.click?' kp-click':'')+(k.feature?' kp-feature':'');
     return '<div class="'+cls+'" style="--kc:'+k.c+'"'+clickAttr+'><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div>'+(k.extra||'')+'</div>';
   });
-  G('kpis').innerHTML='<div class="kpis-left">'+cards.slice(0,8).join('')+'</div>'+cards.slice(8).join('');
+  G('kpis').innerHTML='<div class="kpis-left">'+cards.slice(0,7).join('')+'</div>'+cards.slice(7).join('');
 }
 
 /* ═══════ PRODUÇÃO POR UNIDADE (UN / M² / M³) ═══════ */
@@ -1276,7 +1279,7 @@ function openProducaoModal(turno){
   var agg=computeProducaoDia(day,turno);
   var hdr=G('emp-modal-overlay').querySelector('.modal-h');
   /* 🌅 manhã = âmbar, 🌇 tarde = roxo, 📐 total = ciano (mesmas cores dos cards) */
-  var cfg=turno==='M'?{cor:'#D97706',titulo:'🌅 Serviço da Manhã',periodo:'manhã',prep:'na manhã'}:
+  var cfg=turno==='M'?{cor:'#D97706',titulo:'🌅 Serviço do Dia',periodo:'dia',prep:'no dia'}:
            turno==='T'?{cor:'#7C3AED',titulo:'🌇 Serviço da Tarde',periodo:'tarde',prep:'na tarde'}:
            {cor:'#0891B2',titulo:'📦 Produção Total',periodo:'dia',prep:'no dia'};
   hdr.style.background=cfg.cor;
