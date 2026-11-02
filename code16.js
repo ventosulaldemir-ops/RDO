@@ -739,11 +739,23 @@ function clearRangeDates(){RANGE_SELECTED.clear();setRangePreset(null);initRange
 function selectLastNDates(n){if(!PARSED)return;RANGE_SELECTED.clear();PARSED.days.slice(0,n).forEach(function(d){RANGE_SELECTED.add(d.date)});setRangePreset(n===7?'range-btn-7':(n===30?'range-btn-30':null));initRangeChips();renderRangeAll()}
 function selectCurrentMonth(offset){
   if(!PARSED||!PARSED.days.length)return;
-  var now=new Date();
-  var targetM=now.getMonth()+1+offset,targetY=now.getFullYear();
+  function pick(m,y){var out=[];PARSED.days.forEach(function(d){var pd=parseDateBR(d.date);if(pd&&pd.m===m&&pd.y===y)out.push(d.date)});return out}
+  /* Mês de referência: o mês atual. Se ele ainda não tem nenhum dia lançado
+     (ex.: planilha parou em outubro), usa o mês mais recente da planilha —
+     assim "Mês passado" sempre anda um mês em relação ao que está na tela. */
+  var now=new Date(),baseM=now.getMonth()+1,baseY=now.getFullYear();
+  if(!pick(baseM,baseY).length){
+    var ultimo=null;
+    PARSED.days.forEach(function(d){
+      var pd=parseDateBR(d.date);if(!pd)return;
+      var idx=pd.y*12+(pd.m-1);
+      if(!ultimo||idx>ultimo.idx)ultimo={m:pd.m,y:pd.y,idx:idx};
+    });
+    if(ultimo){baseM=ultimo.m;baseY=ultimo.y}
+  }
+  var targetM=baseM+offset,targetY=baseY;
   while(targetM<1){targetM+=12;targetY--}
   while(targetM>12){targetM-=12;targetY++}
-  function pick(m,y){var out=[];PARSED.days.forEach(function(d){var pd=parseDateBR(d.date);if(pd&&pd.m===m&&pd.y===y)out.push(d.date)});return out}
   var picked=pick(targetM,targetY),usado=null;
   if(!picked.length){
     /* Mês sem nenhum dia lançado: cai no mês mais próximo que tenha dados. */
