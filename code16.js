@@ -602,15 +602,15 @@ function parseData(raw){
     function _turnoParts(a,b){
       var ma=temAtividade(a),mb=temAtividade(b);
       if(ma&&mb)return 'manh\u00e3: '+a+' \u00b7 tarde: '+b;
-      if(ma)return 'manh\u00e3: '+a;
-      if(mb)return 'tarde: '+b;
+      if(ma)return a;
+      if(mb)return b;
       return '';
     }
     function _prodParts(a,b){
       var ma=temAtividade(a),mb=temAtividade(b);
       if(ma&&mb)return 'manh\u00e3: '+a+' \u00b7 tarde: '+b;
-      if(ma)return 'manh\u00e3: '+a;
-      if(mb)return 'tarde: '+b;
+      if(ma)return a;
+      if(mb)return b;
       return '';
     }
     var atvComb=_turnoParts(atividadeRaw,atividadeTRaw);
@@ -1286,7 +1286,6 @@ function renderKPIs(day){
   var pctPrevisto=previsto>0?(comAtiv/previsto*100).toFixed(0):'0';
   var prodDia=computeProducaoDia(day);
   var prodM2Dia=prodDia.totals.M2||0;
-  var turnoM=computeTurnoDia(day,'M');
   /* Mini-ranking: top 3 empresas do dia em m², exibido dentro do card 📐 */
   var byEmpMini={};
   prodDia.producers.forEach(function(pr){pr.parsed.forEach(function(u){if(u.unidade==='M2')byEmpMini[pr.p.empresa]=(byEmpMini[pr.p.empresa]||0)+u.valor})});
@@ -1302,16 +1301,22 @@ function renderKPIs(day){
     {i:'🌴',l:'De Ferias',      v:day.ferias.length, f:'excluidos do efetivo',              c:'var(--amber)', click:'openPeopleModal(\'ferias\')'},
     {i:'🚫',l:'Faltosos',       v:faltosos,          f:'sem atividade — excluidos',         c:'var(--red)',   click:'openPeopleModal(\'faltosos\')'},
     {i:'🏢',l:'Empresas',       v:empCnt,            f:'ativas hoje',                       c:'var(--blue)',  click:''},
-    {i:'⚒️',l:'Funcoes',v:funcCnt,          f:'distintas',                         c:'var(--cyan)',  click:''},
-    {i:'🌅',l:'Serviço do dia',      v:turnoValTxt(turnoM.totals), f:turnoFootTxt(turnoM), c:'#D97706', click:'openProducaoModal(\'M\')'},
-
-    {i:'📐',l:'Produção diária', v:fmtNum(prodM2Dia)+' m²', f:day.date+' — clique para ver', c:'#0891B2', click:'openProducaoModal()', feature:true, extra:miniHtml}
-  ].map(function(k){
+    {i:'⚒️',l:'Funcoes',v:funcCnt,          f:'distintas',                         c:'var(--cyan)',  click:''}
+  ];
+  /* Card de produção em destaque: valores por unidade + mini-ranking das empresas */
+  var totDia=prodDia.totals||{};
+  var uniChips='<div class="kes">'+
+    '<span class="ke'+(totDia.M2>0?'':' z')+'"><b>'+fmtNum(totDia.M2||0)+'</b> m\u00b2</span>'+
+    '<span class="ke'+(totDia.M3>0?'':' z')+'"><b>'+fmtNum(totDia.M3||0)+'</b> m\u00b3</span>'+
+    '<span class="ke'+(totDia.UN>0?'':' z')+'"><b>'+fmtNum(totDia.UN||0)+'</b> un</span></div>';
+  var featExtra=uniChips+(miniHtml||'<div class="kp-empty">Nenhuma produção lançada neste dia</div>');
+  function kpHtml(k){
     var clickAttr=k.click?(' onclick="'+k.click+'" role="button" tabindex="0"'):'';
     var cls='kp'+(k.click?' kp-click':'')+(k.feature?' kp-feature':'');
     return '<div class="'+cls+'" style="--kc:'+k.c+'"'+clickAttr+'><div class="ki">'+k.i+'</div><div class="kl">'+k.l+'</div><div class="kv">'+k.v+'</div><div class="kf">'+k.f+'</div>'+(k.extra||'')+'</div>';
-  });
-  G('kpis').innerHTML='<div class="kpis-left">'+cards.slice(0,7).join('')+'</div>'+cards.slice(7).join('');
+  }
+  var feat={i:'📐',l:'Produção diária',v:fmtNum(prodM2Dia)+' m²',f:day.date+' · '+comAtiv+' com serviço · '+prodDia.producers.length+' com produção',c:'#0891B2',click:'openProducaoModal()',feature:true,extra:featExtra};
+  G('kpis').innerHTML='<div class="kpis-left">'+cards.map(kpHtml).join('')+'</div>'+kpHtml(feat);
 }
 
 /* ═══════ PRODUÇÃO POR UNIDADE (UN / M² / M³) ═══════ */
@@ -2496,9 +2501,6 @@ function injectEffCard(day){
   var c=effCalc(day),m=effMedias(day);
   function chip(v,un,f){return '<span class="ke'+(v>0?'':' z')+'"><b>'+f(v)+'</b> '+un+'/pessoa</span>'}
   var f=c.pess?fmtNum(c.M2)+' m² ÷ '+c.p2+' · '+fmt3(c.M3)+' m³ ÷ '+c.p3+' · '+fmtNum(c.UN)+' un ÷ '+c.pu+' · '+c.pess+' com atividade':'sem pessoas com atividade';
-  /* Detalhe por turno no rodapé: manhã e tarde lado a lado (vazio = —) */
-  var tM=computeTurnoDia(day,'M').totals,tT=computeTurnoDia(day,'T').totals;
-  if(tM.M2>0||tM.M3>0||tM.UN>0||tT.M2>0||tT.M3>0||tT.UN>0){f+=' · manhã '+turnoValTxt(tM)+' · tarde '+turnoValTxt(tT)}
   el.insertAdjacentHTML('beforeend','<div id="eff-kpi" class="kp kp-click" style="--kc:#0891B2" onclick="openEffModal()" role="button" tabindex="0" title="Produção ÷ colaboradores que lançaram cada unidade — clique para ver por empresa">'+
     '<div class="ki">⚡</div><div class="kl">Produtividade</div>'+
     '<div class="kv">'+fmtNum(c.r2)+' m²/pessoa'+effBadge(c.r2,m.r2,'vs média do mês')+'</div>'+
