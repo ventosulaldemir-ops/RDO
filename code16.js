@@ -2623,15 +2623,19 @@ function renderPPCModal(){
   }
   var all=ppcIsAll(),w=ppcCurWeek(),st=ppcStats(w);
   sub.textContent=(PPC_OBRA?PPC_OBRA+' · ':'')+(all?'Período todo · ':'Semana ')+w.label;
-  var h='<div class="ppc-chips">'+PPC_WEEKS.map(function(x,i){
+  /* Topo do modal: % grande, barra de progresso e resumo em uma linha */
+  var h='<div class="ppc-hero"><div class="ppc-hero-v" style="color:'+ppcColor(st.pct)+'">'+st.pct+'<span>%</span></div>'+
+    '<div class="ppc-hero-info"><div class="ppc-hero-l">PPC '+(all?'do período':'da semana')+'</div>'+
+    '<div class="ppc-hero-bar"><i style="width:'+st.pct+'%;background:'+ppcColor(st.pct)+'"></i></div>'+
+    '<div class="ppc-hero-f">'+st.done+' de '+st.total+' tarefas concluídas · execução média '+st.avg+'%</div></div></div>';
+  h+='<div class="ppc-chips">'+PPC_WEEKS.map(function(x,i){
     return '<button class="ppc-chip'+(i===PPC_SEL?' sel':'')+'" onclick="ppcSelectWeek('+i+')">'+esc(x.label)+' · '+ppcStats(x).pct+'%</button>';
   }).join('')+'<button class="ppc-chip'+(all?' sel':'')+'" onclick="ppcSelectWeek('+PPC_WEEKS.length+')" title="Todas as semanas somadas">📅 Todo o período</button></div>';
   if(PPC_WEEKS.length>1){
     var wA=ppcAllWeek(),stA=wA?ppcStats(wA):{pct:0};
-    h+='<div class="ppc-trend">'+PPC_WEEKS.map(function(x,i){var stx=ppcStats(x);return '<div class="ppc-trend-col'+(i===PPC_SEL?' sel':'')+'" onclick="ppcSelectWeek('+i+')" title="'+esc(x.label)+' \u00b7 '+stx.pct+'%"><i style="height:'+Math.max(stx.pct,4)+'%;background:'+ppcColor(stx.pct)+'"></i><span>'+stx.pct+'%</span></div>'}).join('')+'<div class="ppc-trend-col all'+(all?' sel':'')+'" onclick="ppcSelectWeek('+PPC_WEEKS.length+')" title="Todo o período \u00b7 '+stA.pct+'%"><i style="height:'+Math.max(stA.pct,4)+'%;background:'+ppcColor(stA.pct)+'"></i><span>'+stA.pct+'%</span></div></div>';
+    h+='<div class="ppc-trend">'+PPC_WEEKS.map(function(x,i){var stx=ppcStats(x);return '<div class="ppc-trend-col'+(i===PPC_SEL?' sel':'')+'" onclick="ppcSelectWeek('+i+')" title="'+esc(x.label)+' \u00b7 '+stx.pct+'%"><i style="height:'+Math.max(stx.pct,4)+'%;background:'+ppcColor(stx.pct)+'"></i><span>'+stx.pct+'%</span><em>'+esc(x.label.split(' a ')[0].slice(0,5))+'</em></div>'}).join('')+'<div class="ppc-trend-col all'+(all?' sel':'')+'" onclick="ppcSelectWeek('+PPC_WEEKS.length+')" title="Todo o período \u00b7 '+stA.pct+'%"><i style="height:'+Math.max(stA.pct,4)+'%;background:'+ppcColor(stA.pct)+'"></i><span>'+stA.pct+'%</span><em>período</em></div></div>';
   }
   h+='<div class="ppc-sum">'
-    +'<div><div class="l">PPC</div><div class="v" style="color:'+ppcColor(st.pct)+'">'+st.pct+'%</div></div>'
     +'<div><div class="l">Planejadas</div><div class="v">'+st.total+'</div></div>'
     +'<div><div class="l">Concluídas</div><div class="v" style="color:var(--green)">'+st.done+'</div></div>'
     +'<div><div class="l">Não concluídas</div><div class="v" style="color:var(--red)">'+st.open+'</div></div>'
