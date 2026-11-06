@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>RDO - Relatorio Diario de Obra</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="code16.css?v=44">
+<link rel="stylesheet" href="code16.css?v=45">
 
 <style id="prod-modal-style">
   #prod-month-modal-overlay .modal-card{max-width:1100px;width:min(1100px,calc(100vw - 24px));max-height:90vh;border-radius:10px}
@@ -366,6 +366,14 @@
       <select id="remp" onchange="renderRangeTable()"><option value="">Todas empresas</option></select>
       <select id="rfunc" onchange="renderRangeTable()"><option value="">Todas funcoes</option></select>
       <select id="rpav" onchange="renderRangeTable()"><option value="">Todos pavimentos</option></select>
+      <select id="rfaltas" onchange="renderRangeTable()" title="Filtrar por quantidade de faltas no periodo">
+        <option value="">Faltas: todas</option>
+        <option value="1">Com faltas (1+)</option>
+        <option value="2">2+ faltas</option>
+        <option value="3">3+ faltas</option>
+        <option value="5">5+ faltas</option>
+        <option value="0">Sem faltas</option>
+      </select>
     </div>
     <div class="cd-b" id="range-tbl-box"></div>
   </div>
@@ -445,6 +453,23 @@
   </div>
 </div>
 
+
+<div id="faltas-modal-overlay" class="modal-overlay" onclick="if(event.target===this)closeFaltasModal()">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-h">
+      <div><h4 id="faltas-modal-title">🚫 Faltas por pessoa</h4><div class="mt2" id="faltas-modal-sub">—</div></div>
+      <button class="modal-close" onclick="closeFaltasModal()" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="modal-b">
+      <div id="faltas-tools">
+        <input type="text" id="faltas-q" placeholder="Buscar nome, empresa ou função..." oninput="renderFaltasModal()" autocomplete="off">
+        <button type="button" class="btn btn-a" onclick="limparFaltasBusca()">Limpar</button>
+      </div>
+      <div id="faltas-modal-body"></div>
+    </div>
+  </div>
+</div>
+
 <div id="print-modal-overlay" class="modal-overlay" onclick="if(event.target===this)closePrintModal()">
   <div class="modal-card" style="max-width:500px" role="dialog" aria-modal="true">
     <div class="modal-h" style="background:var(--blue)">
@@ -506,7 +531,7 @@
 </div>
 
 
-<script src="code16.js?v=48"></script>
+<script src="code16.js?v=50"></script>
 </body>
 </html>
 
