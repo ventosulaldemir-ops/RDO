@@ -784,9 +784,9 @@ function computeRangeAgg(days){
   days.forEach(function(day){
     day.all.forEach(function(p){
       var key=norm(p.nome)+'|'+norm(p.empresa);
-      if(!map[key])map[key]={nome:p.nome,empresa:p.empresa,funcao:p.funcao,diasPresente:0,diasAtivo:0,diasFerias:0,diasSem:0,diasSemProd:0,pavs:{},producoes:[],faltasDatas:[]};
+      if(!map[key])map[key]={nome:p.nome,empresa:p.empresa,funcao:p.funcao,diasListado:0,diasPresente:0,diasAtivo:0,diasFerias:0,diasSem:0,diasSemProd:0,pavs:{},producoes:[],faltasDatas:[]};
       var e=map[key];
-      e.diasPresente++;
+      e.diasListado++;
       if(p.ferias){e.diasFerias++;return}
       if(p.atividade)e.diasAtivo++;else{e.diasSem++;e.faltasDatas.push(day.date||p.data||'')}
       if(!temAtividade(p.prod))e.diasSemProd++;
@@ -796,6 +796,8 @@ function computeRangeAgg(days){
   });
   return Object.keys(map).map(function(k){
     var e=map[k];
+    /* Dias presentes = dias em que aparece no RDO menos os dias em que faltou. */
+    e.diasPresente=Math.max(0,e.diasListado-e.diasSem);
     return e;
   });
 }
@@ -825,7 +827,7 @@ function renderRangeKPIs(days,agg){
   el.innerHTML=[
     {i:'📅',l:'Dias no periodo',v:days.length,f:'datas selecionadas',c:'var(--blue)'},
     {i:'👷',l:'Pessoas distintas',v:pessoasDistintas,f:'no periodo',c:'#059669'},
-    {i:'🧮',l:'Pessoa-dias',v:totalPessoaDias,f:'soma de presencas',c:'var(--cyan)'},
+    {i:'🧮',l:'Pessoa-dias',v:totalPessoaDias,f:'presencas (sem faltas)',c:'var(--cyan)'},
     {i:'📈',l:'Media dias/pessoa',v:mediaDias,f:'presenca media',c:'#7C3AED'},
     {i:'✅',l:'Dias c/ atividade',v:totalAtivo,f:'lancamentos',c:'var(--green)'},
     {i:'🌴',l:'Dias de ferias',v:totalFerias,f:'no periodo',c:'var(--amber)'},
@@ -847,7 +849,8 @@ function renderRangeKPIs2(days,agg){
   var totalPessoaDias=agg.reduce(function(s,p){return s+p.diasPresente},0);
   var totalFerias=agg.reduce(function(s,p){return s+p.diasFerias},0);
   var totalAtivo=agg.reduce(function(s,p){return s+p.diasAtivo},0);
-  var naoFerias=totalPessoaDias-totalFerias;
+  var totalListado=agg.reduce(function(s,p){return s+p.diasListado},0);
+  var naoFerias=totalListado-totalFerias;
   var taxaAtividade=naoFerias>0?(totalAtivo/naoFerias*100).toFixed(0):'0';
   var unicos=agg.filter(function(p){return p.diasPresente===1}).length;
   el.innerHTML=[
@@ -1092,7 +1095,7 @@ function renderRangeTable(){
       '<td data-label="Nome" style="font-weight:600;white-space:nowrap">'+esc(p.nome)+'</td>'+
       '<td data-label="Empresa"><span class="badge badge-gray">'+esc(p.empresa)+'</span></td>'+
       '<td data-label="Funcao" style="color:var(--ink2)">'+esc(p.funcao)+'</td>'+
-      '<td data-label="Dias presente" class="nr" style="font-weight:700;color:var(--navy)">'+p.diasPresente+'</td>'+
+      '<td data-label="Dias presente" class="nr" style="font-weight:700;color:var(--navy)" title="Presente em '+p.diasPresente+' de '+p.diasListado+' dia(s) em que consta no RDO">'+p.diasPresente+(p.diasListado>p.diasPresente?'<div class="faltas-datas">de '+p.diasListado+'</div>':'')+'</td>'+
       '<td data-label="Dias c/ ativ." class="nr" style="color:var(--green)">'+p.diasAtivo+'</td>'+
       '<td data-label="Faltas" class="nr" style="color:var(--red);font-weight:700">'+p.diasSem+(p.diasSem&&p.faltasDatas&&p.faltasDatas.length?'<div class="faltas-datas">'+esc(p.faltasDatas.slice().sort(function(a,b){return dateKey(a).localeCompare(dateKey(b))}).slice(0,5).join(', '))+(p.faltasDatas.length>5?' +'+(p.faltasDatas.length-5):'')+'</div>':'')+'</td>'+
       '<td data-label="Dias s/ producao" class="nr" style="color:'+(p.diasSemProd?'var(--red)':'var(--ink3)')+';font-weight:'+(p.diasSemProd?'700':'400')+'">'+(p.diasSemProd?'⚠ ':'')+p.diasSemProd+'</td>'+
